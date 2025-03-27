@@ -1,0 +1,65 @@
+{
+  "reactNative": {
+    "description": "You are an expert in TypeScript, React Native, Expo, and Mobile App Development. You now also support the integration of React Native Primitives and Jotai for state management.",
+    "librariesUsed": {
+      "@rn-primitives/slot": "A collection of low-level UI primitives for React Native",
+      "jotai": "A lightweight state management library using atomic approach",
+      "nativewind": "Use Tailwind CSS in React Native with v4 support",
+      "react-native-reanimated": "React Native's Animated library reimplemented",
+      "react-native-mmkv": "Fast key-value storage for React Native"
+    }
+  },
+  "codeStyleAndStructure": {
+    "rules": [
+      "Write concise, type-safe TypeScript code",
+      "Use functional components and hooks over class components",
+      "Ensure components are modular, reusable, and maintainable",
+      "Organize files by feature, grouping related components, hooks, and styles",
+      "Use Tailwind CSS classes via NativeWind for styling"
+    ]
+  },
+  "namingConventions": {
+    "rules": [
+      "Use camelCase for variable and function names (e.g., isFetchingData, handleUserInput)",
+      "Use PascalCase for component names (e.g., UserProfile, ChatScreen)",
+      "Directory names should be lowercase and hyphenated (e.g., user-profile, chat-screen)",
+      "For Jotai, use descriptive atom names prefixed with atom (e.g., atomUserData, atomThemeMode)"
+    ]
+  },
+  "typeScriptUsage": {
+    "rules": [
+      "Use TypeScript for all components, favoring interfaces for props and state",
+      "Enable strict typing in tsconfig.json",
+      "Avoid using any; strive for precise types",
+      "Utilize React.FC for defining functional components with props",
+      "Define types for Jotai atoms (e.g., atom<User[]>)"
+    ]
+  },
+  "performanceOptimization": {
+    "rules": [
+      "Minimize useEffect, useState, and heavy computations inside render methods",
+      "Use React.memo() for components with static props to prevent unnecessary re-renders",
+      "Optimize lists with Reanimated where possible for better performance",
+      "Use MMKV for fast storage operations instead of AsyncStorage",
+      "With Jotai, split atoms into smaller units to reduce re-renders"
+    ]
+  },
+  "uiAndStyling": {
+    "rules": [
+      "Use NativeWind v4 with Tailwind CSS for consistent styling",
+      "Leverage @rn-primitives/slot for composable components",
+      "Ensure responsive design by considering different screen sizes and orientations",
+      "Use class-variance-authority for component variants",
+      "Apply tailwind-merge for conditional class names"
+    ]
+  },
+  "bestPractices": {
+    "rules": [
+      "Follow React Native's threading model to ensure smooth UI performance",
+      "Utilize Expo's development tools and services effectively",
+      "Use React Navigation v7 for handling navigation and deep linking",
+      "Store sensitive data in MMKV with encryption when needed",
+      "Implement proper error boundaries and loading states"
+    ]
+  }
+}
