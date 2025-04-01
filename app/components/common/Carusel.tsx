@@ -12,7 +12,7 @@ import { Image } from "expo-image";
 
 // Use type intersection instead of extending the interface
 
-type CarouselProps<T> = {
+type CarouselProps<T extends { id: string }> = {
   data: T[];
   width?: number;
   height?: number;
@@ -23,13 +23,20 @@ type CarouselProps<T> = {
     item: T;
     index: number;
   }) => React.ReactElement;
+  loop?: boolean;
+  autoPlay?: boolean;
+  autoPlayInterval?: number;
+  mode?: "horizontal-stack" | "vertical-stack" | "parallax";
 };
 
-const Carousel = <T,>({
+const Carousel = <T extends { id: string }>({
   data,
   width = screen.width,
   height = screen.width / 2,
   renderItem,
+  loop = false,
+  autoPlay = false,
+  autoPlayInterval = 1000,
 }: CarouselProps<T>) => {
   const ref = useRef<ICarouselInstance>(null);
   const progress = useSharedValue<number>(0);
@@ -48,7 +55,9 @@ const Carousel = <T,>({
         width={width}
         height={height}
         data={data}
-        autoPlayInterval={1000}
+        loop={loop}
+        autoPlay={autoPlay}
+        autoPlayInterval={autoPlayInterval}
         style={{ width: "100%" }}
         onProgressChange={progress}
         renderItem={renderItem}
@@ -56,7 +65,7 @@ const Carousel = <T,>({
       <View className="py-[10]">
         <Pagination.Basic
           progress={progress}
-          data={[...Array(10)]}
+          data={data}
           dotStyle={{
             backgroundColor: "rgba(255,255,255,0.2)",
             borderRadius: 50,

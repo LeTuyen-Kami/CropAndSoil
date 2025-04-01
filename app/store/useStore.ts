@@ -1,67 +1,34 @@
-import { atom } from "jotai";
-import { atomWithStorage, createJSONStorage } from "jotai/utils";
-import { MMKV } from "react-native-mmkv";
 import { User } from "../types";
+import { atomWithMMKV } from "./atomWithMMKV";
+import { jotaiStore } from "./store";
 
-// Initialize MMKV
-const storage = new MMKV({
-  id: "auth-storage",
-  encryptionKey: "auth-secret-key",
-});
+interface AuthState {
+  isLoggedIn: boolean;
+  user: User | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+  scope: string | null;
+  tokenType: string | null;
+  expiresIn: number | null;
+}
 
-// Create MMKV storage adapter for Jotai
-const mmkvStorage = createJSONStorage<any>(() => ({
-  getItem: (key: string) => {
-    const value = storage.getString(key);
-    return value ? JSON.parse(value) : null;
-  },
-  setItem: (key: string, value: unknown) => {
-    storage.set(key, JSON.stringify(value));
-  },
-  removeItem: (key: string) => {
-    storage.delete(key);
-  },
-}));
+export const initialAuthState: AuthState = {
+  isLoggedIn: false,
+  user: null,
+  accessToken: null,
+  refreshToken: null,
+  scope: null,
+  tokenType: null,
+  expiresIn: null,
+};
 
-// Auth Atoms
-export const atomAccessToken = atomWithStorage<string | null>(
-  "accessToken",
-  null,
-  mmkvStorage
-);
-export const atomRefreshToken = atomWithStorage<string | null>(
-  "refreshToken",
-  null,
-  mmkvStorage
-);
-export const atomUser = atomWithStorage<User | null>("user", null, mmkvStorage);
-export const atomIsAuthenticated = atom((get) => !!get(atomAccessToken));
+export const authAtom = atomWithMMKV<AuthState>("auth", initialAuthState);
 
-// Auth Hook
-export const useAuth = () => {
-  const [accessToken, setAccessToken] = atom(atomAccessToken);
-  const [refreshToken, setRefreshToken] = atom(atomRefreshToken);
-  const [user, setUser] = atom(atomUser);
-  const [isAuthenticated] = atom(atomIsAuthenticated);
+export const signOut = () => {
+  jotaiStore.set(authAtom, initialAuthState);
+};
 
-  const setTokens = (access: string, refresh: string) => {
-    setAccessToken(access);
-    setRefreshToken(refresh);
-  };
-
-  const clearTokens = () => {
-    setAccessToken(null);
-    setRefreshToken(null);
-    setUser(null);
-  };
-
-  return {
-    accessToken,
-    refreshToken,
-    user,
-    isAuthenticated,
-    setTokens,
-    setUser,
-    clearTokens,
-  };
+export const signIn = (data: Partial<AuthState>) => {
+  const currentState = jotaiStore.get(authAtom);
+  jotaiStore.set(authAtom, { ...currentState, ...data });
 };

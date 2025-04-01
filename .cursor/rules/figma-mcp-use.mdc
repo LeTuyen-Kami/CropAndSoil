@@ -1,0 +1,39 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# MCP Development Workflow
+
+## Using Figma MCP
+
+- Follow the provided Figma link to analyze the design.
+
+## Step 1: Analyze the Structure
+
+- Break down the design into individual sections.
+- Identify whether each section is a reusable component.
+- If a component is reusable, check if it already exists in `app/component/common/README.md`.
+  - If it exists, use the existing component.
+  - If it does not exist, create a new component in `app/component/common` and update `app/component/common/README.md`.
+
+## Step 2: Asset Management
+
+- Identify any images or icons in the design, image alway save as png, icon can use svg.
+- Download and organize assets as follows:
+  - Store images in `app/assets/images`.
+  - Store icons in `app/assets/icons`.
+- Update `app/assets/imagePath.ts` to reflect the newly added assets, remmeber check if exists.
+
+## Step 3: Implement the Code
+
+- Begin coding in the designated file as per the project structure.
+- Follow best practices to ensure modularity and maintainability.
+- Utilize the predefined components and assets for consistency.
+
+---
+
+### Notes:
+- Always ensure components are reusable where possible to maintain a scalable codebase.
+- Keep `README.md` updated to provide clear documentation for future reference.
+- Maintain proper asset organization to avoid redundancy and improve accessibility.

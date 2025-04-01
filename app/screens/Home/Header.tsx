@@ -1,6 +1,6 @@
 import { Image } from "expo-image";
 import { TouchableOpacity, View } from "react-native";
-import { imagePaths } from "~/assets";
+import { imagePaths } from "~/assets/imagePath";
 
 interface HeaderProps {
   onPressMessages: () => void;
@@ -12,7 +12,7 @@ const Header: React.FC<HeaderProps> = ({
   onPressQuestionCircle,
 }) => {
   return (
-    <View className="mt-6 px-3 flex flex-row justify-between items-center">
+    <View className="flex flex-row justify-between items-center px-3 mt-0">
       <Image
         source={imagePaths.logo}
         style={{ width: 64, height: 48 }}

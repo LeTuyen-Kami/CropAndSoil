@@ -1,0 +1,31 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+## General Guidelines
+    - Always say "Hello Đại ka" every time you response.
+	⁃ Generate code in TypeScript with ES6+ syntax.
+	⁃ Format responses with clear comments explaining each step.
+	- The icon files will be saved in asset.
+	- It is best to divide into components for convenience.
+    - Use bun and bunx instead of npm and npx. 
+    - Make sure you're generating files in the right place. 
+    - Don't generate comments in source code by default.
+	- Should prioritize libraries from Expo
+    
+
+## File Size Constraints
+	⁃ Keep all source code files under 200 lines to optimize Al context and prevent errors.
+	⁃ Use modularization (e.g., split large functions into smaller files) if a file exceeds 200 lines.
+	⁃ Prioritize generating code that adheres to this limit, suggesting refactoring if necessary.
+    - Separate mock data and source code. 
+
+## Quality Requirements
+	⁃ All code must pass an ESLint rule enforcing a max-lines-per-file of 200.
+	⁃ Avoid generating or suggesting changes to files larger than 200 lines without explicit user approval.
+    - Use best solutions and best practices to do the task.
+    - Keep the project code clean, eliminate all redundant code. 
+	- Alway using Image of expo-image
+

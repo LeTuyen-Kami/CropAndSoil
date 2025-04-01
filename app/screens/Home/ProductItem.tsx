@@ -8,7 +8,7 @@ const ProductItem = () => {
 
   return (
     <View className="flex-1 mr-[6] rounded-2xl bg-white overflow-hidden">
-      <View className="p-3 bg-neutral-100 h-[142]">
+      <View className="bg-neutral-100 h-[142]">
         <Image
           source={"https://picsum.photos/200/300"}
           style={{ width: "100%", height: "100%", borderRadius: 8 }}
@@ -17,7 +17,7 @@ const ProductItem = () => {
       </View>
       <View className="p-[10] flex-col gap-[2]">
         <Text
-          className="text-neutral-700 text-xs tracking-tight"
+          className="text-xs tracking-tight text-neutral-700"
           numberOfLines={2}
         >
           Thuốc trừ bệnh Sumi Eight 12.5WP 100gr
@@ -26,7 +26,7 @@ const ProductItem = () => {
           <Text className="text-sm font-medium leading-tight text-error-500">
             {price.toLocaleString()}đ
           </Text>
-          <Text className="text-neutral-400 text-xs tracking-tight line-through">
+          <Text className="text-xs tracking-tight line-through text-neutral-400">
             {oldPrice.toLocaleString()}đ
           </Text>
         </View>
@@ -34,7 +34,7 @@ const ProductItem = () => {
       <View className="mt-1">
         <View className="bg-secondary-100 rounded-full h-[14] w-full overflow-hidden">
           <View
-            className="h-full bg-secondary-500 rounded-full"
+            className="h-full rounded-full bg-secondary-500"
             style={{
               width: "50%",
             }}

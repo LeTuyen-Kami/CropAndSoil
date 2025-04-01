@@ -5,7 +5,9 @@ import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 // Define the param list for the tab navigator
 export type TabParamList = {
   Home: undefined;
-  Test: undefined;
+  TempSearch: undefined;
+  Notifications: undefined;
+  Profile: undefined;
 };
 
 // Define the param list for the root stack navigator
@@ -15,6 +17,8 @@ export type RootStackParamList = {
   // Add other root stack screens here
   Buttons: undefined;
   Inputs: undefined;
+  Search: undefined;
+  Login: undefined;
 };
 
 // Create a type for the navigation prop for stack screens

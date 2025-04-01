@@ -7,11 +7,6 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.letuyen1277.CropAndSoil"
@@ -25,6 +20,19 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "splash": {
+      "image": "./assets/intro.png",
+      "backgroundColor": "#ffffff",
+      "resizeMode": "cover"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "bf1935de-993c-497f-bd3f-542b308c2e2c"
+      }
+    },
+    "plugins": [
+      "expo-font"
+    ]
   }
 }

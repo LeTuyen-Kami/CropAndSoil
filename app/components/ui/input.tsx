@@ -18,7 +18,7 @@ const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
       <>
         <View
           className={cn(
-            "flex-row items-center bg-white rounded-full px-[22] py-[15]",
+            "flex-row items-center bg-white rounded-full px-6",
             props.editable === false && "opacity-50 web:cursor-not-allowed",
             className,
             error && "border border-red-500"
@@ -27,7 +27,7 @@ const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
           {leftIcon && <View className="mr-2">{leftIcon}</View>}
           <TextInput
             ref={ref}
-            className={cn("text-base flex-1 leading-5")}
+            className={cn("flex-1 py-4 text-base leading-5")}
             placeholderClassName={cn(
               "text-muted-foreground",
               placeholderClassName
@@ -37,7 +37,7 @@ const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
           {rightIcon && <View className="ml-2">{rightIcon}</View>}
         </View>
         {error && (
-          <Text className="text-red-500 text-sm mt-1 ml-2">{error}</Text>
+          <Text className="mt-1 ml-2 text-sm text-red-500">{error}</Text>
         )}
       </>
     );
