@@ -65,6 +65,18 @@ import productThuoc from "~/assets/images/product-thuoc.png";
 import productHatgiong from "~/assets/images/product-hatgiong.png";
 import productVattu from "~/assets/images/product-vattu.png";
 
+// Product detail icons
+import icBrandBadge2 from "~/assets/icons/brand_badge_icon_2.svg";
+import icBrandBadge3 from "~/assets/icons/brand_badge_icon_3.svg";
+import icAuthentic1 from "~/assets/icons/authentic_icon_1.svg";
+import icAuthentic2 from "~/assets/icons/authentic_icon_2.svg";
+import icHealth from "~/assets/icons/health_icon.svg";
+import icCartDetail from "~/assets/icons/cart_icon.svg";
+import icPromotion2 from "~/assets/icons/promotion_icon_2.svg";
+import icPromotion3 from "~/assets/icons/promotion_icon_3.svg";
+import icPromotionArrow from "~/assets/icons/promotion_arrow_icon.svg";
+import starFilled from "~/assets/icons/star_filled.svg";
+
 export const imagePaths = {
   //images
   logo: logo,
@@ -134,4 +146,16 @@ export const imagePaths = {
   productThuoc: productThuoc,
   productHatgiong: productHatgiong,
   productVattu: productVattu,
+
+  // Product detail icons
+  icBrandBadge2: icBrandBadge2,
+  icBrandBadge3: icBrandBadge3,
+  icAuthentic1: icAuthentic1,
+  icAuthentic2: icAuthentic2,
+  icHealth: icHealth,
+  icCartDetail: icCartDetail,
+  icPromotion2: icPromotion2,
+  icPromotion3: icPromotion3,
+  icPromotionArrow: icPromotionArrow,
+  starFilled: starFilled,
 };

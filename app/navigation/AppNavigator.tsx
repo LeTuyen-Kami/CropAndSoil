@@ -12,6 +12,7 @@ import Buttons from "~/screens/Test/Buttons";
 import Inputs from "~/screens/Test/Inputs";
 import CustomTabBar from "./CustomTabbar";
 import { RootStackParamList, TabParamList } from "./types";
+import DetailProduct from "~/screens/DetailProduct";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -44,6 +45,11 @@ export const AppNavigator = () => {
         <Stack.Screen name="Buttons" component={Buttons} />
         <Stack.Screen name="Inputs" component={Inputs} />
         <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen
+          name="DetailProduct"
+          component={DetailProduct}
+          initialParams={{ id: "" }}
+        />
         <Stack.Screen
           name="Search"
           component={SearchScreen}

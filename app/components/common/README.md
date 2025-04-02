@@ -82,3 +82,17 @@ A wrapper component for screens, providing consistent layout, safe area handling
 **Usage:**
 
 Ensures consistent screen structure, handles safe areas, and provides basic layout options like scrolling and padding.
+
+## ProductTypeChip (`ProductTypeChip.tsx`)
+
+A customizable chip component primarily used for product type selection.
+
+**Props:**
+
+- `label`: (string, required) The text displayed on the chip.
+- `isSelected`: (boolean, required) Whether the chip is in selected state.
+- `onPress`: (function, required) Callback function called when the chip is pressed.
+
+**Usage:**
+
+Used for selection UI, particularly for product type or variant selection on product detail screens.

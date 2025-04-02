@@ -37,3 +37,4 @@ alwaysApply: false
 - Always ensure components are reusable where possible to maintain a scalable codebase.
 - Keep `README.md` updated to provide clear documentation for future reference.
 - Maintain proper asset organization to avoid redundancy and improve accessibility.
+- Using Nativewind for style

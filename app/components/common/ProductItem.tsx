@@ -1,3 +1,4 @@
+import { useNavigation } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { TouchableOpacity, View } from "react-native";
 import { imagePaths } from "~/assets/imagePath";
@@ -32,6 +33,8 @@ const ProductItem = ({
   height,
   onPress,
 }: ProductItemProps) => {
+  const navigation = useNavigation();
+
   const hasDiscount = !!discount && discount > 0;
   const hasSoldCount =
     typeof soldCount === "number" && typeof totalCount === "number";
@@ -46,8 +49,16 @@ const ProductItem = ({
     return (soldCount / totalCount) * 100;
   };
 
+  const handlePress = () => {
+    if (onPress) {
+      onPress();
+    } else {
+      navigation.navigate("DetailProduct", { id: "123" });
+    }
+  };
+
   return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
+    <TouchableOpacity onPress={handlePress} activeOpacity={0.8}>
       <View
         className="overflow-hidden bg-white rounded-2xl border border-neutral-200"
         style={{
