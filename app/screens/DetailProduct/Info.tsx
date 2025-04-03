@@ -141,6 +141,8 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     backgroundColor: "#FFFFFF",
     gap: 8,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
   },
   brandInfoText: {
     fontFamily: "Roboto",

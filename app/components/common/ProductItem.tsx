@@ -3,6 +3,7 @@ import { Image } from "expo-image";
 import { TouchableOpacity, View } from "react-native";
 import { imagePaths } from "~/assets/imagePath";
 import { Text } from "~/components/ui/text";
+import { cn } from "~/lib/utils";
 
 export interface ProductItemProps {
   image?: string;
@@ -17,6 +18,7 @@ export interface ProductItemProps {
   onPress?: () => void;
   width?: number;
   height?: number;
+  className?: string;
 }
 
 const ProductItem = ({
@@ -32,6 +34,7 @@ const ProductItem = ({
   width = 150,
   height,
   onPress,
+  className,
 }: ProductItemProps) => {
   const navigation = useNavigation();
 
@@ -60,7 +63,10 @@ const ProductItem = ({
   return (
     <TouchableOpacity onPress={handlePress} activeOpacity={0.8}>
       <View
-        className="overflow-hidden bg-white rounded-2xl border border-neutral-200"
+        className={cn(
+          "overflow-hidden bg-white rounded-2xl border border-neutral-200",
+          className
+        )}
         style={{
           width: width,
           height: height ? height : undefined,

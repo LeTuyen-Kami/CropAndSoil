@@ -22,6 +22,12 @@ import icLocation from "~/assets/icons/ic_location.svg";
 import icBack from "~/assets/icons/chevron-left.svg";
 import icMagnifier from "~/assets/icons/Magnifer.svg";
 
+// Shop info icons
+import shopImage from "~/assets/icons/shop_image.png";
+import officialBadgeIcon from "~/assets/icons/official_badge_icon.png";
+import locationIcon from "~/assets/icons/location_icon.png";
+import chatIcon from "~/assets/icons/chat_icon.png";
+
 // Profile screen icons
 import icWallet from "~/assets/icons/wallet-icon.svg";
 import icBox from "~/assets/icons/box-icon.svg";
@@ -77,6 +83,12 @@ import icPromotion3 from "~/assets/icons/promotion_icon_3.svg";
 import icPromotionArrow from "~/assets/icons/promotion_arrow_icon.svg";
 import starFilled from "~/assets/icons/star_filled.svg";
 
+// Top products icons
+import icRightArrow from "~/assets/icons/right_arrow.png";
+import productImg1 from "~/assets/icons/product1.png";
+import productImg2 from "~/assets/icons/product2.png";
+import productImg3 from "~/assets/icons/product3.png";
+
 export const imagePaths = {
   //images
   logo: logo,
@@ -87,7 +99,7 @@ export const imagePaths = {
   //icons
   icQuestionCircle: icQuestionCircle,
   icMessages: icMessages,
-  // icSearch: icSearch, // Remove old search icon export
+  // icSearch: icSearch, // Remove old search icon
   icCart: icCart,
 
   // New Icons
@@ -103,6 +115,12 @@ export const imagePaths = {
   icLocation: icLocation,
   icBack: icBack,
   icMagnifier: icMagnifier,
+
+  // Shop info icons
+  shopImage: shopImage,
+  officialBadgeIcon: officialBadgeIcon,
+  locationIcon: locationIcon,
+  chatIcon: chatIcon,
 
   // Profile screen icons
   icWallet: icWallet,
@@ -158,4 +176,10 @@ export const imagePaths = {
   icPromotion3: icPromotion3,
   icPromotionArrow: icPromotionArrow,
   starFilled: starFilled,
+
+  // Top products icons
+  icRightArrow: icRightArrow,
+  productImg1: productImg1,
+  productImg2: productImg2,
+  productImg3: productImg3,
 };

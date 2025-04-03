@@ -1,4 +1,6 @@
+import { useNavigation } from "@react-navigation/native";
 import { Image } from "expo-image";
+import { useEffect, useRef, useState } from "react";
 import {
   FlatList,
   Pressable,
@@ -6,16 +8,18 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { imagePaths } from "~/assets/imagePath";
+import Gallery, { GalleryItem } from "~/components/common/Galery";
 import ScreenContainer from "~/components/common/ScreenContainer";
 import { Text } from "~/components/ui/text";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useEffect, useRef, useState } from "react";
-import Gallery, { GalleryItem } from "~/components/common/Galery";
 import { screen } from "~/utils";
 import Info from "./Info";
 import Rating from "./Rating";
+import ShopInfo from "./ShopInfo";
+import TopProduct from "./TopProduct";
+import Detail from "./Detail";
+import MaybeLike from "./MaybeLike";
 const Header = () => {
   const { top } = useSafeAreaInsets();
   const navigation = useNavigation();
@@ -27,7 +31,7 @@ const Header = () => {
         className="w-10 h-10 bg-[#E3E3E3] rounded-full items-center justify-center"
       >
         <Image
-          source={imagePaths.backArrow}
+          source={imagePaths.icArrowLeft}
           cachePolicy="memory"
           style={{
             width: 8,
@@ -45,6 +49,9 @@ const DetailProduct = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [images, setImages] = useState<GalleryItem[]>([]);
   const flatListRef = useRef<FlatList>(null);
+  const { bottom } = useSafeAreaInsets();
+
+  console.log("bottom", bottom);
 
   useEffect(() => {
     setImages([
@@ -72,8 +79,6 @@ const DetailProduct = () => {
       });
     }
   }, [isGalleryVisible]);
-
-  console.log("render");
 
   return (
     <ScreenContainer
@@ -139,7 +144,47 @@ const DetailProduct = () => {
         </View>
         <Info />
         <Rating />
+        <ShopInfo />
+        <TopProduct />
+        <Detail />
+        <MaybeLike />
       </ScrollView>
+      <View
+        className="w-full h-[60px] bg-[#159747] rounded-t-[32px] flex-row"
+        style={{
+          bottom: bottom,
+        }}
+      >
+        <TouchableOpacity className="flex-row gap-2 items-center py-[10px] px-[20px] border-r border-[#12853E]">
+          <Image
+            source={imagePaths.chatIcon}
+            className="size-6"
+            style={{
+              tintColor: "white",
+            }}
+          />
+          <Text className="text-sm font-medium leading-tight text-white">
+            Chat
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity className="flex-row gap-2 items-center py-[10px] px-[20px]">
+          <Image
+            source={imagePaths.icCart}
+            className="size-6"
+            style={{
+              tintColor: "white",
+            }}
+          />
+          <Text className="text-sm font-medium leading-tight text-white">
+            Thêm sản phẩm
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity className="flex-row gap-2 items-center py-[10px] px-[20px] bg-[#FCBA26] flex-1 justify-center rounded-tr-[32px]">
+          <Text className="text-sm font-bold leading-tight text-white">
+            Mua ngay
+          </Text>
+        </TouchableOpacity>
+      </View>
       <Gallery
         visible={isGalleryVisible}
         images={images}

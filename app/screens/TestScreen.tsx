@@ -21,13 +21,17 @@ const TestScreen: React.FC = () => {
 
   return (
     <ScreenContainer>
-      <View className="flex-1 items-center justify-center gap-4">
+      <View className="flex-1 gap-4 justify-center items-center">
         <Button onPress={handleNavigateToButton}>
           <Text>Test Button</Text>
         </Button>
 
         <Button onPress={handleNavigateToInput}>
           <Text>Test Input</Text>
+        </Button>
+
+        <Button onPress={navigation.goBack}>
+          <Text>Go back</Text>
         </Button>
       </View>
     </ScreenContainer>

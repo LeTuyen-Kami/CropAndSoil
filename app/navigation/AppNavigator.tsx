@@ -13,6 +13,7 @@ import Inputs from "~/screens/Test/Inputs";
 import CustomTabBar from "./CustomTabbar";
 import { RootStackParamList, TabParamList } from "./types";
 import DetailProduct from "~/screens/DetailProduct";
+import TestScreen from "~/screens/TestScreen";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -58,6 +59,7 @@ export const AppNavigator = () => {
             animation: "fade_from_bottom",
           }}
         />
+        <Stack.Screen name="test" component={TestScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

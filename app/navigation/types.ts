@@ -22,6 +22,7 @@ export type RootStackParamList = {
   DetailProduct: {
     id: string;
   };
+  test: undefined;
 };
 
 // Create a type for the navigation prop for stack screens

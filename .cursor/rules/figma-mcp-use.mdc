@@ -13,13 +13,14 @@ alwaysApply: false
 
 - Break down the design into individual sections.
 - Identify whether each section is a reusable component.
-- If a component is reusable, check if it already exists in `app/component/common/README.md`.
+- If a component is reusable, check if it already exists in `app/components/common/README.md`.
   - If it exists, use the existing component.
-  - If it does not exist, create a new component in `app/component/common` and update `app/component/common/README.md`.
+  - If it does not exist, create a new component in `app/components/common` and update `app/components/common/README.md`.
 
 ## Step 2: Asset Management
 
-- Identify any images or icons in the design, image alway save as png, icon can use svg.
+- Identify any images or icons in the design, image and icon alway use png.
+- Check if icon exists in `app/assets/imagePath.ts` then not download, depend on name.
 - Download and organize assets as follows:
   - Store images in `app/assets/images`.
   - Store icons in `app/assets/icons`.

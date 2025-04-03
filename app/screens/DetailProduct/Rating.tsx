@@ -1,9 +1,10 @@
-import React, { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { Image as ExpoImage } from "expo-image";
+import React, { useState } from "react";
+import { ScrollView, TouchableOpacity, View } from "react-native";
 import { imagePaths } from "~/assets/imagePath";
+import AllMedia from "./AllMedia";
 import ReviewItem, { ReviewItemProps } from "./ReviewItem";
-
+import { Text } from "~/components/ui/text";
 type RatingProps = {
   rating?: number;
   totalReviews?: number;
@@ -25,8 +26,9 @@ const MOCK_REVIEWS: ReviewItemProps[] = [
     media: [
       {
         type: "video",
-        uri: "https://images.unsplash.com/photo-1560493676-04071c5f467b",
+        uri: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
         duration: "0:18",
+        thumbnail: "https://images.unsplash.com/photo-1560493676-04071c5f467b",
       },
       {
         type: "image",
@@ -100,7 +102,8 @@ const Rating: React.FC<RatingProps> = ({
       : MOCK_REVIEWS;
 
   return (
-    <View className="w-full bg-white">
+    <View className="mt-2 w-full bg-white rounded-3xl">
+      <AllMedia />
       <View className="p-2 border-b border-gray-100">
         {/* Header Section */}
         <View className="flex-row justify-between items-center w-full">

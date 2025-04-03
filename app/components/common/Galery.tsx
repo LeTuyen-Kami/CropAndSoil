@@ -5,6 +5,7 @@ import React, { useCallback, useRef, useState } from "react";
 import {
   Dimensions,
   FlatList,
+  Modal,
   StatusBar,
   StyleSheet,
   TouchableOpacity,
@@ -31,6 +32,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 export interface GalleryItem {
   url: string;
   type: "image" | "video";
+  thumbnail?: string;
 }
 
 interface GalleryProps {
@@ -126,6 +128,12 @@ const Gallery = ({
     if (viewableItems.length > 0) {
       setCurrentIndex(viewableItems[0].index);
       onChangeIndex?.(viewableItems[0].index);
+
+      Object.values(videoRefs.current).forEach((videoRef) => {
+        if (videoRef) {
+          videoRef.pauseAsync();
+        }
+      });
     }
   }).current;
 
@@ -133,111 +141,114 @@ const Gallery = ({
 
   return (
     <GestureHandlerRootView style={[StyleSheet.absoluteFill, { zIndex: 1000 }]}>
-      <Animated.View style={[styles.container, backgroundOpacity]}>
-        <StatusBar hidden />
+      <Modal visible={visible} transparent={true}>
+        <Animated.View style={[styles.container, backgroundOpacity]}>
+          <StatusBar hidden />
 
-        <TouchableOpacity
-          style={[styles.closeButton, { top: insets.top }]}
-          onPress={() => handleClose(true)}
-        >
-          <AntDesign name="close" size={24} color="white" />
-        </TouchableOpacity>
-
-        <View style={styles.counterContainer}>
-          <Text className="text-white">
-            {currentIndex + 1} / {images.length}
-          </Text>
-        </View>
-
-        {/* Left navigation button */}
-        {currentIndex > 0 && (
           <TouchableOpacity
-            style={styles.navigationButtonLeft}
-            onPress={() => {
-              flatListRef.current?.scrollToIndex({
-                index: currentIndex - 1,
-                animated: true,
-              });
-            }}
+            style={[styles.closeButton, { top: insets.top }]}
+            onPress={() => handleClose(true)}
           >
-            <AntDesign name="left" size={30} color="white" />
+            <AntDesign name="close" size={24} color="white" />
           </TouchableOpacity>
-        )}
 
-        {/* Right navigation button */}
-        {currentIndex < images.length - 1 && (
-          <TouchableOpacity
-            style={styles.navigationButtonRight}
-            onPress={() => {
-              flatListRef.current?.scrollToIndex({
-                index: currentIndex + 1,
-                animated: true,
-              });
-            }}
-          >
-            <AntDesign name="right" size={30} color="white" />
-          </TouchableOpacity>
-        )}
+          <View style={styles.counterContainer}>
+            <Text className="text-white">
+              {currentIndex + 1} / {images.length}
+            </Text>
+          </View>
 
-        <GestureDetector gesture={panGesture}>
-          <Animated.View style={[styles.scrollContainer, translateStyle]}>
-            <FlatList
-              ref={flatListRef}
-              data={images}
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              initialScrollIndex={initialIndex}
-              onViewableItemsChanged={onViewableItemsChanged}
-              viewabilityConfig={{
-                itemVisiblePercentThreshold: 50,
-              }}
-              getItemLayout={(_, index) => ({
-                length: SCREEN_WIDTH,
-                offset: SCREEN_WIDTH * index,
-                index,
-              })}
-              keyExtractor={(_, index) => index.toString()}
-              renderItem={({ item, index }) => (
-                <View style={styles.slideContainer}>
-                  {item.type === "image" ? (
-                    <GalleryImageItem url={item.url} onClose={handleClose} />
-                  ) : (
-                    <GalleryVideoItem
-                      url={item.url}
-                      ref={(ref) => {
-                        videoRefs.current[index] = ref;
-                      }}
-                    />
-                  )}
-                </View>
-              )}
-            />
-          </Animated.View>
-        </GestureDetector>
-
-        {/* Pagination dots */}
-        <View style={styles.paginationContainer}>
-          {images.map((_, index) => (
+          {/* Left navigation button */}
+          {currentIndex > 0 && (
             <TouchableOpacity
-              key={index}
+              style={styles.navigationButtonLeft}
               onPress={() => {
                 flatListRef.current?.scrollToIndex({
-                  index,
+                  index: currentIndex - 1,
                   animated: true,
                 });
               }}
             >
-              <View
-                style={[
-                  styles.paginationDot,
-                  index === currentIndex && styles.paginationDotActive,
-                ]}
-              />
+              <AntDesign name="left" size={30} color="white" />
             </TouchableOpacity>
-          ))}
-        </View>
-      </Animated.View>
+          )}
+
+          {/* Right navigation button */}
+          {currentIndex < images.length - 1 && (
+            <TouchableOpacity
+              style={styles.navigationButtonRight}
+              onPress={() => {
+                flatListRef.current?.scrollToIndex({
+                  index: currentIndex + 1,
+                  animated: true,
+                });
+              }}
+            >
+              <AntDesign name="right" size={30} color="white" />
+            </TouchableOpacity>
+          )}
+
+          <GestureDetector gesture={panGesture}>
+            <Animated.View style={[styles.scrollContainer, translateStyle]}>
+              <FlatList
+                ref={flatListRef}
+                data={images}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                initialScrollIndex={initialIndex}
+                onViewableItemsChanged={onViewableItemsChanged}
+                viewabilityConfig={{
+                  itemVisiblePercentThreshold: 50,
+                }}
+                getItemLayout={(_, index) => ({
+                  length: SCREEN_WIDTH,
+                  offset: SCREEN_WIDTH * index,
+                  index,
+                })}
+                keyExtractor={(_, index) => index.toString()}
+                renderItem={({ item, index }) => (
+                  <View style={styles.slideContainer}>
+                    {item.type === "image" ? (
+                      <GalleryImageItem url={item.url} onClose={handleClose} />
+                    ) : (
+                      <GalleryVideoItem
+                        url={item.url}
+                        thumbnail={item.thumbnail}
+                        ref={(ref) => {
+                          videoRefs.current[index] = ref;
+                        }}
+                      />
+                    )}
+                  </View>
+                )}
+              />
+            </Animated.View>
+          </GestureDetector>
+
+          {/* Pagination dots */}
+          <View style={styles.paginationContainer}>
+            {images.map((_, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() => {
+                  flatListRef.current?.scrollToIndex({
+                    index,
+                    animated: true,
+                  });
+                }}
+              >
+                <View
+                  style={[
+                    styles.paginationDot,
+                    index === currentIndex && styles.paginationDotActive,
+                  ]}
+                />
+              </TouchableOpacity>
+            ))}
+          </View>
+        </Animated.View>
+      </Modal>
     </GestureHandlerRootView>
   );
 };
@@ -311,22 +322,23 @@ const GalleryImageItem = ({ url, onClose }: GalleryImageItemProps) => {
 };
 
 // Video item
-const GalleryVideoItem = React.forwardRef<Video, { url: string }>(
-  ({ url }, ref) => {
-    return (
-      <View style={styles.videoWrapper}>
-        <Video
-          ref={ref}
-          source={{ uri: url }}
-          style={styles.video}
-          useNativeControls
-          resizeMode={ResizeMode.CONTAIN}
-          isLooping
-        />
-      </View>
-    );
-  }
-);
+const GalleryVideoItem = React.forwardRef<
+  Video,
+  { url: string; thumbnail: string }
+>(({ url, thumbnail }, ref) => {
+  return (
+    <View style={styles.videoWrapper}>
+      <Video
+        ref={ref}
+        source={{ uri: url }}
+        style={styles.video}
+        useNativeControls
+        resizeMode={ResizeMode.CONTAIN}
+        isLooping
+      />
+    </View>
+  );
+});
 
 const styles = StyleSheet.create({
   container: {

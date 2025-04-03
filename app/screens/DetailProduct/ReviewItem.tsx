@@ -1,12 +1,26 @@
-import React, { memo } from "react";
-import { View, Text, TouchableOpacity, FlatList } from "react-native";
 import { Image as ExpoImage } from "expo-image";
+import React, { memo, useState } from "react";
+import {
+  FlatList,
+  Pressable,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import Animated, {
+  LinearTransition,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 import { imagePaths } from "~/assets/imagePath";
-
+import Gallery from "~/components/common/Galery";
+import useDisclosure from "~/hooks/useDisclosure";
 type ReviewMedia = {
   type: "image" | "video";
   uri: string;
   duration?: string;
+  thumbnail?: string;
 };
 
 export type ReviewItemProps = {
@@ -35,6 +49,12 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
   media,
   sellerResponse,
 }) => {
+  const { isOpen, onOpen, onClose, openValue } = useDisclosure({
+    initialOpenValue: 0,
+  });
+  const [sallerCollapsed, setSallerCollapsed] = useState(true);
+  const rotate = useSharedValue(0);
+
   // Render stars based on rating
   const renderStars = () => {
     const stars = [];
@@ -50,6 +70,17 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
     }
     return stars;
   };
+
+  const handleSallerCollapsed = () => {
+    setSallerCollapsed(!sallerCollapsed);
+    rotate.value = withTiming(sallerCollapsed ? 90 : 0);
+  };
+
+  const rotateArrow = useAnimatedStyle(() => {
+    return {
+      transform: [{ rotate: `${rotate.value}deg` }],
+    };
+  });
 
   return (
     <View className="p-3 border-b border-gray-100">
@@ -90,7 +121,10 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
                 showsHorizontalScrollIndicator={false}
                 keyExtractor={(_, index) => index.toString()}
                 renderItem={({ item, index }) => (
-                  <View className="relative mr-2">
+                  <Pressable
+                    onPress={() => onOpen(index)}
+                    className="relative mr-2"
+                  >
                     <ExpoImage
                       source={item.uri}
                       style={{ width: 80, height: 80, borderRadius: 5 }}
@@ -103,7 +137,7 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
                         </Text>
                       </View>
                     )}
-                  </View>
+                  </Pressable>
                 )}
               />
             </View>
@@ -123,29 +157,58 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
 
           {/* Seller Response */}
           {sellerResponse && (
-            <View className="bg-[#FFF9ED] p-3 rounded-xl mt-2">
-              <View className="flex-row justify-between items-center">
-                <Text className="text-[#000000] text-sm">
-                  Phản hồi của người bán
-                </Text>
-                <ExpoImage
-                  source={imagePaths.icArrowRight}
+            <Pressable onPress={handleSallerCollapsed}>
+              <Animated.View
+                className="bg-[#FFF9ED] p-3 rounded-xl mt-2 overflow-hidden"
+                layout={LinearTransition}
+              >
+                <View className="flex-row justify-between items-center">
+                  <Text className="text-[#000000] text-sm">
+                    Phản hồi của người bán
+                  </Text>
+                  <Animated.View style={rotateArrow}>
+                    <ExpoImage
+                      source={imagePaths.icArrowRight}
+                      style={[
+                        {
+                          width: 16,
+                          height: 16,
+                          tintColor: "#383B45",
+                        },
+                      ]}
+                      contentFit="contain"
+                    />
+                  </Animated.View>
+                </View>
+                <View
+                  className="overflow-hidden"
                   style={{
-                    width: 16,
-                    height: 16,
-                    tintColor: "#383B45",
-                    transform: [{ rotate: "90deg" }],
+                    height: sallerCollapsed ? 0 : "auto",
                   }}
-                  contentFit="contain"
-                />
-              </View>
-              <Text className="text-[#575964] text-xs mt-1">
-                {sellerResponse}
-              </Text>
-            </View>
+                >
+                  {sallerCollapsed ? null : (
+                    <Text className="text-[#575964] text-xs mt-1">
+                      {sellerResponse}
+                    </Text>
+                  )}
+                </View>
+              </Animated.View>
+            </Pressable>
           )}
         </View>
       </View>
+      <Gallery
+        visible={isOpen}
+        images={
+          media?.map((item) => ({
+            url: item.uri,
+            type: item.type,
+            thumbnail: item.thumbnail,
+          })) ?? []
+        }
+        onClose={onClose}
+        initialIndex={openValue}
+      />
     </View>
   );
 };
