@@ -96,3 +96,25 @@ A customizable chip component primarily used for product type selection.
 **Usage:**
 
 Used for selection UI, particularly for product type or variant selection on product detail screens.
+
+## ShoppingCartItem (`ShoppingCartItem.tsx`)
+
+A shopping cart item component that displays product details and allows quantity adjustment.
+
+**Props:**
+
+- `id`: (string, required) Unique identifier for the cart item.
+- `name`: (string, required) The name of the product.
+- `image`: (string, required) The image URL of the product.
+- `price`: (number, required) The current price of the product.
+- `originalPrice`: (number, optional) The original price before discount.
+- `type`: (string, optional) The product variant or type.
+- `quantity`: (number, required) The quantity of the product in the cart.
+- `isSelected`: (boolean, optional, default: false) Whether the item is selected in the cart.
+- `onSelect`: (function, optional) Callback when selection status changes, receives id and selection status.
+- `onQuantityChange`: (function, optional) Callback when quantity changes, receives id and new quantity.
+- `onDelete`: (function, optional) Callback when delete button is pressed, receives id.
+
+**Usage:**
+
+Used in the shopping cart to display items with quantity controls and selection capabilities.

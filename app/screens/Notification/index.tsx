@@ -1,12 +1,7 @@
+import RNDateTimePicker from "@react-native-community/datetimepicker";
 import { useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
-import {
-  LayoutAnimation,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 const App = () => {
@@ -23,6 +18,9 @@ const App = () => {
           >
             <Text>Press me!</Text>
           </TouchableOpacity>
+        </View>
+        <View className="w-[350px] h-[300px]">
+          <RNDateTimePicker value={new Date()} display="calendar" />
         </View>
       </SafeAreaView>
     </SafeAreaProvider>

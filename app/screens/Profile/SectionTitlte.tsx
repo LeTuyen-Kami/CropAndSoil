@@ -16,17 +16,15 @@ const SectionTitle = ({
 }) => (
   <View className="flex-row justify-between items-center px-2 py-3">
     <Text className="text-sm font-medium text-[#383B45]">{title}</Text>
-    {actionText && (
-      <TouchableOpacity className="flex-row items-center">
-        <Text className="text-xs text-[#676767] mr-1">{actionText}</Text>
-        {showArrow && (
-          <Image
-            source={imagePaths.icArrowRight}
-            style={{ width: 14, height: 14 }}
-          />
-        )}
-      </TouchableOpacity>
-    )}
+    <TouchableOpacity className="flex-row items-center">
+      <Text className="text-xs text-[#676767] mr-1">{actionText}</Text>
+      {showArrow && (
+        <Image
+          source={imagePaths.icArrowRight}
+          style={{ width: 14, height: 14 }}
+        />
+      )}
+    </TouchableOpacity>
   </View>
 );
 

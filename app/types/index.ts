@@ -1,10 +1,25 @@
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  avatar?: string;
+export interface Token {
+  accessToken: string;
+  accessTokenExpiresIn: string;
+  refreshToken: string;
+  refreshTokenExpiresIn: string;
 }
 
+export interface User {
+  accountType: string;
+  avatarUrl?: any;
+  birthday?: any;
+  createdAt: string;
+  email: string;
+  gender?: any;
+  id: string;
+  name: string;
+  phone: string;
+  taxCertificateUrl?: any;
+  taxNumber?: any;
+  updatedAt: string;
+  wooId: number;
+}
 export interface ApiResponse<T> {
   data: T;
   status: number;

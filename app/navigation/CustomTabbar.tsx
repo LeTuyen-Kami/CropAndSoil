@@ -103,7 +103,7 @@ const CustomTabBar = ({
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => navigation.navigate("Cart")}
+                onPress={() => navigation.navigate("ShoppingCart")}
                 style={styles.scanButtonContainer}
               >
                 <LinearGradient

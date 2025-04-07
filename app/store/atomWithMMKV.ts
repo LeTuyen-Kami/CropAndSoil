@@ -1,19 +1,19 @@
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
 import { MMKV } from "react-native-mmkv";
 
-const storage = new MMKV();
+export const mmkvStore = new MMKV();
 
 function getItem(key: string): string | null {
-  const value = storage.getString(key);
+  const value = mmkvStore.getString(key);
   return value ? value : null;
 }
 
 function setItem(key: string, value: string): void {
-  storage.set(key, value);
+  mmkvStore.set(key, value);
 }
 
 function removeItem(key: string): void {
-  storage.delete(key);
+  mmkvStore.delete(key);
 }
 
 function subscribe(
@@ -26,7 +26,7 @@ function subscribe(
     }
   };
 
-  const { remove } = storage.addOnValueChangedListener(listener);
+  const { remove } = mmkvStore.addOnValueChangedListener(listener);
 
   return () => {
     remove();

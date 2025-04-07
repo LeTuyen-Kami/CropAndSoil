@@ -1,7 +1,13 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
-import { atomAccessToken, atomRefreshToken } from "../store/useStore";
-import { getDefaultStore } from "jotai";
-import { ENV } from "~/utils";
+import axios, {
+  AxiosError,
+  AxiosRequestConfig,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+} from "axios";
+import { Platform } from "react-native";
+import { authAtom } from "~/store/atoms";
+import { jotaiStore } from "~/store/store";
+import { ENV, getDeviceId } from "~/utils";
 
 interface CustomAxiosConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
@@ -10,12 +16,24 @@ interface CustomAxiosConfig extends InternalAxiosRequestConfig {
 const BASE_URL = ENV.EXPO_PUBLIC_BASE_URL;
 const IDENTITY_BASE_URL = ENV.EXPO_PUBLIC_IDENTITY_BASE_URL;
 
+export const identityAxiosInstance = axios.create({
+  baseURL: IDENTITY_BASE_URL,
+  timeout: 10000,
+  headers: {
+    "Content-Type": "application/json",
+    "device-id": getDeviceId(),
+    "platform-os-type": Platform.OS,
+  },
+});
+
 // Create axios instance
 export const axiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
+    "device-id": getDeviceId(),
+    "platform-os-type": Platform.OS,
   },
 });
 
@@ -44,9 +62,9 @@ const processQueue = (error: any = null) => {
 
 // Function to refresh token
 const refreshTokenFn = async () => {
+  const auth = jotaiStore.get(authAtom);
   try {
-    const store = getDefaultStore();
-    const refreshToken = store.get(atomRefreshToken);
+    const refreshToken = auth.token?.refreshToken;
 
     if (!refreshToken) throw new Error("No refresh token");
 
@@ -57,14 +75,19 @@ const refreshTokenFn = async () => {
     const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
       response.data;
 
-    store.set(atomAccessToken, newAccessToken);
-    store.set(atomRefreshToken, newRefreshToken);
+    jotaiStore.set(authAtom, {
+      ...auth,
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+    });
 
     return newAccessToken;
   } catch (error) {
-    const store = getDefaultStore();
-    store.set(atomAccessToken, null);
-    store.set(atomRefreshToken, null);
+    jotaiStore.set(authAtom, {
+      ...auth,
+      accessToken: null,
+      refreshToken: null,
+    });
     throw error;
   }
 };
@@ -72,8 +95,7 @@ const refreshTokenFn = async () => {
 // Request interceptor
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const store = getDefaultStore();
-    const token = store.get(atomAccessToken);
+    const token = jotaiStore.get(authAtom).token?.accessToken;
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -85,7 +107,7 @@ axiosInstance.interceptors.request.use(
 
 // Response interceptor
 axiosInstance.interceptors.response.use(
-  (response) => response,
+  (response: AxiosResponse<any>) => response.data,
   async (error: AxiosError) => {
     const originalRequest = error.config as CustomAxiosConfig;
 
@@ -123,3 +145,11 @@ axiosInstance.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export const typedAxios = axiosInstance as {
+  get<T>(url: string, config?: AxiosRequestConfig): Promise<T>;
+  post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
+  put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
+  delete<T>(url: string, config?: AxiosRequestConfig): Promise<T>;
+  patch<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
+};

@@ -75,7 +75,7 @@ const Gallery = ({
   const handleClose = useCallback(
     (immediate = false) => {
       translateY.value = immediate
-        ? screen.height
+        ? translateY.value
         : withTiming(screen.height, { duration: 200 });
       setTimeout(
         () => {
@@ -85,6 +85,7 @@ const Gallery = ({
               videoRef.stopAsync();
             }
           });
+
           onClose();
         },
         immediate ? 0 : 200

@@ -1,32 +1,86 @@
-import { useState } from "react";
-import { View } from "react-native";
+import { useMemo, useState } from "react";
+import { ActivityIndicator, View } from "react-native";
 import { Text } from "~/components/ui/text";
 import { Input } from "~/components/ui/input";
 import { Image } from "expo-image";
 import { TouchableOpacity } from "react-native";
 import { Button } from "~/components/ui/button";
 import { imagePaths } from "~/assets/imagePath";
-
+import { useSetAtom } from "jotai";
+import { loginAtom } from "./atom";
+import { authService } from "~/services/api/auth.service";
+import { toggleLoading } from "~/components/common/ScreenLoading";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "~/components/common/Toast";
+import { getErrorMessage, validatePhoneNumber } from "~/utils";
+import { authAtom } from "~/store/atoms";
+import { useNavigation } from "@react-navigation/native";
 const LoginForm = () => {
+  const setAuthState = useSetAtom(authAtom);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [togglePassword, setTogglePassword] = useState(false);
+  const setLoginState = useSetAtom(loginAtom);
+  const navigation = useNavigation();
+
+  const mutationLogin = useMutation({
+    mutationFn: authService.login,
+  });
 
   const togglePasswordVisibility = () => {
     setTogglePassword(!togglePassword);
   };
 
   const handleForgotPassword = () => {
-    console.log("Forgot Password");
+    setLoginState({
+      step: "resetPassword",
+    });
   };
 
   const handleRegister = () => {
-    console.log("Register");
+    setLoginState({
+      step: "signUp",
+    });
   };
 
   const handleLogin = () => {
-    console.log("Login");
+    if (!validatePhoneNumber(phoneNumber)) {
+      toast.error("Số điện thoại không hợp lệ");
+      return;
+    }
+
+    toggleLoading(true);
+    mutationLogin.mutate(
+      {
+        phone: phoneNumber,
+        password,
+      },
+      {
+        onSuccess: (data) => {
+          toast.success("Đăng nhập thành công");
+          setAuthState((prev) => ({
+            ...prev,
+            user: data,
+            token: data.token,
+            isLoggedIn: true,
+          }));
+          navigation.navigate("MainTabs", {
+            screen: "Profile",
+          });
+        },
+        onError: (error) => {
+          toast.error(getErrorMessage(error, "Lỗi khi đăng nhập"));
+        },
+        onSettled: () => {
+          toggleLoading(false);
+        },
+      }
+    );
   };
+
+  const disabled = useMemo(() => {
+    return !phoneNumber || !password;
+  }, [phoneNumber, password]);
 
   return (
     <View className="flex-1 px-8 mb-6">
@@ -97,8 +151,18 @@ const LoginForm = () => {
         </View>
 
         {/* Login Button */}
-        <Button onPress={handleLogin} className="h-11 bg-[#FCBA27] mb-4">
-          <Text className="text-base font-medium text-white">Đăng nhập</Text>
+        <Button
+          onPress={handleLogin}
+          className="h-11 bg-[#FCBA27] mb-4 disabled:opacity-50"
+          disabled={disabled || mutationLogin.isPending}
+        >
+          <Text className="text-base font-medium text-white">
+            {mutationLogin.isPending ? (
+              <ActivityIndicator size="small" color="white" />
+            ) : (
+              "Đăng nhập"
+            )}
+          </Text>
         </Button>
 
         {/* Register Button */}

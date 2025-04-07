@@ -19,6 +19,7 @@ export interface ProductItemProps {
   width?: number;
   height?: number;
   className?: string;
+  footer?: React.ReactNode;
 }
 
 const ProductItem = ({
@@ -35,6 +36,7 @@ const ProductItem = ({
   height,
   onPress,
   className,
+  footer,
 }: ProductItemProps) => {
   const navigation = useNavigation();
 
@@ -64,7 +66,7 @@ const ProductItem = ({
     <TouchableOpacity onPress={handlePress} activeOpacity={0.8}>
       <View
         className={cn(
-          "overflow-hidden bg-white rounded-2xl border border-neutral-200",
+          "overflow-hidden bg-white rounded-2xl border shadow-sm border-neutral-200",
           className
         )}
         style={{
@@ -151,6 +153,7 @@ const ProductItem = ({
               </Text>
             </View>
           )}
+          {!!footer ? footer : null}
         </View>
 
         {hasDiscount && (

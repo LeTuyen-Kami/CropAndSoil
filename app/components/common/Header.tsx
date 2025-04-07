@@ -4,22 +4,35 @@ import { useNavigation } from "@react-navigation/native";
 import { Text } from "~/components/ui/text";
 import { Image } from "expo-image";
 import { imagePaths } from "~/assets/imagePath";
-
+import { cn } from "~/lib/utils";
 interface HeaderProps {
   title?: string;
   showBack?: boolean;
   rightComponent?: React.ReactNode;
+  leftClassName?: string;
+  className?: string;
+  textColor?: string;
+  titleClassName?: string;
 }
 
 const Header: React.FC<HeaderProps> = ({
   title,
   showBack = true,
   rightComponent,
+  leftClassName,
+  className,
+  textColor,
+  titleClassName,
 }) => {
   const navigation = useNavigation();
 
   return (
-    <View className="flex-row justify-between items-center px-4 py-3 border-b bg-background border-border">
+    <View
+      className={cn(
+        "flex-row justify-between items-center px-4 py-3 border-b bg-background border-border",
+        className
+      )}
+    >
       <View className="flex-row flex-1 items-center">
         {!!showBack ? (
           <TouchableOpacity
@@ -30,26 +43,30 @@ const Header: React.FC<HeaderProps> = ({
               right: 40,
             }}
             onPress={() => navigation.goBack()}
-            className="w-8"
+            className={cn("w-8", leftClassName)}
           >
             <Image
               source={imagePaths.icBack}
-              style={{ width: 7.5, height: 15 }}
+              style={{ width: 7.5, height: 15, tintColor: textColor }}
             />
           </TouchableOpacity>
         ) : (
           <View className="w-8" />
         )}
         <Text
-          className="flex-1 text-lg font-medium text-center text-foreground"
+          className={cn(
+            "flex-1 text-lg font-medium text-center text-foreground",
+            titleClassName
+          )}
           numberOfLines={1}
+          style={{ color: textColor }}
         >
           {title}
         </Text>
       </View>
 
       {!!rightComponent ? (
-        <View className="ml-4">{rightComponent}</View>
+        <View>{rightComponent}</View>
       ) : (
         <View className="w-8" />
       )}

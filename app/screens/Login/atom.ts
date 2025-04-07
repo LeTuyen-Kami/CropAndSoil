@@ -1,10 +1,9 @@
 import { atom } from "jotai";
-
-type IStep = "signIn" | "signUp" | "resetPassword";
+import { LoginStep } from "~/hooks/useStepAnimation";
 
 type ILoginAtom = {
-  step: IStep;
-  previousStep: IStep | null;
+  step: LoginStep;
+  previousStep: LoginStep | null;
   countdown: number;
 };
 

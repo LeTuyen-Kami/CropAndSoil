@@ -1,25 +1,17 @@
-import { User } from "../types";
+import { Token, User } from "../types";
 import { atomWithMMKV } from "./atomWithMMKV";
 import { jotaiStore } from "./store";
 
 interface AuthState {
   isLoggedIn: boolean;
   user: User | null;
-  accessToken: string | null;
-  refreshToken: string | null;
-  scope: string | null;
-  tokenType: string | null;
-  expiresIn: number | null;
+  token: Token | null;
 }
 
 export const initialAuthState: AuthState = {
   isLoggedIn: false,
   user: null,
-  accessToken: null,
-  refreshToken: null,
-  scope: null,
-  tokenType: null,
-  expiresIn: null,
+  token: null,
 };
 
 export const authAtom = atomWithMMKV<AuthState>("auth", initialAuthState);

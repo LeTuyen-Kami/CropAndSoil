@@ -1,24 +1,29 @@
-import { useEffect, useMemo, useState } from "react";
-import { View, TouchableOpacity, Pressable } from "react-native";
-import { Text } from "~/components/ui/text";
-import { Input } from "~/components/ui/input";
-import { Image } from "expo-image";
-import { Button } from "~/components/ui/button";
-import { imagePaths } from "~/assets/imagePath";
 import Checkbox from "expo-checkbox";
-import { validatePhoneNumber } from "~/utils";
+import { Image } from "expo-image";
+import { useAtom, useSetAtom } from "jotai";
+import { useEffect, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  Pressable,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { OtpInput } from "react-native-otp-entry";
-import Animated, {
-  FadeIn,
-  FadeOut,
-  SlideInRight,
-  SlideOutLeft,
-  SlideInLeft,
-  SlideOutRight,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
-
+import Animated, { SlideInRight, SlideOutLeft } from "react-native-reanimated";
+import { imagePaths } from "~/assets/imagePath";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Text } from "~/components/ui/text";
+import { getErrorMessage, validatePhoneNumber } from "~/utils";
+import { loginAtom } from "./atom";
+import { authService, SendSmsOtpResponse } from "~/services/api/auth.service";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "~/components/common/Toast";
+import { toggleLoading } from "~/components/common/ScreenLoading";
+import { authAtom } from "~/store/atoms";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "~/navigation/types";
 type IStep = "phone" | "code";
 
 const RegisterForm = () => {
@@ -29,9 +34,22 @@ const RegisterForm = () => {
   const [step, setStep] = useState<IStep>("phone");
   const [previousStep, setPreviousStep] = useState<IStep | null>(null);
   const [countdown, setCountdown] = useState(60);
+  const [loginState, setLoginState] = useAtom(loginAtom);
+  const [registerSendOtpState, setRegisterSendOtpState] =
+    useState<SendSmsOtpResponse | null>(null);
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const setAuthState = useSetAtom(authAtom);
+
+  const mutationRegisterSendOtp = useMutation({
+    mutationFn: authService.registerSendOtp,
+  });
+
+  const mutationRegisterVerifyOtp = useMutation({
+    mutationFn: authService.registerVerifyOtp,
+  });
 
   // Animation progress value
-  const animationProgress = useSharedValue(0);
 
   const togglePasswordVisibility = () => {
     setTogglePassword(!togglePassword);
@@ -42,55 +60,88 @@ const RegisterForm = () => {
   };
 
   const handleLogin = () => {
-    console.log("Login");
+    setLoginState({
+      step: "signIn",
+      previousStep: loginState.step || "signUp",
+    });
   };
 
-  const handleRegister = () => {
-    setPreviousStep(step);
-    setStep("code");
-    animationProgress.value = withTiming(1, { duration: 300 });
+  const handleRegister = async () => {
+    toggleLoading(true);
+    mutationRegisterSendOtp.mutate(
+      {
+        flow: "REGISTER",
+        phone: phoneNumber,
+      },
+      {
+        onSuccess: (data) => {
+          setRegisterSendOtpState(data);
+          setPreviousStep(step);
+          setStep("code");
+        },
+        onError: (error) => {
+          toast.error(getErrorMessage(error), "top", 3000);
+        },
+        onSettled: () => {
+          toggleLoading(false);
+        },
+      }
+    );
   };
 
   const handleBecomeSupplier = () => {
-    console.log("Become Supplier");
+    const value = Math.random().toString(36).substring(2, 9);
+    toast.error("Đăng ký thành công" + value, "top", 3000, "123");
   };
 
   const handleGoBack = () => {
     if (step === "code") {
       setPreviousStep(step);
       setStep("phone");
-      animationProgress.value = withTiming(0, { duration: 300 });
     }
   };
 
+  const onOtpChange = (otp: string) => {
+    if (otp.length === 6) {
+      toggleLoading(true);
+      mutationRegisterVerifyOtp.mutate(
+        {
+          flow: "REGISTER",
+          phone: phoneNumber,
+          transactionId: registerSendOtpState?.transactionId || "",
+          otp,
+          password,
+        },
+        {
+          onSuccess: (data) => {
+            toast.success("Đăng ký thành công");
+            setAuthState((prev) => ({
+              ...prev,
+              user: data,
+              token: data.token,
+              isLoggedIn: true,
+            }));
+            navigation.replace("MainTabs", {
+              screen: "Profile",
+            });
+          },
+          onError: (error) => {
+            toast.error(
+              getErrorMessage(error, "Lỗi khi xác thực mã OTP"),
+              "top",
+              3000
+            );
+          },
+          onSettled: () => {
+            toggleLoading(false);
+          },
+        }
+      );
+    }
+  };
   const disabledRegister = useMemo(() => {
     return !validatePhoneNumber(phoneNumber) || !password || !isAgreed;
   }, [phoneNumber, password, isAgreed]);
-
-  // Get animation based on direction (forward or backward)
-  const getEnteringAnimation = (currentStep: IStep, prevStep: IStep | null) => {
-    if (!prevStep) return FadeIn.duration(300);
-
-    // Moving forward
-    if (prevStep === "phone" && currentStep === "code") {
-      return SlideInRight.duration(300);
-    }
-
-    // Moving backward
-    return SlideInLeft.duration(300);
-  };
-
-  const getExitingAnimation = (currentStep: IStep, prevStep: IStep | null) => {
-    if (!prevStep) return FadeOut.duration(300);
-
-    // Moving forward
-    if (currentStep === "phone" && prevStep === "code") {
-      return SlideOutLeft.duration(300);
-    }
-
-    // Moving backward
-    return SlideOutRight.duration(300);
-  };
 
   // Countdown timer effect
   useEffect(() => {
@@ -125,11 +176,7 @@ const RegisterForm = () => {
 
       {/* Register Form */}
       {step === "phone" && (
-        <Animated.View
-          entering={getEnteringAnimation(step, previousStep)}
-          exiting={getExitingAnimation(step, previousStep)}
-          className="flex-1"
-        >
+        <Animated.View className="flex-1" exiting={SlideOutLeft}>
           {/* Phone Input */}
           <View className="mb-4">
             <Input
@@ -209,7 +256,11 @@ const RegisterForm = () => {
             className="h-11 bg-[#FCBA27] mb-4 disabled:opacity-50"
             disabled={disabledRegister}
           >
-            <Text className="text-base font-medium text-white">Đăng ký</Text>
+            {mutationRegisterSendOtp.isPending ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text className="text-base font-medium text-white">Đăng ký</Text>
+            )}
           </Button>
 
           {/* Login Button */}
@@ -236,8 +287,8 @@ const RegisterForm = () => {
 
       {step === "code" && (
         <Animated.View
-          entering={getEnteringAnimation(step, previousStep)}
-          exiting={getExitingAnimation(step, previousStep)}
+          entering={SlideInRight}
+          exiting={SlideOutLeft}
           className="flex-1"
         >
           <Text className="mt-4 text-xs tracking-tight text-center text-zinc-600">
@@ -252,20 +303,27 @@ const RegisterForm = () => {
                   backgroundColor: "#DDF1E5",
                 },
               }}
+              onTextChange={onOtpChange}
             />
           </View>
 
-          <Text className="mt-4 text-xs tracking-tight text-center text-zinc-600">
-            Vui lòng chờ{" "}
-            <Text className="text-xs font-bold text-[#159747]">
-              {countdown}
-            </Text>{" "}
-            giây để nhận lại mã xác thực.{"\n"}Lưu ý: Kiểm tra thông báo của
-            Zalo để nhận mã kịp thời.
-          </Text>
-
-          {countdown === 0 && (
-            <TouchableOpacity className="mt-4" onPress={() => setCountdown(60)}>
+          {countdown > 0 ? (
+            <Text className="mt-4 text-xs tracking-tight text-center text-zinc-600">
+              Vui lòng chờ{" "}
+              <Text className="text-xs font-bold text-[#159747]">
+                {countdown}
+              </Text>{" "}
+              giây để nhận lại mã xác thực.{"\n"}Lưu ý: Kiểm tra thông báo của
+              Zalo để nhận mã kịp thời.
+            </Text>
+          ) : (
+            <TouchableOpacity
+              className="mt-4"
+              onPress={() => {
+                setCountdown(60);
+                handleRegister();
+              }}
+            >
               <Text className="text-sm text-[#159747] text-center">
                 Gửi lại mã xác thực
               </Text>

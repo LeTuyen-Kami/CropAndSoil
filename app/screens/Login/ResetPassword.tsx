@@ -6,31 +6,22 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
 import { validatePhoneNumber } from "~/utils";
-import Animated, {
-  FadeIn,
-  FadeOut,
-  SlideInRight,
-  SlideOutLeft,
-  SlideInLeft,
-  SlideOutRight,
-  useSharedValue,
-  withTiming,
-  useAnimatedStyle,
-} from "react-native-reanimated";
-
-type IStep = "phone" | "code" | "newPassword";
+import Animated, { withTiming } from "react-native-reanimated";
+import { ResetPasswordStep, useStepAnimation } from "~/hooks/useStepAnimation";
 
 const ResetPassword = () => {
-  const [step, setStep] = useState<IStep>("phone");
-  const [previousStep, setPreviousStep] = useState<IStep | null>(null);
+  const [step, setStep] = useState<ResetPasswordStep>("phone");
+  const [previousStep, setPreviousStep] = useState<ResetPasswordStep | null>(
+    null
+  );
   const [phoneNumber, setPhoneNumber] = useState("");
   const [hasInput, setHasInput] = useState(false);
   const [password, setPassword] = useState("");
   const [togglePassword, setTogglePassword] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
 
-  // Animation progress value
-  const animationProgress = useSharedValue(0);
+  const { animationProgress, getEnteringAnimation, getExitingAnimation } =
+    useStepAnimation<ResetPasswordStep>();
 
   const handlePhoneChange = (text: string) => {
     setPhoneNumber(text);
@@ -76,37 +67,6 @@ const ResetPassword = () => {
   useEffect(() => {
     setStep("phone");
   }, []);
-
-  // Get animation based on direction (forward or backward)
-  const getEnteringAnimation = (currentStep: IStep, prevStep: IStep | null) => {
-    if (!prevStep) return FadeIn.duration(300);
-
-    // Moving forward
-    if (
-      (prevStep === "phone" && currentStep === "code") ||
-      (prevStep === "code" && currentStep === "newPassword")
-    ) {
-      return SlideInRight.duration(300);
-    }
-
-    // Moving backward
-    return SlideInLeft.duration(300);
-  };
-
-  const getExitingAnimation = (currentStep: IStep, prevStep: IStep | null) => {
-    if (!prevStep) return FadeOut.duration(300);
-
-    // Moving forward
-    if (
-      (currentStep === "phone" && prevStep === "code") ||
-      (currentStep === "code" && prevStep === "newPassword")
-    ) {
-      return SlideOutLeft.duration(300);
-    }
-
-    // Moving backward
-    return SlideOutRight.duration(300);
-  };
 
   return (
     <View className="flex-1 px-8 pt-10 mb-6">

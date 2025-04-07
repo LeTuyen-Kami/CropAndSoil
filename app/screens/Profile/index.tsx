@@ -1,33 +1,31 @@
 import { useNavigation } from "@react-navigation/native";
 import { Image } from "expo-image";
-import { useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { useState } from "react";
-import {
-  RefreshControl,
-  ScrollView,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { RefreshControl, ScrollView, View } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { imagePaths } from "~/assets/imagePath";
+import GradientBackground from "~/components/common/GradientBackground";
 import ProductItem from "~/components/common/ProductItem";
 import ScreenContainer from "~/components/common/ScreenContainer";
-import { Text } from "~/components/ui/text";
 import { screen } from "~/utils";
 import { loginAtom } from "../Login/atom";
-import GradientBackground from "./GradientBackground";
+import HeaderLogging from "./HeaderLogging";
 import OrderStatusItem from "./OrderStatusItem";
 import ProfileHeader from "./ProfileHeader";
 import SectionTitle from "./SectionTitlte";
 import SupportItem from "./SupportItem";
 import UtilityItem from "./UlitityItem";
+import { authAtom } from "~/store/atoms";
 // Main profile component
 const ProfileScreen = () => {
   const { top } = useSafeAreaInsets();
   const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
   const setLoginState = useSetAtom(loginAtom);
+
+  const auth = useAtomValue(authAtom);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -54,50 +52,16 @@ const ProfileScreen = () => {
         <ProfileHeader />
         {/* User section */}
 
-        <View className="flex-row items-center px-4 py-4">
-          <View className="h-12 w-12 rounded-full bg-[#DEF1E5] border border-white justify-center items-center mr-2">
-            <Image
-              source={imagePaths.icUser}
-              style={{ width: 24, height: 24 }}
-            />
-          </View>
-          <View className="flex-1">
-            <Text className="text-sm font-bold text-white">
-              Chào mừng bạn đến với Cropee!
-            </Text>
-            <View className="flex-row mt-2">
-              <TouchableOpacity
-                className="bg-[#FCBA27] rounded-full px-4 py-2 mr-2"
-                onPress={() => {
-                  setLoginState({ step: "signIn" });
-                  navigation.navigate("Login");
-                }}
-              >
-                <Text className="text-xs font-medium text-white">
-                  Đăng nhập
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                className="px-4 py-2 bg-white rounded-full"
-                onPress={() => {
-                  setLoginState({ step: "signUp" });
-                  navigation.navigate("Login");
-                }}
-              >
-                <Text className="text-xs font-medium text-[#676767]">
-                  Đăng ký
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
+        <HeaderLogging />
       </GradientBackground>
       {/* My orders section */}
       <View>
         <View className="bg-white rounded-xl mb-2.5 -mt-4">
           <SectionTitle
             title="Đơn hàng của tôi"
-            actionText="Đăng nhập để xem"
+            actionText={
+              auth?.isLoggedIn ? "Xem lịch sử mua hàng" : "Đăng nhập để xem"
+            }
             showArrow={true}
           />
           <View className="flex-row flex-wrap px-2 py-3">
@@ -171,22 +135,27 @@ const ProfileScreen = () => {
         <View className="bg-white  rounded-xl mb-2.5">
           <SectionTitle
             title="Đã xem gần đây"
-            actionText="Đăng nhập để xem"
+            actionText={auth?.isLoggedIn ? "" : "Đăng nhập để xem"}
             showArrow={true}
           />
-          <View className="flex-row gap-2 px-2 pb-2">
-            {[...Array(10)].map((_, index) => (
-              <ProductItem
-                key={index}
-                name={"Thuốc trừ bệnh Sumi Eight 12.5WP 100gr "}
-                price={160000}
-                originalPrice={180000}
-                rating={4.5}
-                soldCount={100}
-                location="Hà Nội"
-              />
-            ))}
-          </View>
+
+          {auth?.isLoggedIn && (
+            <ScrollView horizontal>
+              <View className="flex-row gap-2 px-2 pb-2">
+                {[...Array(10)].map((_, index) => (
+                  <ProductItem
+                    key={index}
+                    name={"Thuốc trừ bệnh Sumi Eight 12.5WP 100gr "}
+                    price={160000}
+                    originalPrice={180000}
+                    rating={4.5}
+                    soldCount={100}
+                    location="Hà Nội"
+                  />
+                ))}
+              </View>
+            </ScrollView>
+          )}
         </View>
 
         {/* My utilities section */}

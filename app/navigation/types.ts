@@ -23,6 +23,12 @@ export type RootStackParamList = {
     id: string;
   };
   test: undefined;
+  LikedProduct: undefined;
+  EditProfile: undefined;
+  ShoppingCart: undefined;
+  Payment: undefined;
+  Address: undefined;
+  VoucherSelect: undefined;
 };
 
 // Create a type for the navigation prop for stack screens

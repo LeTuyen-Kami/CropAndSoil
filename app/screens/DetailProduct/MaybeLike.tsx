@@ -15,16 +15,10 @@ const MaybeLike = () => {
         </Text>
         <View className="flex-1 h-[1px] bg-[#CCC]" />
       </View>
-      <View className="px-2 py-3">
-        <FlashList
-          contentContainerStyle={{}}
-          data={[...Array(10)]}
-          ItemSeparatorComponent={() => <View className="h-2" />}
-          numColumns={2}
-          estimatedItemSize={200}
-          renderItem={({ item, index }) => (
+      <View className="flex-row flex-wrap gap-2 px-2 py-3">
+        {[...Array(10)].map((_, index) => (
+          <View key={index}>
             <ProductItem
-              className={index % 2 === 0 ? "mr-1" : "ml-1"}
               width={(screen.width - 24) / 2}
               name={
                 "Voluptate irure in laboris sit sunt pariatur. Sit  Voluptate irure in 123 "
@@ -37,8 +31,8 @@ const MaybeLike = () => {
               rating={4.5}
               location={"Hà Nội"}
             />
-          )}
-        />
+          </View>
+        ))}
       </View>
     </View>
   );

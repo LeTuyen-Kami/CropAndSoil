@@ -16,6 +16,17 @@ import ResetPassword from "./ResetPassword";
 import RegisterForm from "./RegisterForm";
 import { loginAtom } from "./atom";
 import { useAtom } from "jotai";
+import { authService } from "~/services/api/auth.service";
+import Animated, {
+  LinearTransition,
+  SlideInDown,
+  SlideInLeft,
+  SlideInRight,
+  SlideOutLeft,
+  SlideOutRight,
+  withTiming,
+} from "react-native-reanimated";
+import { LoginStep, useStepAnimation } from "~/hooks/useStepAnimation";
 
 const LoginScreen = () => {
   const { top } = useSafeAreaInsets();
@@ -84,9 +95,21 @@ const LoginScreen = () => {
           className="flex-1"
         >
           <ScrollView className="flex-1 bg-white rounded-t-[40px] z-10 relative">
-            {loginState.step === "signIn" && <LoginForm />}
-            {loginState.step === "signUp" && <RegisterForm />}
-            {loginState.step === "resetPassword" && <ResetPassword />}
+            {loginState.step === "signIn" && (
+              <Animated.View entering={SlideInRight} exiting={SlideOutLeft}>
+                <LoginForm />
+              </Animated.View>
+            )}
+            {loginState.step === "signUp" && (
+              <Animated.View entering={SlideInRight} exiting={SlideOutLeft}>
+                <RegisterForm />
+              </Animated.View>
+            )}
+            {loginState.step === "resetPassword" && (
+              <Animated.View entering={SlideInRight} exiting={SlideOutLeft}>
+                <ResetPassword />
+              </Animated.View>
+            )}
           </ScrollView>
         </KeyboardAvoidingView>
       </LinearGradient>

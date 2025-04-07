@@ -3,14 +3,14 @@ import { Image } from "expo-image";
 import { imagePaths } from "~/assets/imagePath";
 import { useState } from "react";
 import ProductTypeChip from "~/components/common/ProductTypeChip";
+import { AntDesign } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 
 const BrandBadge = () => {
   return (
-    <View style={styles.brandBadge}>
-      <View style={styles.brandBadgeContent}>
-        <Image source={imagePaths.icBrandBadge2} style={styles.brandIcon} />
-        <Image source={imagePaths.icBrandBadge3} style={styles.brandIcon} />
-      </View>
+    <View className="flex flex-row gap-1 items-center px-[10] py-[2] bg-[#FEF2D4] rounded-[5]">
+      <Image source={imagePaths.icProdcutFlashSale} className="size-[18]" />
+      <Image source={imagePaths.icTopDeal} className="w-[112] h-[11]" />
     </View>
   );
 };
@@ -29,8 +29,7 @@ const AuthenticBadge = () => {
   return (
     <View style={styles.authenticBadge}>
       <View style={styles.authenticBadgeContent}>
-        <Image source={imagePaths.icAuthentic1} style={styles.authenticIcon} />
-        <Image source={imagePaths.icAuthentic2} style={styles.authenticIcon} />
+        <Image source={imagePaths.icTicked} style={styles.authenticIcon} />
         <Text style={styles.authenticText}>CHÍNH HÃNG</Text>
       </View>
     </View>
@@ -38,14 +37,15 @@ const AuthenticBadge = () => {
 };
 
 const SalesCount = () => {
+  const navigation = useNavigation();
+
   return (
-    <View style={styles.salesCountContainer}>
-      <Text style={styles.salesCountText}>Đã bán 62</Text>
-      <View style={styles.healthIcon}>
-        <Image source={imagePaths.icHealth} style={styles.icon} />
-        <Image source={imagePaths.icCartDetail} style={styles.icon} />
+    <TouchableOpacity onPress={() => navigation.navigate("LikedProduct")}>
+      <View style={styles.salesCountContainer}>
+        <Text style={styles.salesCountText}>Đã bán 62</Text>
+        <AntDesign name="heart" size={15} color="#E01739" />
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
@@ -53,7 +53,7 @@ const PromotionBadge = () => {
   return (
     <View style={styles.promotionContainer}>
       <View style={styles.promotionContent}>
-        <Image source={imagePaths.icPromotion2} style={styles.promotionIcon} />
+        <Image source={imagePaths.icPromotion} style={styles.promotionIcon} />
         <Text style={styles.promotionText}>
           Giảm 24k từ mã khuyến mãi của nhà bán
         </Text>
@@ -202,13 +202,13 @@ const styles = StyleSheet.create({
   },
   authenticBadgeContent: {
     flexDirection: "row",
-    alignItems: "flex-end",
+    alignItems: "center",
     gap: 5,
     height: 18,
   },
   authenticIcon: {
-    width: 12,
-    height: 12,
+    width: 15,
+    height: 15,
   },
   authenticText: {
     fontFamily: "Roboto",

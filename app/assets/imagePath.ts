@@ -82,6 +82,11 @@ import icPromotion2 from "~/assets/icons/promotion_icon_2.svg";
 import icPromotion3 from "~/assets/icons/promotion_icon_3.svg";
 import icPromotionArrow from "~/assets/icons/promotion_arrow_icon.svg";
 import starFilled from "~/assets/icons/star_filled.svg";
+import icPromotion from "~/assets/icons/ic_promotion.png";
+import icHeartFilled from "~/assets/icons/ic_heart.png";
+import icTicked from "~/assets/icons/ic_tick.png";
+import icProdcutFlashSale from "~/assets/icons/ic_product_flash.png";
+import icTopDeal from "~/assets/icons/ic_top_deal.png";
 
 // Top products icons
 import icRightArrow from "~/assets/icons/right_arrow.png";
@@ -89,6 +94,8 @@ import productImg1 from "~/assets/icons/product1.png";
 import productImg2 from "~/assets/icons/product2.png";
 import productImg3 from "~/assets/icons/product3.png";
 
+import icTrash from "~/assets/icons/ic_trash.png";
+import icTicketSale from "~/assets/icons/ic_ticket_sale.png";
 export const imagePaths = {
   //images
   logo: logo,
@@ -176,10 +183,17 @@ export const imagePaths = {
   icPromotion3: icPromotion3,
   icPromotionArrow: icPromotionArrow,
   starFilled: starFilled,
-
+  icPromotion: icPromotion,
+  icHeartFilled: icHeartFilled,
+  icTicked: icTicked,
+  icProdcutFlashSale: icProdcutFlashSale,
+  icTopDeal: icTopDeal,
   // Top products icons
   icRightArrow: icRightArrow,
   productImg1: productImg1,
   productImg2: productImg2,
   productImg3: productImg3,
+
+  icTrash: icTrash,
+  icTicketSale: icTicketSale,
 };
