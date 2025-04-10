@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { cn } from "~/lib/utils";
+import Animated, { FadeInUp, SlideInUp } from "react-native-reanimated";
 
 interface CenterModalProps {
   visible: boolean;

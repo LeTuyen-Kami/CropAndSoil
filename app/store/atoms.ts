@@ -47,3 +47,19 @@ export const adressAtom = atom<Adress>({
   isOpen: false,
   type: "province",
 });
+
+export type ConfirmState = {
+  title: string;
+  message: string;
+  onConfirm: () => void;
+  onCancel?: () => void;
+  isOpen: boolean;
+};
+
+export const confirmAtom = atom<ConfirmState>({
+  title: "",
+  message: "",
+  onConfirm: () => {},
+  onCancel: () => {},
+  isOpen: false,
+});

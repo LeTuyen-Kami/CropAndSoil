@@ -1,5 +1,6 @@
 import { Image } from "expo-image";
 import { TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { imagePaths } from "~/assets/imagePath";
 
 interface HeaderProps {
@@ -11,8 +12,13 @@ const Header: React.FC<HeaderProps> = ({
   onPressMessages,
   onPressQuestionCircle,
 }) => {
+  const { top } = useSafeAreaInsets();
+
   return (
-    <View className="flex flex-row justify-between items-center px-3 mt-0">
+    <View
+      className="flex flex-row justify-between items-center px-3 mt-0"
+      style={{ paddingTop: top }}
+    >
       <Image
         source={imagePaths.logo}
         style={{ width: 64, height: 48 }}

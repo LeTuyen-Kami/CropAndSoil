@@ -52,6 +52,7 @@ export const HomeScreen: React.FC = () => {
       className="bg-primary"
       paddingVertical={0}
       paddingHorizontal={0}
+      safeArea={false}
     >
       <View className="px-3 py-4">
         <Text style={styles.text}>

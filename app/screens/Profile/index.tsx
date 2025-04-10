@@ -21,6 +21,7 @@ import { authAtom } from "~/store/atoms";
 // Main profile component
 const ProfileScreen = () => {
   const { top } = useSafeAreaInsets();
+
   const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
   const setLoginState = useSetAtom(loginAtom);
@@ -32,6 +33,10 @@ const ProfileScreen = () => {
     setTimeout(() => {
       setRefreshing(false);
     }, 2000);
+  };
+
+  const onPressMyOrder = (index: number) => {
+    navigation.navigate("MyOrder", { tabIndex: index });
   };
 
   return (
@@ -65,14 +70,31 @@ const ProfileScreen = () => {
             showArrow={true}
           />
           <View className="flex-row flex-wrap px-2 py-3">
-            <OrderStatusItem icon={imagePaths.icWallet} title="Chờ xác nhận" />
-            <OrderStatusItem icon={imagePaths.icBox} title="Chờ vận chuyển" />
+            <OrderStatusItem
+              icon={imagePaths.icWallet}
+              title="Chờ xác nhận"
+              onPress={() => onPressMyOrder(0)}
+            />
+            <OrderStatusItem
+              icon={imagePaths.icBox}
+              title="Chờ vận chuyển"
+              onPress={() => onPressMyOrder(1)}
+            />
             <OrderStatusItem
               icon={imagePaths.icDelivery}
               title="Đang vận chuyển"
+              onPress={() => onPressMyOrder(2)}
             />
-            <OrderStatusItem icon={imagePaths.icStarProfile} title="Đã giao" />
-            <OrderStatusItem icon={imagePaths.icReturn} title="Đổi trả" />
+            <OrderStatusItem
+              icon={imagePaths.icStarProfile}
+              title="Đã giao"
+              onPress={() => onPressMyOrder(3)}
+            />
+            <OrderStatusItem
+              icon={imagePaths.icReturn}
+              title="Đổi trả"
+              onPress={() => onPressMyOrder(4)}
+            />
           </View>
         </View>
 

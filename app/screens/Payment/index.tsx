@@ -33,6 +33,7 @@ const Payment = () => {
         />
       }
       backgroundColor="white"
+      safeArea={false}
     >
       <ScrollView
         className="flex-1 bg-[#F5F5F5] px-[10px] pt-[10px]"

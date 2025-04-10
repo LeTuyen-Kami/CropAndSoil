@@ -105,6 +105,7 @@ const CustomTabBar = ({
               <TouchableOpacity
                 onPress={() => navigation.navigate("ShoppingCart")}
                 style={styles.scanButtonContainer}
+                activeOpacity={0.9}
               >
                 <LinearGradient
                   colors={["#07BE4D", "#0D823A"]}
@@ -155,7 +156,6 @@ export default CustomTabBar;
 const styles = StyleSheet.create({
   tabBarContainer: {
     flexDirection: "row",
-    height: BOTTOM_TAB_HEIGHT,
     backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,

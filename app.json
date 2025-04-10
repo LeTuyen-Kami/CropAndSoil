@@ -31,6 +31,6 @@
         "projectId": "bf1935de-993c-497f-bd3f-542b308c2e2c"
       }
     },
-    "plugins": ["expo-font"]
+    "plugins": ["react-native-edge-to-edge"]
   }
 }

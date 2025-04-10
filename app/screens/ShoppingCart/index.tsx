@@ -216,6 +216,7 @@ const ShoppingCart = () => {
           }
         />
       }
+      safeArea={false}
       backgroundColor="white"
       wrapperClassName="bg-[#EEE]"
     >

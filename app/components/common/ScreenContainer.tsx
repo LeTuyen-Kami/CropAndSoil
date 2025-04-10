@@ -66,10 +66,10 @@ const ScreenContainer: React.FC<ScreenContainerProps> = ({
 
   return (
     <Container className={`flex-1 ${className || ""}`} style={[bgStyle]}>
-      <StatusBar
+      {/* <StatusBar
         backgroundColor={backgroundColor}
         barStyle={isDarkColorScheme ? "light-content" : "dark-content"}
-      />
+      /> */}
 
       {header}
       <ContentContainer

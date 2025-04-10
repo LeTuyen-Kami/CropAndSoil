@@ -5,6 +5,7 @@ import { Text } from "~/components/ui/text";
 import { Image } from "expo-image";
 import { imagePaths } from "~/assets/imagePath";
 import { cn } from "~/lib/utils";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 interface HeaderProps {
   title?: string;
   showBack?: boolean;
@@ -25,6 +26,7 @@ const Header: React.FC<HeaderProps> = ({
   titleClassName,
 }) => {
   const navigation = useNavigation();
+  const { top } = useSafeAreaInsets();
 
   return (
     <View
@@ -32,6 +34,7 @@ const Header: React.FC<HeaderProps> = ({
         "flex-row justify-between items-center px-4 py-3 border-b bg-background border-border",
         className
       )}
+      style={{ paddingTop: top }}
     >
       <View className="flex-row flex-1 items-center">
         {!!showBack ? (

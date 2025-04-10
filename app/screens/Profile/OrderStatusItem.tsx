@@ -3,8 +3,16 @@ import { Image } from "expo-image";
 import { View } from "react-native";
 import { Text } from "~/components/ui/text";
 // Order status item component
-const OrderStatusItem = ({ icon, title }: { icon: any; title: string }) => (
-  <TouchableOpacity className="flex-1 items-center min-w-16">
+const OrderStatusItem = ({
+  icon,
+  title,
+  onPress,
+}: {
+  icon: any;
+  title: string;
+  onPress: () => void;
+}) => (
+  <TouchableOpacity className="flex-1 items-center min-w-16" onPress={onPress}>
     <View className="w-10 h-10 rounded-full bg-[#DEF1E5] items-center justify-center mb-0.5">
       <Image source={icon} style={{ width: 20, height: 20 }} />
     </View>

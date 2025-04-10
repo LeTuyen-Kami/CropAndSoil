@@ -12,7 +12,8 @@ import ScreenLoading from "~/components/common/ScreenLoading";
 import NetworkLogger from "~/components/common/NetworkLogger";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-
+import { SystemBars } from "react-native-edge-to-edge";
+import ModalConfirm from "~/components/common/ModalConfirm";
 SplashScreen.preventAutoHideAsync();
 
 cssInterop(Image, {
@@ -28,6 +29,8 @@ export default function App() {
             <ToastHolder />
             <ScreenLoading />
             <NetworkLogger />
+            <SystemBars style={"auto"} />
+            <ModalConfirm />
           </SafeAreaProvider>
         </ReactQueryProvider>
       </JotaiProvider>
