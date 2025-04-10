@@ -1,7 +1,7 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import React from "react";
+import React, { useEffect } from "react";
 import { Text } from "react-native";
 import { HomeScreen } from "~/screens/Home";
 import LoginScreen from "~/screens/Login";
@@ -20,7 +20,9 @@ import ShoppingCart from "~/screens/ShoppingCart";
 import Payment from "~/screens/Payment";
 import Address from "~/screens/Address";
 import VoucherSelectScreen from "~/screens/VoucherSelect";
-
+import SearchAdvance from "~/screens/SearchAdvance";
+import EditAddress from "~/screens/EditAddress";
+import MyOrderScreen from "~/screens/MyOrder";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -72,6 +74,16 @@ export const AppNavigator = () => {
         <Stack.Screen name="Payment" component={Payment} />
         <Stack.Screen name="Address" component={Address} />
         <Stack.Screen name="VoucherSelect" component={VoucherSelectScreen} />
+        <Stack.Screen
+          name="SearchAdvance"
+          component={SearchAdvance}
+          options={{
+            animationDuration: 300,
+            animation: "fade_from_bottom",
+          }}
+        />
+        <Stack.Screen name="EditAddress" component={EditAddress} />
+        <Stack.Screen name="MyOrder" component={MyOrderScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

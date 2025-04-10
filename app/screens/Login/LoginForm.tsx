@@ -83,7 +83,7 @@ const LoginForm = () => {
   }, [phoneNumber, password]);
 
   return (
-    <View className="flex-1 px-8 mb-6">
+    <View className="px-8 mb-6">
       {/* Login Form */}
       <View className="mt-4">
         <Text className="text-3xl font-bold text-[#383B45] text-center mb-4">

@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -157,7 +158,7 @@ const RegisterForm = () => {
   }, [countdown, step]);
 
   return (
-    <View className="flex-1 px-8 pt-10 mb-6">
+    <View className="px-8 pt-10 mb-6">
       {/* Header with back button for OTP screen */}
       <View className="flex-row justify-center items-center mb-4">
         {step !== "phone" && (
@@ -176,7 +177,7 @@ const RegisterForm = () => {
 
       {/* Register Form */}
       {step === "phone" && (
-        <Animated.View className="flex-1" exiting={SlideOutLeft}>
+        <Animated.View exiting={SlideOutLeft}>
           {/* Phone Input */}
           <View className="mb-4">
             <Input
@@ -286,11 +287,7 @@ const RegisterForm = () => {
       )}
 
       {step === "code" && (
-        <Animated.View
-          entering={SlideInRight}
-          exiting={SlideOutLeft}
-          className="flex-1"
-        >
+        <Animated.View entering={SlideInRight} exiting={SlideOutLeft}>
           <Text className="mt-4 text-xs tracking-tight text-center text-zinc-600">
             Mã xác thực (OTP) đã được gửi qua tin nhắn của số{"\n"}
             <Text className="text-black">{phoneNumber || "0123456789"}</Text>

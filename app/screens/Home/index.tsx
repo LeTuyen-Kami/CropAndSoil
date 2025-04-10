@@ -1,5 +1,5 @@
 import { Image } from "expo-image";
-import React from "react";
+import React, { useEffect } from "react";
 import {
   FlatList,
   ScrollView,
@@ -12,7 +12,7 @@ import ScreenContainer from "~/components/common/ScreenContainer";
 import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
 import Header from "./Header";
-
+import * as SplashScreen from "expo-splash-screen";
 import Carousel from "~/components/common/Carusel";
 import Category from "./Category";
 import ContainerList from "./ContainerList";
@@ -30,6 +30,14 @@ export const HomeScreen: React.FC = () => {
   const onPressQuestionCircle = () => {
     console.log("question circle");
   };
+
+  useEffect(() => {
+    SplashScreen.setOptions({
+      fade: true,
+      duration: 500,
+    });
+    SplashScreen.hideAsync();
+  }, []);
 
   return (
     <ScreenContainer
@@ -223,7 +231,7 @@ export const HomeScreen: React.FC = () => {
           </ContainerList>
         </View>
       </View>
-      {/* <View className="h-[80] bg-"></View> */}
+      <View className="h-[80] bg-"></View>
     </ScreenContainer>
   );
 };

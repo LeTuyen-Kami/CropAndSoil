@@ -27,6 +27,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { LoginStep, useStepAnimation } from "~/hooks/useStepAnimation";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 
 const LoginScreen = () => {
   const { top } = useSafeAreaInsets();
@@ -90,28 +91,26 @@ const LoginScreen = () => {
           </View>
           <View className="absolute right-2 left-2 -bottom-14 z-0 h-[68] bg-[#3E9B5E] rounded-t-[40px]"></View>
         </View>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          className="flex-1"
+        <KeyboardAwareScrollView
+          className="flex-1 bg-white rounded-t-[40px] z-10 relative"
+          bottomOffset={50}
         >
-          <ScrollView className="flex-1 bg-white rounded-t-[40px] z-10 relative">
-            {loginState.step === "signIn" && (
-              <Animated.View entering={SlideInRight} exiting={SlideOutLeft}>
-                <LoginForm />
-              </Animated.View>
-            )}
-            {loginState.step === "signUp" && (
-              <Animated.View entering={SlideInRight} exiting={SlideOutLeft}>
-                <RegisterForm />
-              </Animated.View>
-            )}
-            {loginState.step === "resetPassword" && (
-              <Animated.View entering={SlideInRight} exiting={SlideOutLeft}>
-                <ResetPassword />
-              </Animated.View>
-            )}
-          </ScrollView>
-        </KeyboardAvoidingView>
+          {loginState.step === "signIn" && (
+            <Animated.View entering={SlideInRight} exiting={SlideOutLeft}>
+              <LoginForm />
+            </Animated.View>
+          )}
+          {loginState.step === "signUp" && (
+            <Animated.View entering={SlideInRight} exiting={SlideOutLeft}>
+              <RegisterForm />
+            </Animated.View>
+          )}
+          {loginState.step === "resetPassword" && (
+            <Animated.View entering={SlideInRight} exiting={SlideOutLeft}>
+              <ResetPassword />
+            </Animated.View>
+          )}
+        </KeyboardAwareScrollView>
       </LinearGradient>
     </View>
   );

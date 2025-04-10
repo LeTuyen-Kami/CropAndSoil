@@ -8,6 +8,7 @@ import {
   StatusBar,
   View,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useColorScheme } from "~/lib/useColorScheme";
 import { cn } from "~/lib/utils";
 import { BOTTOM_TAB_HEIGHT } from "~/utils";
@@ -45,7 +46,7 @@ const ScreenContainer: React.FC<ScreenContainerProps> = ({
 }) => {
   const { isDarkColorScheme } = useColorScheme();
   const Container = safeArea ? SafeAreaView : View;
-  const ContentContainer = scrollable ? ScrollView : View;
+  const ContentContainer = scrollable ? KeyboardAwareScrollView : View;
 
   // Create dynamic padding styles based on props
   const paddingStyle: any = {};
@@ -71,26 +72,22 @@ const ScreenContainer: React.FC<ScreenContainerProps> = ({
       />
 
       {header}
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      <ContentContainer
+        className={cn(
+          scrollable ? "flex-grow" : "flex-1",
+          paddingHorizontal === undefined ? "px-4" : "",
+          paddingVertical === undefined ? "py-4" : "",
+          wrapperClassName
+        )}
+        bottomOffset={50}
+        style={paddingStyle}
+        contentContainerStyle={
+          scrollable && hasBottomTabs ? { paddingBottom: 20 } : undefined
+        }
+        {...(refreshControl && scrollable ? { refreshControl } : {})}
       >
-        <ContentContainer
-          className={cn(
-            scrollable ? "flex-grow" : "flex-1",
-            paddingHorizontal === undefined ? "px-4" : "",
-            paddingVertical === undefined ? "py-4" : "",
-            wrapperClassName
-          )}
-          style={paddingStyle}
-          contentContainerStyle={
-            scrollable && hasBottomTabs ? { paddingBottom: 20 } : undefined
-          }
-          {...(refreshControl && scrollable ? { refreshControl } : {})}
-        >
-          {children}
-        </ContentContainer>
-      </KeyboardAvoidingView>
+        {children}
+      </ContentContainer>
 
       {footer}
     </Container>

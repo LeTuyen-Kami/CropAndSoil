@@ -9,10 +9,14 @@ import { FlashList } from "@shopify/flash-list";
 import { Button } from "~/components/ui/button";
 import { AntDesign } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+import { RootStackScreenProps } from "~/navigation/types";
 const Address = () => {
   const { top, bottom } = useSafeAreaInsets();
 
   const [data, setData] = useState<any[]>([]);
+
+  const navigation = useNavigation<RootStackScreenProps<"EditAddress">>();
 
   useEffect(() => {
     setData([
@@ -59,7 +63,7 @@ const Address = () => {
         </GradientBackground>
       }
     >
-      <View className="flex-1 px-5 -mt-10 bg-[#EEE] rounded-t-3xl overflow-hidden">
+      <View className="flex-1 px-5 -mt-5 bg-[#EEE] rounded-t-3xl overflow-hidden">
         <FlashList
           className="pt-3"
           data={[...data, ...data, ...data, ...data, ...data, ...data]}
@@ -70,6 +74,7 @@ const Address = () => {
               address={item.address}
               isDefault={item.isDefault}
               type={item.type}
+              onEdit={() => navigation.navigate("EditAddress")}
             />
           )}
           estimatedItemSize={100}

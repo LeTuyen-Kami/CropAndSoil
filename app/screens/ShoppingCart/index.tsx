@@ -1,20 +1,16 @@
+import { FlashList } from "@shopify/flash-list";
+import Checkbox from "expo-checkbox";
 import { Image } from "expo-image";
-import { useState, useMemo, useCallback } from "react";
-import { Pressable, ScrollView, TouchableOpacity, View } from "react-native";
-import ScreenContainer from "~/components/common/ScreenContainer";
-import ShoppingCartItem from "~/components/common/ShoppingCartItem";
-import Header from "~/components/common/Header";
-import { Text } from "~/components/ui/text";
-import { Feather } from "@expo/vector-icons";
+import { useCallback, useMemo, useState } from "react";
+import { Pressable, TouchableOpacity, View } from "react-native";
 import { imagePaths } from "~/assets/imagePath";
 import Badge from "~/components/common/Badge";
-import { BOTTOM_TAB_HEIGHT, screen } from "~/utils";
-import Checkbox from "expo-checkbox";
-import { cn } from "~/lib/utils";
-import { FlashList } from "@shopify/flash-list";
-import { Store } from "./types";
+import Header from "~/components/common/Header";
+import ScreenContainer from "~/components/common/ScreenContainer";
+import { Text } from "~/components/ui/text";
 import ShoppingCartStore from "./ShoppingCartStore";
-import { useNavigation } from "@react-navigation/native";
+import { Store } from "./types";
+import Footer from "./Footer";
 
 // Mock data for the shopping cart
 const mockStores: Store[] = [
@@ -73,71 +69,6 @@ const mockStores: Store[] = [
     ],
   },
 ];
-
-const Footer = ({
-  totalPrice,
-  totalSavings,
-  selectedCount,
-}: {
-  totalPrice: number;
-  totalSavings: number;
-  selectedCount: number;
-}) => {
-  const navigation = useNavigation();
-
-  // Format prices to display with thousand separators
-  const formatPrice = (price: number) => {
-    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  };
-
-  const handlePayment = () => {
-    navigation.navigate("Payment");
-  };
-
-  return (
-    <View className="overflow-hidden bg-white rounded-t-2xl">
-      {/* Voucher Section */}
-      <View className="flex-row justify-between items-center px-2 py-4 border-t border-l border-r border-[#F0F0F0] rounded-t-2xl">
-        <View className="flex-row gap-2 items-center">
-          <Feather name="tag" size={20} color="#159747" />
-          <Text className="text-sm text-[#0A0A0A]">Cropee Voucher</Text>
-        </View>
-        <View className="flex-row items-center">
-          <Text className="text-sm text-[#AEAEAE] mr-2">Chọn hoặc nhập mã</Text>
-          <Feather name="chevron-right" size={20} color="#AEAEAE" />
-        </View>
-      </View>
-
-      {/* Total Price and Payment Button */}
-      <View className="flex-row justify-between items-center px-3 py-3 border-t border-[#F0F0F0]">
-        <View>
-          <Text className="text-xs text-[#676767]">Tổng thanh toán</Text>
-          <View className="flex-row items-center">
-            <Text className="text-sm font-bold text-[#FCBA27] mr-2">
-              {formatPrice(totalPrice)}đ
-            </Text>
-            <Feather name="chevron-up" size={16} color="#FCBA27" />
-          </View>
-          {totalSavings > 0 && (
-            <Text className="text-[10px] text-[#12B76A]">
-              Tiết kiệm {formatPrice(totalSavings)}đ
-            </Text>
-          )}
-        </View>
-
-        <TouchableOpacity
-          className="bg-[#FCBA27] px-[22px] py-[10px] rounded-full"
-          activeOpacity={0.8}
-          onPress={handlePayment}
-        >
-          <Text className="text-sm font-medium text-white">
-            Mua hàng ({selectedCount})
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-};
 
 const ShoppingCart = () => {
   const [stores, setStores] = useState(mockStores);

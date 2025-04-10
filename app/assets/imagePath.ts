@@ -96,6 +96,10 @@ import productImg3 from "~/assets/icons/product3.png";
 
 import icTrash from "~/assets/icons/ic_trash.png";
 import icTicketSale from "~/assets/icons/ic_ticket_sale.png";
+
+import trophy from "~/assets/images/trophy.png";
+import objectError from "~/assets/images/object-error.png";
+import icFilter from "~/assets/icons/ic_filter.png";
 export const imagePaths = {
   //images
   logo: logo,
@@ -196,4 +200,7 @@ export const imagePaths = {
 
   icTrash: icTrash,
   icTicketSale: icTicketSale,
+  trophy: trophy,
+  objectError: objectError,
+  icFilter: icFilter,
 };

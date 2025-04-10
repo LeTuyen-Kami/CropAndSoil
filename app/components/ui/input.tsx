@@ -7,18 +7,27 @@ interface InputProps extends TextInputProps {
   rightIcon?: React.ReactNode;
   placeholderClassName?: string;
   error?: string;
+  textInputClassName?: string;
 }
 
 const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
   (
-    { className, placeholderClassName, leftIcon, rightIcon, error, ...props },
+    {
+      className,
+      placeholderClassName,
+      leftIcon,
+      rightIcon,
+      error,
+      textInputClassName,
+      ...props
+    },
     ref
   ) => {
     return (
       <>
         <View
           className={cn(
-            "flex-row items-center bg-white rounded-full px-6",
+            "flex-row items-center bg-white rounded-full px-6 border border-white",
             props.editable === false && "opacity-50 web:cursor-not-allowed",
             className,
             error && "border border-red-500"
@@ -27,7 +36,10 @@ const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
           {leftIcon && <View className="mr-2">{leftIcon}</View>}
           <TextInput
             ref={ref}
-            className={cn("flex-1 py-4 text-base leading-5")}
+            className={cn(
+              "flex-1 py-4 text-base leading-5",
+              textInputClassName
+            )}
             placeholderClassName={cn(
               "text-muted-foreground",
               placeholderClassName

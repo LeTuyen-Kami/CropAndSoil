@@ -2,13 +2,22 @@ import { ScrollView, View } from "react-native";
 import Header from "~/components/common/Header";
 import ScreenContainer from "~/components/common/ScreenContainer";
 import { Text } from "~/components/ui/text";
+import useDisclosure from "~/hooks/useDisclosure";
 import AddressItem from "./AddressItem";
 import DetailPayment from "./DetailPayment";
+import ModalSuccess from "./ModalSuccess";
 import PaymentMenu from "./PaymentMenu";
 import PaymentMethod from "./PaymentMethod";
 import PaymentStore from "./PaymentStore";
-
+import ModalFailed from "./ModalFailed";
 const Payment = () => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isOpenFailed,
+    onOpen: onOpenFailed,
+    onClose: onCloseFailed,
+  } = useDisclosure();
+
   return (
     <ScreenContainer
       scrollable={false}
@@ -52,9 +61,13 @@ const Payment = () => {
           totalPrice="1.901.300đ"
           savedAmount="331.300đ"
           onVoucherPress={() => {}}
-          onOrderPress={() => {}}
+          onOrderPress={() => {
+            onOpenFailed();
+          }}
         />
       </View>
+      <ModalSuccess isOpen={isOpen} onClose={onClose} />
+      <ModalFailed isOpen={isOpenFailed} onClose={onCloseFailed} />
     </ScreenContainer>
   );
 };

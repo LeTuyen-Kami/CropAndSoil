@@ -69,7 +69,7 @@ const ResetPassword = () => {
   }, []);
 
   return (
-    <View className="flex-1 px-8 pt-10 mb-6">
+    <View className="px-8 pt-10 mb-6">
       {/* Header with back button */}
       <View className="flex-row justify-center items-center mb-4">
         {step !== "phone" && (
@@ -101,7 +101,6 @@ const ResetPassword = () => {
         <Animated.View
           entering={getEnteringAnimation(step, previousStep)}
           exiting={getExitingAnimation(step, previousStep)}
-          className="flex-1"
         >
           {/* Phone Input */}
           <Input
@@ -154,7 +153,6 @@ const ResetPassword = () => {
         <Animated.View
           entering={getEnteringAnimation(step, previousStep)}
           exiting={getExitingAnimation(step, previousStep)}
-          className="flex-1"
         >
           {/* Verification Code Input */}
           <Input

@@ -10,6 +10,8 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import ToastHolder from "~/components/common/Toast";
 import ScreenLoading from "~/components/common/ScreenLoading";
 import NetworkLogger from "~/components/common/NetworkLogger";
+import { KeyboardProvider } from "react-native-keyboard-controller";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -17,20 +19,18 @@ cssInterop(Image, {
   className: "style",
 });
 export default function App() {
-  useEffect(() => {
-    SplashScreen.hideAsync();
-  }, []);
-
   return (
-    <JotaiProvider>
-      <ReactQueryProvider>
-        <SafeAreaProvider>
-          <AppNavigator />
-          <ToastHolder />
-          <ScreenLoading />
-          <NetworkLogger />
-        </SafeAreaProvider>
-      </ReactQueryProvider>
-    </JotaiProvider>
+    <KeyboardProvider>
+      <JotaiProvider>
+        <ReactQueryProvider>
+          <SafeAreaProvider>
+            <AppNavigator />
+            <ToastHolder />
+            <ScreenLoading />
+            <NetworkLogger />
+          </SafeAreaProvider>
+        </ReactQueryProvider>
+      </JotaiProvider>
+    </KeyboardProvider>
   );
 }

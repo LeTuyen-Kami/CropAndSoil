@@ -121,7 +121,7 @@ const ProductItem = ({
             )}
 
             {!hasSoldCount && hasRating && (
-              <View className="flex-row items-center gap-2 mt-[6]">
+              <View className="flex-row gap-2 items-center">
                 {hasRating && (
                   <View className="flex-row items-center bg-[#FDF8EA] rounded-[12px] py-[2] px-[4]">
                     <Text className="text-[10px] text-[#545454] mr-[2]">

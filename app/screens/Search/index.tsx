@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { View } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import Header from "~/components/common/Header";
 import ScreenContainer from "~/components/common/ScreenContainer";
 import SearchBar from "~/components/common/SearchBar";
@@ -11,6 +12,8 @@ import Animated, {
   FlipInYLeft,
   FlipInYRight,
 } from "react-native-reanimated";
+import { RootStackParamList, RootStackScreenProps } from "~/navigation/types";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 // Mock data for search history and suggestions
 const MOCK_SEARCH_HISTORY = [
@@ -27,6 +30,8 @@ const MOCK_SEARCH_SUGGESTIONS = [
 ];
 
 const SearchScreen = () => {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchHistory, setSearchHistory] = useState(MOCK_SEARCH_HISTORY);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -43,11 +48,7 @@ const SearchScreen = () => {
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
-      // Add to search history if not already there
-      if (!searchHistory.includes(searchQuery)) {
-        setSearchHistory([searchQuery, ...searchHistory]);
-      }
-      console.log("Searching for:", searchQuery);
+      navigation.navigate("SearchAdvance", { searchText: searchQuery });
     }
   };
 
@@ -82,7 +83,7 @@ const SearchScreen = () => {
 
   return (
     <ScreenContainer
-      header={<Header title="Tìm kiếm" showBack />}
+      header={<Header title="Tìm kiếm" showBack className="border-0" />}
       backgroundColor="white"
       scrollable
     >

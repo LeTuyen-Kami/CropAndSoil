@@ -1,4 +1,4 @@
-import { NavigatorScreenParams } from "@react-navigation/native";
+import { NavigatorScreenParams, RouteProp } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 
@@ -19,6 +19,9 @@ export type RootStackParamList = {
   Inputs: undefined;
   Search: undefined;
   Login: undefined;
+  SearchAdvance: {
+    searchText: string;
+  };
   DetailProduct: {
     id: string;
   };
@@ -29,11 +32,18 @@ export type RootStackParamList = {
   Payment: undefined;
   Address: undefined;
   VoucherSelect: undefined;
+  EditAddress: undefined;
+  MyOrder: undefined;
 };
 
 // Create a type for the navigation prop for stack screens
 export type RootStackScreenProps<T extends keyof RootStackParamList> =
-  NativeStackScreenProps<RootStackParamList, T>;
+  NativeStackScreenProps<RootStackParamList, T>["navigation"];
+
+export type RootStackRouteProp<T extends keyof RootStackParamList> = RouteProp<
+  RootStackParamList,
+  T
+>;
 
 // Create a type for the navigation prop for tab screens
 export type TabScreenProps<T extends keyof TabParamList> = BottomTabScreenProps<
