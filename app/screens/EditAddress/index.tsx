@@ -1,8 +1,8 @@
-import { TextInput, View } from "react-native";
+import { View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import GradientBackground from "~/components/common/GradientBackground";
 import Header from "~/components/common/Header";
+import ScreenWrapper from "~/components/common/ScreenWrapper";
 import SelectAdress from "~/components/common/SelectAdress";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
@@ -12,22 +12,41 @@ import {
   ContactSection,
   DefaultAddressSection,
 } from "~/screens/EditAddress/component";
-
+import { editAddressAtom } from "~/store/atoms";
+import { useAtomValue, useStore } from "jotai";
+import { IAddress, userService } from "~/services/api/user.service";
+import { useMutation } from "@tanstack/react-query";
+import { formStateAtom } from "./formAtom";
 const EditAddress = () => {
-  const { top, bottom } = useSafeAreaInsets();
+  const { bottom } = useSafeAreaInsets();
+  const store = useStore();
 
-  console.log("render");
+  const mutationAddAddress = useMutation({
+    mutationFn: (address: IAddress) => {
+      return userService.addAddress(address);
+    },
+  });
+
+  const editAddress = useAtomValue(editAddressAtom);
+
+  const title = editAddress.isEdit ? "Sửa sổ địa chỉ" : "Thêm sổ địa chỉ";
+
+  const handleAddAddress = () => {
+    const data = store.get(formStateAtom);
+
+    console.log(data);
+
+    // mutationAddAddress.mutate(editAddress);
+  };
 
   return (
-    <GradientBackground
-      style={{ flex: 1 }}
-      gradientStyle={{ flex: 1, paddingTop: top }}
-    >
+    <ScreenWrapper hasGradient={true} hasSafeBottom={false}>
       <Header
-        title="Sửa sổ địa chỉ"
+        title={title}
         className="bg-transparent border-0"
         textColor="white"
         titleClassName="font-bold"
+        hasSafeTop={false}
       />
       <View className="flex-1 bg-[#EEE] rounded-t-3xl overflow-hidden ">
         <KeyboardAwareScrollView
@@ -58,8 +77,17 @@ const EditAddress = () => {
           </Button>
         </View>
       </View>
-      <SelectAdress />
-    </GradientBackground>
+      <SelectAdress
+        isOpen={true}
+        onClose={() => {}}
+        initialValue={{
+          province: null,
+          district: null,
+          ward: null,
+        }}
+        onSelect={() => {}}
+      />
+    </ScreenWrapper>
   );
 };
 

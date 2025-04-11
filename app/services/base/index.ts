@@ -68,17 +68,29 @@ const refreshTokenFn = async () => {
 
     if (!refreshToken) throw new Error("No refresh token");
 
-    const response = await identityInstance.post("/auth/refresh", {
-      refreshToken,
-    });
+    const response = await identityInstance.post(
+      "/auth/extend",
+      {},
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${refreshToken}`,
+          "device-id": getDeviceId(),
+          "platform-os-type": Platform.OS,
+        },
+      }
+    );
 
     const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
       response.data;
 
     jotaiStore.set(authAtom, {
       ...auth,
-      accessToken: newAccessToken,
-      refreshToken: newRefreshToken,
+      token: {
+        ...auth.token,
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      },
     });
 
     return newAccessToken;

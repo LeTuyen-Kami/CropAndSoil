@@ -1,28 +1,30 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import React, { useEffect } from "react";
+import React from "react";
 import { Text } from "react-native";
+import Address from "~/screens/Address";
+import BusinessVoucherScreen from "~/screens/BussinessVoucher";
+import DetailProduct from "~/screens/DetailProduct";
+import EditAddress from "~/screens/EditAddress";
+import EditProfileScreen from "~/screens/EditProfile";
 import { HomeScreen } from "~/screens/Home";
+import LikedProductScreen from "~/screens/LikedProduct";
 import LoginScreen from "~/screens/Login";
+import MyOrderScreen from "~/screens/MyOrder";
 import NotificationScreen from "~/screens/Notification";
+import Payment from "~/screens/Payment";
 import ProfileScreen from "~/screens/Profile";
 import SearchScreen from "~/screens/Search";
+import SearchAdvance from "~/screens/SearchAdvance";
+import Settings from "~/screens/Settings";
+import ShoppingCart from "~/screens/ShoppingCart";
 import Buttons from "~/screens/Test/Buttons";
 import Inputs from "~/screens/Test/Inputs";
+import TestScreen from "~/screens/TestScreen";
+import VoucherSelectScreen from "~/screens/VoucherSelect";
 import CustomTabBar from "./CustomTabbar";
 import { RootStackParamList, TabParamList } from "./types";
-import DetailProduct from "~/screens/DetailProduct";
-import TestScreen from "~/screens/TestScreen";
-import LikedProductScreen from "~/screens/LikedProduct";
-import EditProfileScreen from "~/screens/EditProfile";
-import ShoppingCart from "~/screens/ShoppingCart";
-import Payment from "~/screens/Payment";
-import Address from "~/screens/Address";
-import VoucherSelectScreen from "~/screens/VoucherSelect";
-import SearchAdvance from "~/screens/SearchAdvance";
-import EditAddress from "~/screens/EditAddress";
-import MyOrderScreen from "~/screens/MyOrder";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -84,6 +86,11 @@ export const AppNavigator = () => {
         />
         <Stack.Screen name="EditAddress" component={EditAddress} />
         <Stack.Screen name="MyOrder" component={MyOrderScreen} />
+        <Stack.Screen name="Settings" component={Settings} />
+        <Stack.Screen
+          name="BusinessVoucher"
+          component={BusinessVoucherScreen}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

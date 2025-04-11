@@ -12,6 +12,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const AnimatedTouchableOpacity =
   Animated.createAnimatedComponent(TouchableOpacity);
@@ -20,6 +21,7 @@ const NetworkLogger = () => {
   const [expanded, setExpanded] = useState(false);
   const position = useSharedValue({ x: 0, y: 0 });
   const previousPosition = useSharedValue({ x: 0, y: 0 });
+  const { bottom } = useSafeAreaInsets();
 
   const style: any = expanded
     ? {
@@ -71,14 +73,6 @@ const NetworkLogger = () => {
     <View style={style}>
       <GestureHandlerRootView className="flex-1">
         <GestureDetector gesture={Gesture.Race(pan, tap)}>
-          {/* <AnimatedTouchableOpacity
-            onPress={() => setExpanded(!expanded)}
-            className="p-4 bg-red-500 rounded-lg opacity-40"
-            style={{
-              ...animatedStyle,
-              opacity: expanded ? 1 : 0.2,
-            }}
-          ></AnimatedTouchableOpacity> */}
           <Animated.View
             className="p-4 bg-red-500 rounded-lg opacity-40"
             style={{
@@ -88,7 +82,7 @@ const NetworkLogger = () => {
           ></Animated.View>
         </GestureDetector>
         {expanded && (
-          <View className="size-full">
+          <View className="size-full" style={{ paddingBottom: bottom }}>
             <NW />
           </View>
         )}

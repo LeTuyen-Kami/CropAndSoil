@@ -1,20 +1,18 @@
-import React from "react";
-import { View, Text } from "react-native";
-import { AddressTextInput } from "./TextInput";
 import { useAtom } from "jotai";
+import React from "react";
+import { Text, View } from "react-native";
 import {
   fullNameAtom,
-  phoneNumberAtom,
   phoneErrorAtom,
-  formStateAtom,
+  phoneNumberAtom,
   validatePhoneNumber,
 } from "../formAtom";
+import { AddressTextInput } from "./TextInput";
 
 export function ContactSection() {
   const [fullName, setFullName] = useAtom(fullNameAtom);
   const [phoneNumber, setPhoneNumber] = useAtom(phoneNumberAtom);
   const [phoneError, setPhoneError] = useAtom(phoneErrorAtom);
-  const [formState, setFormState] = useAtom(formStateAtom);
 
   const handlePhoneChange = (text: string) => {
     setPhoneNumber(text);
@@ -44,6 +42,7 @@ export function ContactSection() {
           onChange={handlePhoneChange}
           atom={phoneNumberAtom}
           error={phoneError}
+          keyboardType="phone-pad"
         />
       </View>
     </View>

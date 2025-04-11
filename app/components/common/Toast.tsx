@@ -1,12 +1,16 @@
 import { AntDesign } from "@expo/vector-icons";
 import { atom, useAtom } from "jotai";
-import { useEffect } from "react";
+import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, {
-  runOnJS,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
+  FadeIn,
+  FadeOut,
+  Layout,
+  LinearTransition,
+  SlideInDown,
+  SlideInUp,
+  SlideOutDown,
+  SlideOutUp,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { jotaiStore } from "~/store/store";
@@ -26,8 +30,8 @@ export interface ToastData {
   duration?: number;
 }
 
-// Create the toast atom
-export const toastAtom = atom<ToastData | null>(null);
+// Create the toast atom for multiple toasts
+export const toastsAtom = atom<ToastData[]>([]);
 
 export const toast = (
   message: string,
@@ -36,13 +40,22 @@ export const toast = (
   duration: number = 3000,
   id: string = Math.random().toString(36).substring(2, 9)
 ) => {
-  jotaiStore.set(toastAtom, {
-    id: id,
+  const newToast = {
+    id,
     message,
     type,
     position,
     duration,
-  });
+  };
+
+  jotaiStore.set(toastsAtom, (prev) => [...prev, newToast]);
+
+  // Auto remove toast after duration
+  setTimeout(() => {
+    jotaiStore.set(toastsAtom, (prev) =>
+      prev.filter((toast) => toast.id !== id)
+    );
+  }, duration);
 };
 
 toast.error = (
@@ -85,101 +98,58 @@ toast.info = (
 const getToastIcon = (type: ToastType) => {
   switch (type) {
     case "success":
-      return <AntDesign name="checkcircleo" size={20} color="#047857" />;
+      return <AntDesign name="checkcircleo" size={20} color="#fff" />;
     case "error":
-      return <AntDesign name="closecircleo" size={20} color="#b91c1c" />;
+      return <AntDesign name="closecircleo" size={20} color="#fff" />;
     case "warning":
-      return <AntDesign name="exclamationcircleo" size={20} color="#92400e" />;
+      return <AntDesign name="exclamationcircleo" size={20} color="#fff" />;
     case "info":
-      return <AntDesign name="questioncircleo" size={20} color="#0369a1" />;
+      return <AntDesign name="questioncircleo" size={20} color="#fff" />;
     default:
       return null;
   }
 };
 
-// Toast colors
-const getToastColors = (type: ToastType) => {
+// Toast background colors
+const getToastBackgroundColor = (type: ToastType) => {
   switch (type) {
     case "success":
-      return {
-        background: "#d1fae5",
-        text: "#047857",
-        border: "#34d399",
-      };
+      return "rgba(40, 167, 69, 0.9)";
     case "error":
-      return {
-        background: "#fee2e2",
-        text: "#b91c1c",
-        border: "#f87171",
-      };
+      return "rgba(220, 53, 69, 0.9)";
     case "warning":
-      return {
-        background: "#fffbeb",
-        text: "#92400e",
-        border: "#fbbf24",
-      };
+      return "rgba(255, 193, 7, 0.9)";
     case "info":
-      return {
-        background: "#e0f2fe",
-        text: "#0369a1",
-        border: "#38bdf8",
-      };
+      return "rgba(23, 162, 184, 0.9)";
     default:
-      return {
-        background: "#f3f4f6",
-        text: "#1f2937",
-        border: "#9ca3af",
-      };
+      return "rgba(52, 58, 64, 0.9)";
   }
 };
 
 // Toast component
 const Toast = ({ toast, onHide }: { toast: ToastData; onHide: () => void }) => {
-  const opacity = useSharedValue(0);
-  const offset = useSharedValue(toast.position === "top" ? -100 : 100);
-  const colors = getToastColors(toast.type);
-
-  useEffect(() => {
-    // Show animation
-    opacity.value = withTiming(1, { duration: 300 });
-    offset.value = withTiming(0, { duration: 300 });
-
-    // Auto-hide after duration
-    const timeout = setTimeout(() => {
-      hideToast();
-    }, toast.duration || 3000);
-
-    return () => clearTimeout(timeout);
-  }, [toast.id]);
-
-  const hideToast = () => {
-    opacity.value = withTiming(0, { duration: 300 });
-    offset.value = withTiming(
-      toast.position === "top" ? -100 : 100,
-      { duration: 300 },
-      () => runOnJS(onHide)()
-    );
-  };
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-    transform: [{ translateY: offset.value }],
-  }));
+  const backgroundColor = getToastBackgroundColor(toast.type);
+  const entering =
+    toast.position === "top"
+      ? SlideInUp.springify().damping(15)
+      : SlideInDown.springify().damping(15);
+  const exiting =
+    toast.position === "top"
+      ? SlideOutUp.springify().damping(15)
+      : SlideOutDown.springify().damping(15);
 
   return (
     <Animated.View
-      style={[
-        styles.toast,
-        animatedStyle,
-        { backgroundColor: colors.background, borderColor: colors.border },
-      ]}
+      entering={entering}
+      exiting={exiting}
+      layout={LinearTransition}
+      style={[styles.toast, { backgroundColor }]}
+      onTouchEnd={onHide}
     >
       <View style={styles.iconContainer}>{getToastIcon(toast.type)}</View>
-      <Text style={[styles.message, { color: colors.text }]}>
-        {toast.message}
-      </Text>
-      <TouchableOpacity style={styles.closeButton} onPress={hideToast}>
-        <AntDesign name="close" size={16} color={colors.text} />
+      <Text style={styles.message}>{toast.message}</Text>
+      <TouchableOpacity style={styles.closeButton} onPress={onHide}>
+        <AntDesign name="close" size={16} color="#fff" />
       </TouchableOpacity>
     </Animated.View>
   );
@@ -187,26 +157,49 @@ const Toast = ({ toast, onHide }: { toast: ToastData; onHide: () => void }) => {
 
 // ToastHolder component
 export const ToastHolder = () => {
-  const [toast, setToast] = useAtom(toastAtom);
+  const [toasts, setToasts] = useAtom(toastsAtom);
   const insets = useSafeAreaInsets();
 
-  const handleHideToast = () => {
-    setToast(null);
+  const handleHideToast = (id: string) => {
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
   };
 
-  if (!toast) return null;
+  if (!toasts.length) return null;
+
+  // Group toasts by position
+  const topToasts = toasts.filter((toast) => toast.position !== "bottom");
+  const bottomToasts = toasts.filter((toast) => toast.position === "bottom");
 
   return (
-    <View
-      style={[
-        styles.container,
-        toast.position === "top"
-          ? { top: insets.top + 10 }
-          : { bottom: insets.bottom + 10 },
-      ]}
-    >
-      <Toast toast={toast} onHide={handleHideToast} />
-    </View>
+    <>
+      {topToasts.length > 0 && (
+        <View style={[styles.container, { top: insets.top + 10 }]}>
+          {topToasts.map((toast) => (
+            <Animated.View
+              key={toast.id}
+              style={styles.toastWrapper}
+              layout={LinearTransition}
+            >
+              <Toast toast={toast} onHide={() => handleHideToast(toast.id)} />
+            </Animated.View>
+          ))}
+        </View>
+      )}
+
+      {bottomToasts.length > 0 && (
+        <View style={[styles.container, { bottom: insets.bottom + 10 }]}>
+          {bottomToasts.map((toast) => (
+            <Animated.View
+              key={toast.id}
+              style={styles.toastWrapper}
+              layout={LinearTransition}
+            >
+              <Toast toast={toast} onHide={() => handleHideToast(toast.id)} />
+            </Animated.View>
+          ))}
+        </View>
+      )}
+    </>
   );
 };
 
@@ -219,36 +212,41 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
   },
+  toastWrapper: {
+    width: "100%",
+    marginBottom: 8,
+    alignItems: "center",
+  },
   toast: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 1,
+    borderRadius: 25,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    shadowOpacity: 0.15,
+    shadowRadius: 5,
+    elevation: 4,
     maxWidth: 500,
-    width: "100%",
+    width: "90%",
   },
   iconContainer: {
     marginRight: 12,
-  },
-  icon: {
-    fontSize: 18,
   },
   message: {
     flex: 1,
     fontSize: 14,
     fontWeight: "500",
+    color: "#FFFFFF",
   },
   closeButton: {
     marginLeft: 12,
     padding: 2,
   },
 });
+
+// For backward compatibility
+export const toastAtom = toastsAtom;
 
 export default ToastHolder;

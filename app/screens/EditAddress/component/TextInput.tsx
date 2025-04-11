@@ -11,6 +11,7 @@ interface TextInputProps {
   atom: any;
   error?: string;
   onClear?: () => void;
+  keyboardType?: "default" | "email-address" | "numeric" | "phone-pad";
 }
 
 export function AddressTextInput({
@@ -20,6 +21,7 @@ export function AddressTextInput({
   atom,
   error,
   onClear,
+  keyboardType = "default",
 }: TextInputProps) {
   // Using the provided atom to track state
   const [inputValue, setInputValue] = useAtom(atom);
@@ -45,6 +47,7 @@ export function AddressTextInput({
       onFocus={() => setIsFocused(true)}
       onBlur={() => setIsFocused(false)}
       error={error}
+      keyboardType={keyboardType}
       textInputClassName="text-sm leading-4"
       className={
         error

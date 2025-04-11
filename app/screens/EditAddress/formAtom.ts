@@ -5,24 +5,42 @@ export interface AddressType {
   isDefault: boolean;
 }
 
-export interface TodoFormState {
+export interface AddressFormState {
   fullName: string;
   phoneNumber: string;
   phoneError?: string;
-  province: string;
-  district: string;
-  ward: string;
+  province: {
+    id: string;
+    name: string;
+  };
+  district: {
+    id: string;
+    name: string;
+  };
+  ward: {
+    id: string;
+    name: string;
+  };
   streetAddress: string;
   addressType: AddressType;
 }
 
-export const initialFormState: TodoFormState = {
+export const initialFormState: AddressFormState = {
   fullName: "",
   phoneNumber: "",
   phoneError: undefined,
-  province: "",
-  district: "",
-  ward: "",
+  province: {
+    id: "",
+    name: "",
+  },
+  district: {
+    id: "",
+    name: "",
+  },
+  ward: {
+    id: "",
+    name: "",
+  },
   streetAddress: "",
   addressType: {
     type: "office",
@@ -34,9 +52,21 @@ export const initialFormState: TodoFormState = {
 export const fullNameAtom = atom<string>("");
 export const phoneNumberAtom = atom<string>("");
 export const phoneErrorAtom = atom<string | undefined>(undefined);
-export const provinceAtom = atom<string>("");
-export const districtAtom = atom<string>("");
-export const wardAtom = atom<string>("");
+export const provinceAtom = atom<{
+  id: string;
+  name: string;
+}>({
+  id: "",
+  name: "",
+});
+export const districtAtom = atom<{
+  id: string;
+  name: string;
+}>({ id: "", name: "" });
+export const wardAtom = atom<{
+  id: string;
+  name: string;
+}>({ id: "", name: "" });
 export const streetAddressAtom = atom<string>("");
 export const addressTypeAtom = atom<AddressType>({
   type: "office",
@@ -55,7 +85,7 @@ export const formStateAtom = atom(
     streetAddress: get(streetAddressAtom),
     addressType: get(addressTypeAtom),
   }),
-  (_get, set, newState: Partial<TodoFormState>) => {
+  (_get, set, newState: Partial<AddressFormState>) => {
     if (newState.fullName !== undefined) set(fullNameAtom, newState.fullName);
     if (newState.phoneNumber !== undefined)
       set(phoneNumberAtom, newState.phoneNumber);

@@ -1,42 +1,149 @@
-import { axiosInstance } from "../base";
+import { PaginatedResponse, PaginationRequets } from "~/types";
+import { typedAxios } from "../base";
 
 export interface User {
-  id: string;
-  email: string;
-  fullName: string;
-  avatar?: string;
-  phone?: string;
-  address?: string;
+  accountType: string;
+  avatarUrl?: any;
+  birthday?: any;
   createdAt: string;
+  email: string;
+  gender?: any;
+  id: string;
+  name: string;
+  phone: string;
+  taxCertificateUrl?: any;
+  taxNumber?: any;
   updatedAt: string;
+  wooId: number;
 }
 
 export interface UpdateUserPayload {
-  fullName?: string;
-  avatar?: string;
+  name?: string;
   phone?: string;
-  address?: string;
+  email?: string;
+  gender?: string;
+  birthday?: string;
+  taxNumber?: string;
+  avatarFile?: {
+    uri: string;
+    type: string;
+    name: string;
+  };
+  taxCertificateFile?: {
+    uri: string;
+    type: string;
+    name: string;
+  };
+}
+
+export interface ChangePasswordPayload {
+  password: string;
+}
+
+export interface ChangeDeviceTokenPayload {
+  deviceToken: string;
+}
+
+export interface Ward {
+  id: string;
+  name: string;
+  type: string;
+  districtId: string;
+}
+
+export interface District {
+  id: string;
+  name: string;
+  type: string;
+  provinceId: string;
+}
+
+export interface Province {
+  id: string;
+  name: string;
+  type: string;
+  slug: string;
+}
+
+export interface IAddress {
+  wooId: number;
+  name: string;
+  phoneNumber: string;
+  isDefault: boolean;
+  addressLine: string;
+  ward: Ward;
+  district: District;
+  province: Province;
+  addressType: string;
 }
 
 class UserService {
-  async getCurrentUser() {
-    return axiosInstance.get<User>("/users/me").then((res) => res?.data);
+  async getProfile() {
+    return typedAxios.get<User>("/account/profile");
   }
 
   async updateProfile(payload: UpdateUserPayload) {
-    return axiosInstance
-      .patch<User>("/users/me", payload)
-      .then((res) => res?.data);
+    const formData = new FormData();
+    payload.name && formData.append("name", payload.name);
+    payload.phone && formData.append("phone", payload.phone);
+    payload.email && formData.append("email", payload.email);
+    payload.gender && formData.append("gender", payload.gender);
+    payload.birthday && formData.append("birthday", payload.birthday);
+    payload.taxNumber && formData.append("taxNumber", payload.taxNumber);
+    if (payload.avatarFile) {
+      formData.append("avatarFile", {
+        uri: payload.avatarFile.uri,
+        type: payload.avatarFile.type,
+        name: payload.avatarFile.name,
+      } as any);
+    }
+    if (payload.taxCertificateFile) {
+      formData.append("taxCertificateFile", {
+        uri: payload.taxCertificateFile.uri,
+        type: payload.taxCertificateFile.type,
+        name: payload.taxCertificateFile.name,
+      } as any);
+    }
+    return typedAxios.put<User>("/account/profile", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
   }
 
-  async changePassword(
-    oldPassword: string,
-    newPassword: string
-  ): Promise<void> {
-    return axiosInstance.post("/users/change-password", {
-      oldPassword,
-      newPassword,
+  async changePassword(payload: ChangePasswordPayload) {
+    return typedAxios.post<{
+      code: string;
+      message: string;
+    }>("/account/change-password", payload);
+  }
+
+  async changeDeviceToken(payload: ChangeDeviceTokenPayload) {
+    return typedAxios.post<{
+      code: string;
+      message: string;
+    }>("/account/change-device-token", payload);
+  }
+
+  async getAddress(payload: PaginationRequets) {
+    return typedAxios.get<PaginatedResponse<IAddress>>("/account/address", {
+      params: payload,
     });
+  }
+
+  async addAddress(payload: IAddress) {
+    return typedAxios.post<IAddress>("/account/address", payload);
+  }
+
+  async updateAddress(payload: IAddress) {
+    return typedAxios.put<IAddress>("/account/address", payload);
+  }
+
+  async deleteAddress(wooId: number) {
+    return typedAxios.delete<{
+      code: string;
+      message: string;
+    }>(`/account/address/${wooId}`);
   }
 }
 

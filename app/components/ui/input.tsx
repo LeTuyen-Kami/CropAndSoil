@@ -1,6 +1,13 @@
 import * as React from "react";
-import { TextInput, View, Text, type TextInputProps } from "react-native";
+import {
+  TextInput,
+  View,
+  Text,
+  type TextInputProps,
+  TouchableOpacity,
+} from "react-native";
 import { cn } from "~/lib/utils";
+import { Ionicons } from "@expo/vector-icons";
 
 interface InputProps extends TextInputProps {
   leftIcon?: React.ReactNode;
@@ -8,6 +15,7 @@ interface InputProps extends TextInputProps {
   placeholderClassName?: string;
   error?: string;
   textInputClassName?: string;
+  clearable?: boolean;
 }
 
 const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
@@ -19,10 +27,13 @@ const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
       rightIcon,
       error,
       textInputClassName,
+      clearable,
       ...props
     },
     ref
   ) => {
+    const [isFocused, setIsFocused] = React.useState(false);
+
     return (
       <>
         <View
@@ -35,6 +46,8 @@ const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
         >
           {leftIcon && <View className="mr-2">{leftIcon}</View>}
           <TextInput
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
             ref={ref}
             className={cn(
               "flex-1 py-4 text-base leading-5",
@@ -47,6 +60,15 @@ const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
             {...props}
           />
           {rightIcon && <View className="ml-2">{rightIcon}</View>}
+          {clearable && props?.value && isFocused && (
+            <TouchableOpacity
+              hitSlop={10}
+              onPress={() => props?.onChangeText?.("")}
+              className="bg-[#F5F5F5] rounded-full p-1"
+            >
+              <Ionicons name="close" size={14} color="#AEAEAE" />
+            </TouchableOpacity>
+          )}
         </View>
         {error && (
           <Text className="mt-1 ml-2 text-sm text-red-500">{error}</Text>

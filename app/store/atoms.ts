@@ -1,11 +1,12 @@
 import { atom } from "jotai";
-import { Token, User } from "../types";
+import { Token } from "../types";
 import { atomWithMMKV } from "./atomWithMMKV";
 import { jotaiStore } from "./store";
+import { IAddress, User } from "~/services/api/user.service";
 
 interface AuthState {
   isLoggedIn: boolean;
-  user: User | null;
+  user: Partial<User> | null;
   token: Token | null;
 }
 
@@ -33,19 +34,21 @@ export type IOption = {
 };
 
 export type Adress = {
-  province?: IOption[];
-  district?: IOption[];
-  ward?: IOption[];
+  province?: IOption | null;
+  district?: IOption | null;
+  ward?: IOption | null;
   isOpen: boolean;
   type: "province" | "district" | "ward";
+  data: IOption[];
 };
 
 export const adressAtom = atom<Adress>({
-  province: [],
-  district: [],
-  ward: [],
+  province: null,
+  district: null,
+  ward: null,
   isOpen: false,
   type: "province",
+  data: [],
 });
 
 export type ConfirmState = {
@@ -63,3 +66,37 @@ export const confirmAtom = atom<ConfirmState>({
   onCancel: () => {},
   isOpen: false,
 });
+
+export type IAtomAddress = IAddress & {
+  isEdit: boolean;
+};
+
+export const initialAddress: IAtomAddress = {
+  wooId: 0,
+  name: "",
+  phoneNumber: "",
+  isDefault: false,
+  addressLine: "",
+  ward: {
+    id: "",
+    name: "",
+    type: "",
+    districtId: "",
+  },
+  district: {
+    id: "",
+    name: "",
+    type: "",
+    provinceId: "",
+  },
+  province: {
+    id: "",
+    name: "",
+    type: "",
+    slug: "",
+  },
+  addressType: "",
+  isEdit: false,
+};
+
+export const editAddressAtom = atom<IAtomAddress>(initialAddress);

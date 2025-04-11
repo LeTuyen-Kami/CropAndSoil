@@ -18,6 +18,7 @@ import SectionTitle from "./SectionTitlte";
 import SupportItem from "./SupportItem";
 import UtilityItem from "./UlitityItem";
 import { authAtom } from "~/store/atoms";
+import { useQueryClient } from "@tanstack/react-query";
 // Main profile component
 const ProfileScreen = () => {
   const { top } = useSafeAreaInsets();
@@ -26,13 +27,15 @@ const ProfileScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const setLoginState = useSetAtom(loginAtom);
 
+  const queryClient = useQueryClient();
+
   const auth = useAtomValue(authAtom);
 
   const onRefresh = () => {
     setRefreshing(true);
-    setTimeout(() => {
+    queryClient.refetchQueries({ queryKey: ["profile"] }).then(() => {
       setRefreshing(false);
-    }, 2000);
+    });
   };
 
   const onPressMyOrder = (index: number) => {

@@ -1,19 +1,38 @@
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Image } from "expo-image";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { Pressable, TouchableOpacity, View } from "react-native";
 import { imagePaths } from "~/assets/imagePath";
 import { Text } from "~/components/ui/text";
 import { RootStackParamList } from "~/navigation/types";
 import { authAtom } from "~/store/atoms";
 import { loginAtom } from "../Login/atom";
+import { useQuery } from "@tanstack/react-query";
+import { userService } from "~/services/api/user.service";
+import { useEffect } from "react";
 const HeaderLogging = () => {
   const setLoginState = useSetAtom(loginAtom);
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  const auth = useAtomValue(authAtom);
+  const [auth, setAuth] = useAtom(authAtom);
+
+  const { data: profile } = useQuery({
+    queryKey: ["profile"],
+    queryFn: () => userService.getProfile(),
+    enabled: auth?.isLoggedIn,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  useEffect(() => {
+    if (profile) {
+      setAuth({
+        ...auth,
+        user: profile,
+      });
+    }
+  }, [profile]);
 
   const renderContent = () => {
     if (auth?.user) {
@@ -25,27 +44,31 @@ const HeaderLogging = () => {
             navigation.navigate("EditProfile");
           }}
         >
-          <View className="h-12 w-12 rounded-full bg-[#DEF1E5] border-2 border-white justify-center items-center mr-2">
+          <View className="rounded-full bg-[#DEF1E5] border-2 border-white mr-2">
             <Image
-              source={imagePaths.icUser}
-              style={{ width: 24, height: 24 }}
+              source={auth?.user?.avatarUrl || profile?.avatarUrl}
+              className="rounded-full size-10"
+              contentFit="cover"
+              placeholder={imagePaths.icUser}
+              placeholderContentFit="cover"
             />
           </View>
           <View className="flex-1">
             <Text className="text-lg font-bold text-white">
-              {auth?.user?.name || auth?.user?.phone}
+              {auth?.user?.name ||
+                auth?.user?.phone ||
+                profile?.name ||
+                profile?.phone}
             </Text>
             <View className="flex-row gap-6 mt-1">
               <Text className="text-xs text-white">{102} Người theo dõi</Text>
               <Text className="text-xs text-white">{125} Đang theo dõi</Text>
             </View>
           </View>
-          <TouchableOpacity>
-            <Image
-              source={imagePaths.icArrowRight}
-              style={{ width: 24, height: 24, tintColor: "#fff" }}
-            />
-          </TouchableOpacity>
+          <Image
+            source={imagePaths.icArrowRight}
+            style={{ width: 24, height: 24, tintColor: "#fff" }}
+          />
         </TouchableOpacity>
       );
     }

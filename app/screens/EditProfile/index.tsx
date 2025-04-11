@@ -3,17 +3,35 @@ import {
   FontAwesome,
   Ionicons,
   MaterialIcons,
+  Octicons,
 } from "@expo/vector-icons";
+import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
+import { useNavigation } from "@react-navigation/native";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import dayjs from "dayjs";
+import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import { useState } from "react";
-import { ScrollView, TouchableOpacity, View } from "react-native";
+import { useAtomValue } from "jotai";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Platform,
+  ScrollView,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import GradientBackground from "~/components/common/GradientBackground";
+import { imagePaths } from "~/assets/imagePath";
 import Header from "~/components/common/Header";
-import ScreenContainer from "~/components/common/ScreenContainer";
+import ScreenWrapper from "~/components/common/ScreenWrapper";
 import { toast } from "~/components/common/Toast";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
+import { UpdateUserPayload, userService } from "~/services/api/user.service";
+import { authAtom } from "~/store/atoms";
+import { getErrorMessage } from "~/utils";
+import { GENDER_OPTIONS, MAX_IMAGE_SIZE } from "~/utils/contants";
 import EditProfileField from "./EditProfileField";
 
 type ProfileItemProps = {
@@ -31,6 +49,7 @@ type ProfileForm = {
   gender: string;
   birthDate: string;
   taxId: string;
+  avatar: ImagePicker.ImagePickerAsset | null;
 };
 
 const ProfileItem = ({
@@ -60,13 +79,31 @@ const ProfileItem = ({
 const EditProfileScreen = () => {
   const { top, bottom } = useSafeAreaInsets();
 
+  const auth = useAtomValue(authAtom);
+
+  const queryClient = useQueryClient();
+
+  const navigation = useNavigation();
+
+  const mutationUpdateProfile = useMutation({
+    mutationFn: (data: UpdateUserPayload) => userService.updateProfile(data),
+  });
+
+  const { data: profile } = useQuery({
+    queryKey: ["profile"],
+    queryFn: () => userService.getProfile(),
+    enabled: auth?.isLoggedIn,
+    staleTime: 1000 * 60 * 5,
+  });
+
   const [profileForm, setProfileForm] = useState<ProfileForm>({
-    fullName: "Cherry Phan",
-    phone: "0912345678",
-    email: "tr*************@gmail.com",
+    fullName: "",
+    phone: "",
+    email: "",
     gender: "",
     birthDate: "",
     taxId: "",
+    avatar: null,
   });
 
   const [editField, setEditField] = useState<{
@@ -75,12 +112,14 @@ const EditProfileScreen = () => {
     value: string;
     label: string;
     keyboardType: "default" | "numeric" | "email-address" | "phone-pad";
+    fieldType: "text" | "date" | "gender";
   }>({
     visible: false,
     field: "",
     value: "",
     label: "",
     keyboardType: "default",
+    fieldType: "text",
   });
 
   const handleEditField = (
@@ -90,14 +129,16 @@ const EditProfileScreen = () => {
       | "default"
       | "numeric"
       | "email-address"
-      | "phone-pad" = "default"
+      | "phone-pad" = "default",
+    fieldType: "text" | "date" | "gender" = "text"
   ) => {
     setEditField({
       visible: true,
       field,
-      value: profileForm[field],
+      value: profileForm[field] as string,
       label,
       keyboardType,
+      fieldType,
     });
   };
 
@@ -117,7 +158,36 @@ const EditProfileScreen = () => {
 
   const handleSaveProfile = () => {
     // Here you would call the API to save the profile
-    toast.success("Thông tin hồ sơ đã được cập nhật");
+    mutationUpdateProfile.mutate(
+      {
+        name: profileForm.fullName,
+        phone: profileForm.phone,
+        email: profileForm.email,
+        gender: profileForm.gender,
+        birthday: profileForm.birthDate,
+        taxNumber: "123",
+        avatarFile:
+          profileForm.avatar && profileForm.avatar.uri
+            ? {
+                uri: profileForm.avatar?.uri || "",
+                type: profileForm.avatar?.type || "",
+                name: profileForm.avatar?.fileName || "",
+              }
+            : undefined,
+      },
+      {
+        onSuccess: (data) => {
+          console.log("data", data);
+
+          toast.success("Thông tin hồ sơ đã được cập nhật");
+          queryClient.invalidateQueries({ queryKey: ["profile"] });
+        },
+        onError: (error) => {
+          const message = getErrorMessage(error, "Có lỗi xảy ra khi cập nhật");
+          toast.error(message);
+        },
+      }
+    );
   };
 
   const handlePickImage = async () => {
@@ -131,133 +201,238 @@ const EditProfileScreen = () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: "images",
       allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
+      quality: 0.8,
     });
 
-    if (!result.canceled) {
+    if (result.assets?.[0]) {
+      //kiểm tra image size
+
+      if (
+        result.assets[0]?.fileSize &&
+        result.assets[0]?.fileSize > MAX_IMAGE_SIZE
+      ) {
+        toast.error("Kích thước ảnh không được vượt quá 2MB");
+        return;
+      }
+
+      console.log("fileSize", result.assets[0]?.fileSize);
+
       // Handle the image upload here
       toast.success("Ảnh đã được chọn");
+      setProfileForm((prev) => ({
+        ...prev,
+        avatar: result.assets[0],
+      }));
     }
   };
 
+  useEffect(() => {
+    if (profile) {
+      setProfileForm({
+        fullName: profile.name,
+        phone: profile.phone,
+        email: profile.email,
+        gender: profile.gender,
+        birthDate: profile.birthday,
+        taxId: profile.taxNumber,
+        avatar: {
+          uri: profile.avatarUrl,
+          width: 140,
+          height: 140,
+        },
+      });
+    }
+  }, [profile]);
+
   return (
-    <ScreenContainer
-      paddingBottom={0}
-      paddingHorizontal={0}
-      paddingVertical={0}
-      safeArea={false}
-      header={
-        <GradientBackground gradientStyle={{ paddingTop: top }}>
-          <Header
-            title="Sửa hồ sơ"
-            className="bg-transparent border-0"
-            textColor="white"
-          />
-        </GradientBackground>
-      }
-    >
-      <View className="flex-1">
-        <GradientBackground>
-          <View className="items-center mt-6 mb-4">
-            <View className="relative z-10">
-              <View className="w-[140px] h-[140px] rounded-full bg-[#DEF1E5] border-4 border-white justify-center items-center">
-                <Ionicons name="person" size={60} color="#159747" />
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ScreenWrapper hasGradient={true} hasSafeBottom={false}>
+        <Header
+          title="Sửa hồ sơ"
+          className="bg-transparent border-0"
+          textColor="white"
+          hasSafeTop={false}
+        />
+        <View className="flex-1">
+          <View>
+            <View className="absolute top-[50%] left-0 right-0 bottom-0 bg-[#F2F2F2] rounded-t-3xl"></View>
+
+            <View className="items-center mt-6 mb-4">
+              <View className="relative">
+                <View className="w-[140px] h-[140px] rounded-full bg-[#DEF1E5] border-4 border-white justify-center items-center">
+                  <Image
+                    source={profileForm.avatar?.uri}
+                    className="w-[140px] h-[140px] rounded-full"
+                    contentFit="cover"
+                    placeholder={imagePaths.icUser}
+                    placeholderContentFit="cover"
+                  />
+                </View>
+                <TouchableOpacity
+                  className="absolute bottom-0 right-4 bg-[#AEAEAE] w-[30px] h-[30px] rounded-full justify-center items-center border-[1.6px] border-white"
+                  onPress={handlePickImage}
+                >
+                  {/* <Feather name="edit-2" size={16} color="white" /> */}
+                  <Octicons name="pencil" size={18} color="white" />
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity
-                className="absolute bottom-0 right-0 bg-[#AEAEAE] w-[30px] h-[30px] rounded-lg justify-center items-center border-[1.6px] border-white"
-                onPress={handlePickImage}
-              >
-                <Feather name="edit-2" size={16} color="white" />
-              </TouchableOpacity>
             </View>
           </View>
-          <View className="absolute top-[50%] left-0 right-0 bottom-0 bg-[#F2F2F2] rounded-t-3xl"></View>
-        </GradientBackground>
-        <ScrollView>
-          <View className="">
-            <ProfileItem
-              icon={
-                <Ionicons name="person-outline" size={24} color="#AEAEAE" />
-              }
-              label="Họ & tên"
-              value={profileForm.fullName}
-              onPress={() => handleEditField("fullName", "Họ & tên")}
-            />
-
-            <ProfileItem
-              icon={<Feather name="phone" size={24} color="#AEAEAE" />}
-              label="Số điện thoại"
-              value={profileForm.phone}
-              onPress={() =>
-                handleEditField("phone", "Số điện thoại", "phone-pad")
-              }
-            />
-
-            <ProfileItem
-              icon={
-                <MaterialIcons name="mail-outline" size={24} color="#AEAEAE" />
-              }
-              label="Email"
-              value={profileForm.email}
-              onPress={() => handleEditField("email", "Email", "email-address")}
-            />
-
-            <ProfileItem
-              icon={
-                <Ionicons
-                  name="male-female-outline"
-                  size={24}
-                  color="#AEAEAE"
+          <View className="flex-col flex-1 bg-[#F2F2F2]">
+            <ScrollView>
+              <View className="">
+                <ProfileItem
+                  icon={
+                    <Image
+                      source={imagePaths.icUser1}
+                      className="size-6"
+                      contentFit="contain"
+                    />
+                  }
+                  label="Họ & tên"
+                  value={profileForm.fullName}
+                  placeholder={"Thêm thông tin họ & tên"}
+                  onPress={() => handleEditField("fullName", "Họ & tên")}
                 />
-              }
-              label="Giới tính"
-              value={profileForm.gender}
-              placeholder="Thêm thông tin giới tính"
-              onPress={() => handleEditField("gender", "Giới tính")}
-            />
 
-            <ProfileItem
-              icon={
-                <Ionicons name="calendar-outline" size={24} color="#AEAEAE" />
-              }
-              label="Ngày sinh"
-              value={profileForm.birthDate}
-              placeholder="Thêm ngày, tháng, năm sinh"
-              onPress={() => handleEditField("birthDate", "Ngày sinh")}
-            />
+                <ProfileItem
+                  icon={
+                    <Image
+                      source={imagePaths.icPhone}
+                      className="size-6"
+                      contentFit="contain"
+                    />
+                  }
+                  label="Số điện thoại"
+                  value={profileForm.phone}
+                  placeholder={"Thêm thông tin số điện thoại"}
+                  onPress={() =>
+                    handleEditField("phone", "Số điện thoại", "phone-pad")
+                  }
+                />
 
-            <ProfileItem
-              icon={
-                <FontAwesome name="file-text-o" size={24} color="#AEAEAE" />
-              }
-              label="Mã số thuế & Chứng từ kinh doanh"
-              value={profileForm.taxId}
-              placeholder="Nhập thông tin & tải lên tệp bắt buộc để hoàn tất"
-              onPress={() => handleEditField("taxId", "Mã số thuế")}
-            />
+                <ProfileItem
+                  icon={
+                    <Image
+                      source={imagePaths.icLetter}
+                      className="size-6"
+                      contentFit="contain"
+                    />
+                  }
+                  label="Email"
+                  value={profileForm.email}
+                  placeholder={"Thêm thông tin email"}
+                  onPress={() =>
+                    handleEditField("email", "Email", "email-address")
+                  }
+                />
+
+                <ProfileItem
+                  icon={
+                    <Image
+                      source={imagePaths.icGender}
+                      className="size-6"
+                      contentFit="contain"
+                    />
+                  }
+                  label="Giới tính"
+                  value={
+                    GENDER_OPTIONS.find(
+                      (option) => option.value === profileForm.gender
+                    )?.label || ""
+                  }
+                  placeholder="Thêm thông tin giới tính"
+                  onPress={() =>
+                    handleEditField("gender", "Giới tính", "default", "gender")
+                  }
+                />
+
+                <ProfileItem
+                  icon={
+                    <Image
+                      source={imagePaths.icCalendar}
+                      className="size-6"
+                      contentFit="contain"
+                    />
+                  }
+                  label="Ngày sinh"
+                  value={
+                    dayjs(profileForm.birthDate).isValid()
+                      ? dayjs(profileForm.birthDate).format("DD/MM/YYYY")
+                      : ""
+                  }
+                  placeholder="Thêm ngày, tháng, năm sinh"
+                  onPress={() => {
+                    if (Platform.OS === "android") {
+                      DateTimePickerAndroid.open({
+                        value: new Date(profileForm.birthDate),
+                        onChange: (event, date) => {
+                          console.log("date", date);
+
+                          setProfileForm((prev) => ({
+                            ...prev,
+                            birthDate: date?.toISOString() || "",
+                          }));
+                        },
+                        maximumDate: new Date(),
+                        mode: "date",
+                        display: "calendar",
+                      });
+                    } else {
+                      handleEditField(
+                        "birthDate",
+                        "Ngày sinh",
+                        "default",
+                        "date"
+                      );
+                    }
+                  }}
+                />
+
+                <ProfileItem
+                  icon={
+                    <Image
+                      source={imagePaths.icDocument}
+                      className="size-6"
+                      contentFit="contain"
+                    />
+                  }
+                  label="Mã số thuế & Chứng từ kinh doanh"
+                  value={profileForm.taxId}
+                  placeholder="Nhập thông tin & tải lên tệp bắt buộc để hoàn tất"
+                  onPress={() => {
+                    navigation.navigate("BusinessVoucher");
+                  }}
+                />
+              </View>
+            </ScrollView>
+            <View className="px-2" style={{ paddingBottom: bottom }}>
+              <Button
+                variant="default"
+                className="bg-[#FCBA27] rounded-full py-3 active:bg-[#FCBA27]/50"
+                onPress={handleSaveProfile}
+              >
+                {mutationUpdateProfile.isPending ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <Text className="text-base font-medium text-white">Lưu</Text>
+                )}
+              </Button>
+            </View>
           </View>
-        </ScrollView>
-        <View style={{ paddingBottom: bottom }} className="px-2">
-          <Button
-            variant="default"
-            className="bg-[#FCBA27] rounded-full py-3 active:bg-[#FCBA27]/50"
-            onPress={handleSaveProfile}
-          >
-            <Text className="text-base font-medium text-white">Lưu</Text>
-          </Button>
         </View>
-      </View>
 
-      <EditProfileField
-        visible={editField.visible}
-        onClose={handleClose}
-        fieldLabel={editField.label}
-        currentValue={editField.value}
-        onSave={handleSaveField}
-        keyboardType={editField.keyboardType}
-      />
-    </ScreenContainer>
+        <EditProfileField
+          visible={editField.visible}
+          onClose={handleClose}
+          fieldLabel={editField.label}
+          currentValue={editField.value}
+          onSave={handleSaveField}
+          keyboardType={editField.keyboardType}
+          fieldType={editField.fieldType}
+        />
+      </ScreenWrapper>
+    </GestureHandlerRootView>
   );
 };
 

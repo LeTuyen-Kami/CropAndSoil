@@ -14,6 +14,7 @@ interface HeaderProps {
   className?: string;
   textColor?: string;
   titleClassName?: string;
+  hasSafeTop?: boolean;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -24,6 +25,7 @@ const Header: React.FC<HeaderProps> = ({
   className,
   textColor,
   titleClassName,
+  hasSafeTop = true,
 }) => {
   const navigation = useNavigation();
   const { top } = useSafeAreaInsets();
@@ -31,10 +33,10 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <View
       className={cn(
-        "flex-row justify-between items-center px-4 py-3 border-b bg-background border-border",
+        "flex-row justify-between items-center px-4 py-3 pb-5 border-b bg-background border-border",
         className
       )}
-      style={{ paddingTop: top }}
+      style={{ paddingTop: hasSafeTop ? top : 0 }}
     >
       <View className="flex-row flex-1 items-center">
         {!!showBack ? (

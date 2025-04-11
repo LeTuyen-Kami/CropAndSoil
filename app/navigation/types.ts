@@ -36,6 +36,8 @@ export type RootStackParamList = {
   MyOrder: {
     tabIndex: number;
   };
+  Settings: undefined;
+  BusinessVoucher: undefined;
 };
 
 // Create a type for the navigation prop for stack screens

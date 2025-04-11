@@ -1,19 +1,14 @@
-import { confirmAtom } from "~/store/atoms";
 import { useAtom } from "jotai";
-import { View, StyleSheet, TouchableWithoutFeedback } from "react-native";
-import { Text } from "../ui/text";
-import { Button } from "../ui/button";
-import { Image } from "expo-image";
-import { AntDesign } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import { StyleSheet, TouchableWithoutFeedback, View } from "react-native";
 import Animated, {
   FadeIn,
   FadeOut,
   SlideInDown,
-  SlideInUp,
   SlideOutDown,
-  SlideOutUp,
 } from "react-native-reanimated";
+import { confirmAtom } from "~/store/atoms";
+import { Button } from "../ui/button";
+import { Text } from "../ui/text";
 
 const ModalConfirm = () => {
   const [confirmState, setConfirmState] = useAtom(confirmAtom);
@@ -38,7 +33,7 @@ const ModalConfirm = () => {
 
   return (
     <Animated.View
-      style={styles.overlay}
+      style={[styles.overlay]}
       entering={FadeIn.duration(300)}
       exiting={FadeOut.duration(100).delay(200)}
     >

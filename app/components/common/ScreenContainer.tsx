@@ -1,13 +1,5 @@
 import React, { ReactNode } from "react";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  RefreshControl,
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  View,
-} from "react-native";
+import { SafeAreaView, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useColorScheme } from "~/lib/useColorScheme";
 import { cn } from "~/lib/utils";

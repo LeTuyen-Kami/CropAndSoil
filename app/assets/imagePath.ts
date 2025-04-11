@@ -100,6 +100,14 @@ import icTicketSale from "~/assets/icons/ic_ticket_sale.png";
 import trophy from "~/assets/images/trophy.png";
 import objectError from "~/assets/images/object-error.png";
 import icFilter from "~/assets/icons/ic_filter.png";
+
+import icCalendar from "~/assets/icons/ic_calendar.svg";
+import icGender from "~/assets/icons/ic_gender.svg";
+import icDocument from "~/assets/icons/ic_document.svg";
+import icPhone1 from "~/assets/icons/ic_phone.svg";
+import icLetter from "~/assets/icons/ic_letter.svg";
+import icUser1 from "~/assets/icons/ic_user.svg";
+
 export const imagePaths = {
   //images
   logo: logo,
@@ -203,4 +211,11 @@ export const imagePaths = {
   trophy: trophy,
   objectError: objectError,
   icFilter: icFilter,
+
+  icCalendar: icCalendar,
+  icGender: icGender,
+  icDocument: icDocument,
+  icPhone1: icPhone1,
+  icLetter: icLetter,
+  icUser1: icUser1,
 };

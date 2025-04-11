@@ -21,19 +21,21 @@ cssInterop(Image, {
 });
 export default function App() {
   return (
-    <KeyboardProvider>
-      <JotaiProvider>
-        <ReactQueryProvider>
-          <SafeAreaProvider>
-            <AppNavigator />
-            <ToastHolder />
-            <ScreenLoading />
-            <NetworkLogger />
-            <SystemBars style={"auto"} />
-            <ModalConfirm />
-          </SafeAreaProvider>
-        </ReactQueryProvider>
-      </JotaiProvider>
-    </KeyboardProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <KeyboardProvider>
+        <JotaiProvider>
+          <ReactQueryProvider>
+            <SafeAreaProvider>
+              <AppNavigator />
+              <ToastHolder />
+              <ScreenLoading />
+              <NetworkLogger />
+              <SystemBars style={"auto"} />
+              <ModalConfirm />
+            </SafeAreaProvider>
+          </ReactQueryProvider>
+        </JotaiProvider>
+      </KeyboardProvider>
+    </GestureHandlerRootView>
   );
 }

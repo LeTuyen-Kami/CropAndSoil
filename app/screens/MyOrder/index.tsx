@@ -1,15 +1,17 @@
+import { Feather } from "@expo/vector-icons";
+import { FlashList } from "@shopify/flash-list";
 import { Image } from "expo-image";
+import { useSetAtom } from "jotai";
 import { TouchableOpacity, View } from "react-native";
 import { imagePaths } from "~/assets/imagePath";
 import GradientBackground from "~/components/common/GradientBackground";
 import Header from "~/components/common/Header";
+import Tabs from "~/components/common/Tabs";
 import { Text } from "~/components/ui/text";
-import ProductCart from "./ProductCart";
-import { useAtom } from "jotai";
 import { confirmAtom } from "~/store/atoms";
-
+import ProductCart from "./ProductCart";
 const MyOrderScreen = () => {
-  const [confirmState, setConfirmState] = useAtom(confirmAtom);
+  const setConfirmState = useSetAtom(confirmAtom);
 
   const mockProducts = [
     {
@@ -48,6 +50,58 @@ const MyOrderScreen = () => {
     console.log("View details");
   };
 
+  const renderPageItem = ({ listItem }: { listItem: any[] }) => {
+    return (
+      <View className="flex-1 mt-3">
+        <FlashList
+          data={listItem}
+          ItemSeparatorComponent={() => <View className="h-2.5" />}
+          renderItem={({ item }) => (
+            <ProductCart
+              shopName="Greenhomevn"
+              products={mockProducts}
+              totalPrice="Tổng số tiền (2 sản phẩm): 500.000đ"
+              onCancelOrder={handleCancelOrder}
+              onViewDetails={handleViewDetails}
+            />
+          )}
+          estimatedItemSize={200}
+        />
+      </View>
+    );
+  };
+
+  const items = [
+    {
+      title: "Tất cả",
+      content: renderPageItem({ listItem: [...Array(10)] }),
+    },
+    {
+      title: "Chờ xác nhận",
+      content: renderPageItem({ listItem: [...Array(10)] }),
+    },
+    {
+      title: "Chờ vận chuyển",
+      content: renderPageItem({ listItem: [...Array(10)] }),
+    },
+    {
+      title: "Đang vận chuyển",
+      content: renderPageItem({ listItem: [...Array(10)] }),
+    },
+    {
+      title: "Đã giao",
+      content: renderPageItem({ listItem: [...Array(10)] }),
+    },
+    {
+      title: "Đổi trả",
+      content: renderPageItem({ listItem: [...Array(10)] }),
+    },
+    {
+      title: "Đã hủy",
+      content: renderPageItem({ listItem: [...Array(10)] }),
+    },
+  ];
+
   return (
     <GradientBackground style={{ flex: 1 }} gradientStyle={{ flex: 1 }}>
       <Header
@@ -65,14 +119,26 @@ const MyOrderScreen = () => {
           </TouchableOpacity>
         }
       />
-      <View>
-        <ProductCart
+      <View className="flex-1 bg-[#EEE] rounded-t-[40px]">
+        <View className="px-3 mt-4 mb-3">
+          <TouchableOpacity className="flex-row gap-3 items-center bg-white rounded-full py-[15px] px-4">
+            <Feather name="search" size={18} color="#AEAEAE" />
+            <Text className="text-sm leading-tight text-[#AEAEAE]">
+              Tìm Mã đơn hàng, Nhà bán, Tên sản phẩm
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <View className="flex-1">
+          <Tabs items={items} />
+        </View>
+
+        {/* <ProductCart
           shopName="Greenhomevn"
           products={mockProducts}
           totalPrice="Tổng số tiền (2 sản phẩm): 500.000đ"
           onCancelOrder={handleCancelOrder}
           onViewDetails={handleViewDetails}
-        />
+        /> */}
       </View>
     </GradientBackground>
   );

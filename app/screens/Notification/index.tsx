@@ -1,23 +1,17 @@
-import RNDateTimePicker from "@react-native-community/datetimepicker";
 import { useNavigation } from "@react-navigation/native";
+import { atom, useAtom } from "jotai";
 import React, { useEffect, useState } from "react";
 import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import {
+import { Gesture } from "react-native-gesture-handler";
+import Animated, {
   CurvedTransition,
   FadeOut,
-  JumpingTransition,
   LinearTransition,
-  SequencedTransition,
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
-import {
-  Gesture,
-  GestureDetector,
-  GestureHandlerRootView,
-} from "react-native-gesture-handler";
-import Animated from "react-native-reanimated";
+import ScreenWrapper from "~/components/common/ScreenWrapper";
+import { toast, ToastType } from "~/components/common/Toast";
 const App = () => {
   const navigation = useNavigation<any>();
 
@@ -43,7 +37,7 @@ const App = () => {
   });
 
   return (
-    <View className="flex-1">
+    <ScreenWrapper hasGradient={false}>
       <View className="bg-red-500">
         <TouchableOpacity
           onPress={() => {
@@ -61,7 +55,7 @@ const App = () => {
           <Animated.View className="bg-blue-500 size-5" style={animatedStyle} />
         </GestureDetector>
       </GestureHandlerRootView> */}
-      <View className="flex-1 bg-fuchsia-100">
+      <View className="flex-1 mt-20 bg-fuchsia-100">
         <Animated.View
           className={"pb-10 bg-cyan-300"}
           layout={LinearTransition}
@@ -74,9 +68,20 @@ const App = () => {
             </View>
           )}
         </Animated.View>
+
         <Items />
+        <Button
+          title="Show Toast"
+          onPress={() => {
+            const randomId = Math.random().toString(36).substring(2, 15);
+            const listState = ["success", "error", "warning", "info"];
+            const randomState =
+              listState[Math.floor(Math.random() * listState.length)];
+            toast("Hello", randomState as ToastType, "top", 3000, randomId);
+          }}
+        />
       </View>
-    </View>
+    </ScreenWrapper>
   );
 };
 
@@ -84,6 +89,7 @@ const Items = () => {
   const [data, setData] = useState<any[]>([]);
 
   const onRemoveItem = (index: number) => {
+    console.log("remove", new Date().getTime());
     setData(data.filter((_, i) => i !== index));
   };
 
@@ -91,8 +97,12 @@ const Items = () => {
     setData([...Array(10)]?.map((_, index) => index));
   }, []);
 
+  useEffect(() => {
+    console.log("datachange", new Date().getTime());
+  }, [data]);
+
   return (
-    <View className="flex-row flex-wrap flex-1 gap-2">
+    <View className="flex-row flex-wrap gap-2">
       {data.map((value) => (
         <Animated.View
           key={value}
@@ -110,6 +120,42 @@ const Items = () => {
         title="reset"
         onPress={() => setData([...Array(10)]?.map((_, index) => index))}
       />
+      <ComponentA />
+      <ComponentB />
+    </View>
+  );
+};
+
+const testAtom = atom("string");
+
+const ComponentA = () => {
+  const [test, setTest] = useAtom(testAtom);
+
+  return (
+    <View className="bg-red-500">
+      <Text>ComponentA</Text>
+      <Button
+        title="Press me"
+        onPress={() => {
+          console.log("A", new Date().getTime());
+
+          setTest(Math.random().toString());
+        }}
+      />
+    </View>
+  );
+};
+
+const ComponentB = () => {
+  const [test, setTest] = useAtom(testAtom);
+
+  useEffect(() => {
+    console.log("B", new Date().getTime());
+  }, [test]);
+
+  return (
+    <View className="bg-blue-500">
+      <Text>ComponentB</Text>
     </View>
   );
 };

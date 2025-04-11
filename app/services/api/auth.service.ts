@@ -1,4 +1,4 @@
-import { identityAxiosInstance } from "../base";
+import { identityAxiosInstance, typedAxios } from "../base";
 
 export interface LoginPayload {
   phone: string;
@@ -75,7 +75,7 @@ class AuthService {
   }
 
   async logout() {
-    return identityAxiosInstance.post("/auth/logout").then((res) => res.data);
+    return typedAxios.post("/auth/logout");
   }
 
   async refreshToken() {

@@ -40,7 +40,7 @@ const ProductItem = ({
       <View className="flex-1">
         <View className="self-stretch pb-1">
           <Text
-            className="text-[#383B45] text-xs leading-[18px] tracking-[0.5%]"
+            className="text-[#383B45] text-xs leading-[18px]"
             numberOfLines={2}
           >
             {name}
@@ -48,18 +48,18 @@ const ProductItem = ({
         </View>
         <View className="flex-row justify-between items-center self-stretch">
           <View className="flex-row items-center">
-            <Text className="text-[#AEAEAE] text-[10px] leading-[14px] tracking-[1%]">
+            <Text className="text-[#AEAEAE] text-[10px] leading-[14px]">
               {type}
             </Text>
           </View>
-          <Text className="text-[#676767] text-[10px] leading-[14px] tracking-[1%]">
+          <Text className="text-[#676767] text-[10px] leading-[14px]">
             x{quantity}
           </Text>
         </View>
         <View className="items-end self-stretch">
           <View className="flex-row items-center gap-1.5 py-1.5">
             <View className="flex-row justify-center items-center">
-              <Text className="text-[#AEAEAE] text-xs leading-[18px] tracking-[0.5%]">
+              <Text className="text-[#AEAEAE] text-xs leading-[18px] ">
                 {originalPrice}
               </Text>
             </View>

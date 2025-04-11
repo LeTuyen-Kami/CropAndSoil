@@ -1,33 +1,17 @@
 import { useNavigation } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useState } from "react";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { useAtom } from "jotai";
+import React from "react";
+import { TouchableOpacity, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import Animated, { SlideInRight, SlideOutLeft } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { imagePaths } from "~/assets/imagePath";
 import LoginForm from "./LoginForm";
-import ResetPassword from "./ResetPassword";
 import RegisterForm from "./RegisterForm";
+import ResetPassword from "./ResetPassword";
 import { loginAtom } from "./atom";
-import { useAtom } from "jotai";
-import { authService } from "~/services/api/auth.service";
-import Animated, {
-  LinearTransition,
-  SlideInDown,
-  SlideInLeft,
-  SlideInRight,
-  SlideOutLeft,
-  SlideOutRight,
-  withTiming,
-} from "react-native-reanimated";
-import { LoginStep, useStepAnimation } from "~/hooks/useStepAnimation";
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 
 const LoginScreen = () => {
   const { top } = useSafeAreaInsets();
