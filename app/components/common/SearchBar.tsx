@@ -25,7 +25,7 @@ const SearchBar = ({
   }, []);
 
   return (
-    <View className="w-full">
+    <View className="px-2">
       <View className="flex-row items-center bg-[#F5F5F5] border border-[#F0F0F0] rounded-full px-[22px]">
         <TextInput
           ref={inputRef}

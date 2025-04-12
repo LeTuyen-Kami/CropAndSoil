@@ -33,24 +33,6 @@ export type IOption = {
   code: string;
 };
 
-export type Adress = {
-  province?: IOption | null;
-  district?: IOption | null;
-  ward?: IOption | null;
-  isOpen: boolean;
-  type: "province" | "district" | "ward";
-  data: IOption[];
-};
-
-export const adressAtom = atom<Adress>({
-  province: null,
-  district: null,
-  ward: null,
-  isOpen: false,
-  type: "province",
-  data: [],
-});
-
 export type ConfirmState = {
   title: string;
   message: string;
@@ -67,12 +49,27 @@ export const confirmAtom = atom<ConfirmState>({
   isOpen: false,
 });
 
+export const showModalConfirm = ({
+  title,
+  message,
+  onConfirm,
+  onCancel,
+}: Omit<ConfirmState, "isOpen">) => {
+  jotaiStore.set(confirmAtom, {
+    title,
+    message,
+    onConfirm,
+    onCancel,
+    isOpen: true,
+  });
+};
+
 export type IAtomAddress = IAddress & {
   isEdit: boolean;
 };
 
 export const initialAddress: IAtomAddress = {
-  wooId: 0,
+  id: 0,
   name: "",
   phoneNumber: "",
   isDefault: false,

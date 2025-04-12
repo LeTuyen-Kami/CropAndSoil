@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { cn } from "~/lib/utils";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 
 interface InputProps extends TextInputProps {
   leftIcon?: React.ReactNode;
@@ -16,6 +16,7 @@ interface InputProps extends TextInputProps {
   error?: string;
   textInputClassName?: string;
   clearable?: boolean;
+  focusedStyle?: string;
 }
 
 const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
@@ -28,6 +29,7 @@ const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
       error,
       textInputClassName,
       clearable,
+      focusedStyle,
       ...props
     },
     ref
@@ -38,10 +40,11 @@ const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
       <>
         <View
           className={cn(
-            "flex-row items-center bg-white rounded-full px-6 border border-white",
+            "flex-row items-center bg-white rounded-full px-5 border border-white",
             props.editable === false && "opacity-50 web:cursor-not-allowed",
             className,
-            error && "border border-red-500"
+            error && "border border-red-500",
+            isFocused && focusedStyle
           )}
         >
           {leftIcon && <View className="mr-2">{leftIcon}</View>}
@@ -53,10 +56,7 @@ const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
               "flex-1 py-4 text-base leading-5",
               textInputClassName
             )}
-            placeholderClassName={cn(
-              "text-muted-foreground",
-              placeholderClassName
-            )}
+            placeholderTextColor="#AEAEAE"
             {...props}
           />
           {rightIcon && <View className="ml-2">{rightIcon}</View>}
@@ -71,7 +71,10 @@ const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
           )}
         </View>
         {error && (
-          <Text className="mt-1 ml-2 text-sm text-red-500">{error}</Text>
+          <View className="flex-row gap-1 items-center pl-5 mt-1">
+            <MaterialIcons name="error" size={12} color="red" />
+            <Text className="text-xs text-red-500">{error}</Text>
+          </View>
         )}
       </>
     );

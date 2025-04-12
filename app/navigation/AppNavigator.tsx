@@ -25,6 +25,7 @@ import TestScreen from "~/screens/TestScreen";
 import VoucherSelectScreen from "~/screens/VoucherSelect";
 import CustomTabBar from "./CustomTabbar";
 import { RootStackParamList, TabParamList } from "./types";
+import MyRating from "~/screens/MyRating";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -91,6 +92,7 @@ export const AppNavigator = () => {
           name="BusinessVoucher"
           component={BusinessVoucherScreen}
         />
+        <Stack.Screen name="MyRating" component={MyRating} />
       </Stack.Navigator>
     </NavigationContainer>
   );

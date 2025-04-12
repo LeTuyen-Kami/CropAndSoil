@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { ScrollView, TouchableOpacity, View } from "react-native";
 import { imagePaths } from "~/assets/imagePath";
 import AllMedia from "./AllMedia";
-import ReviewItem, { ReviewItemProps } from "./ReviewItem";
+import ReviewItem, { ReviewItemProps } from "~/components/common/ReviewItem";
 import { Text } from "~/components/ui/text";
 type RatingProps = {
   rating?: number;

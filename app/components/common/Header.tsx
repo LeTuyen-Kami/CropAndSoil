@@ -60,7 +60,7 @@ const Header: React.FC<HeaderProps> = ({
         )}
         <Text
           className={cn(
-            "flex-1 text-lg font-medium text-center text-foreground",
+            "flex-1 text-lg font-bold text-center text-foreground",
             titleClassName
           )}
           numberOfLines={1}

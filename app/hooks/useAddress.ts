@@ -7,14 +7,18 @@ import {
   placeService,
 } from "~/services/api/place.service";
 
+type AddressOption = {
+  id: string;
+  name: string;
+  code: string;
+};
+
 const useAddress = ({ enabled = true }: { enabled?: boolean }) => {
-  const [selectedProvince, setSelectedProvince] = useState<IProvince | null>(
-    null
-  );
-  const [selectedDistrict, setSelectedDistrict] = useState<IDistrict | null>(
-    null
-  );
-  const [selectedWard, setSelectedWard] = useState<IWard | null>(null);
+  const [selectedProvince, setSelectedProvince] =
+    useState<AddressOption | null>(null);
+  const [selectedDistrict, setSelectedDistrict] =
+    useState<AddressOption | null>(null);
+  const [selectedWard, setSelectedWard] = useState<AddressOption | null>(null);
 
   const { data: provinces } = useQuery({
     queryKey: ["provinces"],
@@ -34,15 +38,15 @@ const useAddress = ({ enabled = true }: { enabled?: boolean }) => {
     enabled: !!selectedDistrict?.id,
   });
 
-  const handleSelectProvince = (province: IProvince) => {
+  const handleSelectProvince = (province: AddressOption) => {
     setSelectedProvince(province);
   };
 
-  const handleSelectDistrict = (district: IDistrict) => {
+  const handleSelectDistrict = (district: AddressOption) => {
     setSelectedDistrict(district);
   };
 
-  const handleSelectWard = (ward: IWard) => {
+  const handleSelectWard = (ward: AddressOption) => {
     setSelectedWard(ward);
   };
 
@@ -60,14 +64,6 @@ const useAddress = ({ enabled = true }: { enabled?: boolean }) => {
   const handleResetWard = () => {
     setSelectedWard(null);
   };
-
-  useEffect(() => {
-    handleResetDistrict();
-  }, [selectedProvince]);
-
-  useEffect(() => {
-    handleResetWard();
-  }, [selectedDistrict]);
 
   return {
     provinces,

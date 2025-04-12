@@ -38,6 +38,7 @@ export type RootStackParamList = {
   };
   Settings: undefined;
   BusinessVoucher: undefined;
+  MyRating: undefined;
 };
 
 // Create a type for the navigation prop for stack screens

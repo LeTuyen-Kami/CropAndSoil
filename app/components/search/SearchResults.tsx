@@ -28,10 +28,6 @@ const SearchResults = ({
     item.toLowerCase().includes(query.toLowerCase())
   );
 
-  const filteredSuggestions = suggestedTerms.filter((item) =>
-    item.toLowerCase().includes(query.toLowerCase())
-  );
-
   if (query.length === 0) {
     return null;
   }
@@ -49,7 +45,7 @@ const SearchResults = ({
       ))}
 
       {/* Suggestion Terms */}
-      {filteredSuggestions.map((item, index) => (
+      {suggestedTerms.map((item, index) => (
         <SearchSuggestionTerm
           key={`suggestion-${index}`}
           text={item}
@@ -58,14 +54,14 @@ const SearchResults = ({
       ))}
 
       {/* View More Button */}
-      {(filteredHistory.length > 0 || filteredSuggestions.length > 0) && (
+      {/* {(filteredHistory.length > 0 || filteredSuggestions.length > 0) && (
         <TouchableOpacity
           onPress={onViewMorePress}
           className="bg-[#F0F0F0] py-4 flex items-center"
         >
           <Text className="text-[#383B45]">Xem thêm</Text>
         </TouchableOpacity>
-      )}
+      )} */}
     </View>
   );
 };

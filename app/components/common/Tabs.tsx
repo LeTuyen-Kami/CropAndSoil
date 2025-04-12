@@ -37,6 +37,7 @@ type TabsProps = {
   className?: string;
   titleClassName?: string;
   onTabChange?: (index: number) => void;
+  fullWidth?: boolean;
 };
 
 const screenWidth = Dimensions.get("window").width;
@@ -58,6 +59,7 @@ const Tabs = forwardRef<
       className,
       titleClassName,
       onTabChange,
+      fullWidth = false,
     },
     ref
   ) => {
@@ -83,7 +85,7 @@ const Tabs = forwardRef<
       }
 
       // Scroll tab into view if needed
-      if (tabItemsRef.current[page]) {
+      if (tabItemsRef.current[page] && !fullWidth) {
         tabItemsRef.current[page]?.measure(
           (x, y, width, height, pageX, pageY) => {
             scrollViewRef.current?.scrollTo({
@@ -91,6 +93,13 @@ const Tabs = forwardRef<
               animated: true,
             });
 
+            indicatorPosition.value = withTiming(x, { duration: 200 });
+            indicatorWidth.value = withTiming(width, { duration: 200 });
+          }
+        );
+      } else if (fullWidth && tabItemsRef.current[page]) {
+        tabItemsRef.current[page]?.measure(
+          (x, y, width, height, pageX, pageY) => {
             indicatorPosition.value = withTiming(x, { duration: 200 });
             indicatorWidth.value = withTiming(width, { duration: 200 });
           }
@@ -123,42 +132,57 @@ const Tabs = forwardRef<
       },
     }));
 
+    // Render tabs based on fullWidth prop
+    const renderTabs = () => {
+      const tabBar = (
+        <View style={[styles.tabBar, fullWidth && styles.tabBarFullWidth]}>
+          {items.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              ref={(ref) => (tabItemsRef.current[index] = ref)}
+              style={[styles.tabItem, fullWidth && styles.tabItemFullWidth]}
+              onPress={() => handlePageChange(index)}
+            >
+              <Title
+                title={item.title}
+                titleClassName={titleClassName}
+                selectedIndex={selectedIndex}
+                index={index}
+              />
+            </TouchableOpacity>
+          ))}
+          <Animated.View
+            style={[
+              styles.indicator,
+              animatedIndicatorStyle,
+              customIndicatorStyle,
+            ]}
+          />
+        </View>
+      );
+
+      if (fullWidth) {
+        return (
+          <View style={[styles.tabBarContainer, tabBarStyle]}>{tabBar}</View>
+        );
+      }
+
+      return (
+        <ScrollView
+          ref={scrollViewRef}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={[styles.tabBarContainer, tabBarStyle]}
+          contentContainerStyle={styles.tabBarContent}
+        >
+          {tabBar}
+        </ScrollView>
+      );
+    };
+
     return (
       <View className={cn("flex-1 w-full", className)}>
-        <View>
-          <ScrollView
-            ref={scrollViewRef}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={[styles.tabBarContainer, tabBarStyle]}
-            contentContainerStyle={styles.tabBarContent}
-          >
-            <View style={styles.tabBar}>
-              {items.map((item, index) => (
-                <TouchableOpacity
-                  key={index}
-                  ref={(ref) => (tabItemsRef.current[index] = ref)}
-                  style={styles.tabItem}
-                  onPress={() => handlePageChange(index)}
-                >
-                  <Title
-                    title={item.title}
-                    titleClassName={titleClassName}
-                    selectedIndex={selectedIndex}
-                    index={index}
-                  />
-                </TouchableOpacity>
-              ))}
-              <Animated.View
-                style={[
-                  styles.indicator,
-                  animatedIndicatorStyle,
-                  customIndicatorStyle,
-                ]}
-              />
-            </View>
-          </ScrollView>
-        </View>
+        <View>{renderTabs()}</View>
         <ReactNativepagerView
           ref={pagerRef}
           style={styles.pagerView}
@@ -223,10 +247,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     position: "relative",
   },
+  tabBarFullWidth: {
+    width: "100%",
+  },
   tabItem: {
     alignItems: "center",
     paddingVertical: 16,
     paddingHorizontal: 16,
+  },
+  tabItemFullWidth: {
+    flex: 1,
+    justifyContent: "center",
   },
   tabText: {
     fontSize: 14,

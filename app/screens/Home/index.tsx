@@ -14,12 +14,13 @@ import { Text } from "~/components/ui/text";
 import Header from "./Header";
 import * as SplashScreen from "expo-splash-screen";
 import Carousel from "~/components/common/Carusel";
-import Category from "./Category";
 import ContainerList from "./ContainerList";
 import ProductItem from "~/components/common/ProductItem";
 import ProductItemL from "./ProductItem";
 import { screen } from "~/utils";
 import { useNavigation } from "@react-navigation/native";
+import HeaderSearch from "./HeaderSearch";
+import Category from "~/components/common/Category";
 
 export const HomeScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -54,34 +55,7 @@ export const HomeScreen: React.FC = () => {
       paddingHorizontal={0}
       safeArea={false}
     >
-      <View className="px-3 py-4">
-        <Text style={styles.text}>
-          <Text className="font-bold">Hello Cherry, </Text>
-          Hôm nay bạn cần tìm gì ?
-        </Text>
-      </View>
-      <View className="flex-row gap-[10] px-2">
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Search")}
-          className="flex-row flex-1 gap-2 justify-between items-center px-4 py-2 bg-white rounded-full"
-        >
-          <Text className="text-sm text-zinc-400">
-            Tìm kiếm sản phẩm, cửa hàng
-          </Text>
-          <Image
-            source={imagePaths.icSearch}
-            style={{ width: 20, height: 20 }}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <View className="bg-secondary-500 size-[50] flex items-center justify-center rounded-full">
-            <Image
-              source={imagePaths.icCart}
-              style={{ width: 24, height: 24 }}
-            />
-          </View>
-        </TouchableOpacity>
-      </View>
+      <HeaderSearch />
       <Carousel
         data={[...Array(10)]}
         autoPlay={true}
@@ -97,30 +71,7 @@ export const HomeScreen: React.FC = () => {
         )}
       />
       <View className="px-2 pt-2">
-        <Category
-          data={[
-            {
-              title: "Đất sạch & giá thể",
-              image: "https://picsum.photos/200/300",
-            },
-            {
-              title: "Các loại phân bón ",
-              image: "https://picsum.photos/200/300",
-            },
-            {
-              title: "Các loại hạt giống",
-              image: "https://picsum.photos/200/300",
-            },
-            {
-              title: "Vật tư trồng hoa",
-              image: "https://picsum.photos/200/300",
-            },
-            {
-              title: "Vật tư kiểng",
-              image: "https://picsum.photos/200/300",
-            },
-          ]}
-        />
+        <Category />
       </View>
       <View>
         <View className="relative mt-10">
@@ -236,9 +187,3 @@ export const HomeScreen: React.FC = () => {
     </ScreenContainer>
   );
 };
-
-const styles = StyleSheet.create({
-  text: {
-    color: "white",
-  },
-});

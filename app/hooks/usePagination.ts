@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
-import { PaginatedResponse, PaginationRequets } from "../types";
+import { PaginatedResponse, PaginationRequests } from "../types";
 
 type FetchFunction<T, P = Record<string, any>> = (
-  params: PaginationRequets & P
+  params: PaginationRequests & P
 ) => Promise<PaginatedResponse<T>>;
 
 interface UsePaginationOptions<T, P = Record<string, any>>
@@ -12,7 +12,7 @@ interface UsePaginationOptions<T, P = Record<string, any>>
     "queryKey" | "queryFn"
   > {
   initialParams?: P;
-  initialPagination?: Partial<PaginationRequets>;
+  initialPagination?: Partial<PaginationRequests>;
   queryKey: string | string[];
 }
 
@@ -33,7 +33,7 @@ export function usePagination<T, P = Record<string, any>>(
   const [isRefresh, setIsRefresh] = useState(false);
 
   // Calculate effective pagination parameters
-  const effectivePagination: PaginationRequets = {
+  const effectivePagination: PaginationRequests = {
     skip: initialPagination.skip ?? 0,
     take: initialPagination.take ?? 10,
   };
@@ -75,7 +75,7 @@ export function usePagination<T, P = Record<string, any>>(
   const fetchNextPage = useCallback(async () => {
     if (!hasNextPage || !firstPageData) return;
 
-    const nextPageParams: PaginationRequets = {
+    const nextPageParams: PaginationRequests = {
       skip:
         firstPageData.skip + firstPageData.take + additionalPagesData.length,
       take: firstPageData.take,

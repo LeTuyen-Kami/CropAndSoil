@@ -19,11 +19,12 @@ import SupportItem from "./SupportItem";
 import UtilityItem from "./UlitityItem";
 import { authAtom } from "~/store/atoms";
 import { useQueryClient } from "@tanstack/react-query";
+import { RootStackScreenProps } from "~/navigation/types";
 // Main profile component
 const ProfileScreen = () => {
   const { top } = useSafeAreaInsets();
 
-  const navigation = useNavigation();
+  const navigation = useNavigation<RootStackScreenProps<"MainTabs">>();
   const [refreshing, setRefreshing] = useState(false);
   const setLoginState = useSetAtom(loginAtom);
 
@@ -187,11 +188,20 @@ const ProfileScreen = () => {
         <View className="bg-white rounded-xl mb-2.5">
           <SectionTitle title="Tiện ích của tôi" />
           <View className="flex-row justify-around px-2 py-3">
-            <UtilityItem icon={imagePaths.icVoucher} title="Kho Voucher" />
-            <UtilityItem icon={imagePaths.icHeart} title="Sản phẩm yêu thích" />
+            <UtilityItem
+              icon={imagePaths.icVoucher}
+              title="Kho Voucher"
+              onPress={() => navigation.navigate("VoucherSelect")}
+            />
+            <UtilityItem
+              icon={imagePaths.icHeart}
+              title="Sản phẩm yêu thích"
+              onPress={() => navigation.navigate("LikedProduct")}
+            />
             <UtilityItem
               icon={imagePaths.icClipboard}
               title="Danh sách đánh giá"
+              onPress={() => navigation.navigate("MyRating")}
             />
           </View>
         </View>

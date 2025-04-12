@@ -4,45 +4,20 @@ import { Text } from "~/components/ui/text";
 import SearchSuggestionItem from "./SearchSuggestionItem";
 import { imagePaths } from "~/assets/imagePath";
 import { screen } from "~/utils";
-
-const SUGGESTIONS = [
-  {
-    id: "1",
-    name: "Giá thể",
-    image: imagePaths.productGiathe,
-  },
-  {
-    id: "2",
-    name: "Dụng cụ trồng cây",
-    image: imagePaths.productDungcu,
-  },
-  {
-    id: "3",
-    name: "Phân bón",
-    image: imagePaths.productPhanbon,
-  },
-  {
-    id: "4",
-    name: "Thuốc dưỡng cây",
-    image: imagePaths.productThuoc,
-  },
-  {
-    id: "5",
-    name: "Hạt giống",
-    image: imagePaths.productHatgiong,
-  },
-  {
-    id: "6",
-    name: "Vật tư",
-    image: imagePaths.productVattu,
-  },
-];
+import { useQuery } from "@tanstack/react-query";
+import { ISearchTrending, searchService } from "~/services/api/search.services";
 
 interface SearchSuggestionsProps {
-  onSuggestionPress?: (suggestion: (typeof SUGGESTIONS)[0]) => void;
+  onSuggestionPress?: (suggestion: ISearchTrending) => void;
 }
 
 const SearchSuggestions = ({ onSuggestionPress }: SearchSuggestionsProps) => {
+  const { data } = useQuery({
+    queryKey: ["search-suggestions"],
+    queryFn: () => searchService.getTrending(),
+    staleTime: 1000 * 60 * 5,
+  });
+
   return (
     <View className="mx-2 mt-5">
       <View className="mb-2">
@@ -50,7 +25,7 @@ const SearchSuggestions = ({ onSuggestionPress }: SearchSuggestionsProps) => {
       </View>
 
       <View className="flex-row flex-wrap gap-2">
-        {SUGGESTIONS.map((item) => (
+        {data?.map((item) => (
           <View
             key={item.id}
             style={{

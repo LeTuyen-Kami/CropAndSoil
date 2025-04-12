@@ -15,13 +15,14 @@ type ScreenWrapperProps = {
       xEnd?: number;
       yEnd?: number;
     }
-  | { hasGradient: false }
+  | { hasGradient: false; backgroundColor?: string }
 );
 
 const ScreenWrapper = ({
   children,
   hasSafeTop = true,
   hasSafeBottom = true,
+
   ...props
 }: ScreenWrapperProps) => {
   const { top, bottom } = useSafeAreaInsets();
@@ -51,6 +52,7 @@ const ScreenWrapper = ({
         flex: 1,
         paddingTop: hasSafeTop ? top : 0,
         paddingBottom: hasSafeBottom ? bottom : 0,
+        backgroundColor: props.backgroundColor || "white",
       }}
     >
       {children}

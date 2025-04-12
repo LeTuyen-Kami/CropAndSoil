@@ -12,12 +12,12 @@ export interface RegisterPayload {
 }
 
 export interface RegisterSendOtpPayload {
-  flow: "REGISTER";
+  flow: "REGISTER" | "FORGOT_PASSWORD";
   phone: string;
 }
 
 export interface RegisterVerifyOtpPayload {
-  flow: "REGISTER";
+  flow: "REGISTER" | "FORGOT_PASSWORD";
   phone: string;
   transactionId: string;
   otp: string;

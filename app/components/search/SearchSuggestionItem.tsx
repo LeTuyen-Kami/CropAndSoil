@@ -6,7 +6,7 @@ import { screen } from "~/utils";
 
 interface SearchSuggestionItemProps {
   name: string;
-  image: ImageSourcePropType;
+  image: string;
   onPress?: () => void;
 }
 

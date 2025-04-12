@@ -14,6 +14,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { RootStackParamList, RootStackScreenProps } from "~/navigation/types";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import ScreenWrapper from "~/components/common/ScreenWrapper";
 
 // Mock data for search history and suggestions
 const MOCK_SEARCH_HISTORY = [
@@ -82,11 +83,13 @@ const SearchScreen = () => {
   }, []);
 
   return (
-    <ScreenContainer
-      header={<Header title="Tìm kiếm" showBack className="border-0" />}
-      backgroundColor="white"
-      scrollable
-    >
+    <ScreenWrapper hasGradient={false} hasSafeBottom={false}>
+      <Header
+        title="Tìm kiếm"
+        showBack
+        className="border-0"
+        hasSafeTop={false}
+      />
       <View className="flex-1">
         <SearchBar
           value={searchQuery}
@@ -106,16 +109,16 @@ const SearchScreen = () => {
         />
 
         {/* Category Suggestions Grid */}
-        {showSuggestions && (
+        {/* {showSuggestions && (
           <Animated.View
             entering={FadeIn.duration(300)}
             exiting={FadeOut.duration(300)}
           >
             <SearchSuggestions onSuggestionPress={handleSuggestionPress} />
           </Animated.View>
-        )}
+        )} */}
       </View>
-    </ScreenContainer>
+    </ScreenWrapper>
   );
 };
 

@@ -42,9 +42,11 @@ const AddressItem = ({
               <Text className="text-[10px] text-[#FCBA27]">Mặc định</Text>
             </View>
           )}
-          <View className="px-3 py-1.5 border rounded-full border-[#AEAEAE]">
-            <Text className="text-[10px] text-[#AEAEAE]">{type}</Text>
-          </View>
+          {type && (
+            <View className="px-3 py-1.5 border rounded-full border-[#AEAEAE]">
+              <Text className="text-[10px] text-[#AEAEAE]">{type}</Text>
+            </View>
+          )}
         </View>
         <TouchableOpacity onPress={onDelete}>
           <Text className="text-xs text-[#AEAEAE]">Xóa</Text>

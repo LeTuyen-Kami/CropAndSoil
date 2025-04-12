@@ -1,6 +1,12 @@
 import React, { useState } from "react";
 import ScreenWrapper from "~/components/common/ScreenWrapper";
-import { View, TouchableOpacity, Alert, Modal } from "react-native";
+import {
+  View,
+  TouchableOpacity,
+  Alert,
+  Modal,
+  ActivityIndicator,
+} from "react-native";
 import { Text } from "~/components/ui/text";
 import Header from "~/components/common/Header";
 import { Input } from "~/components/ui/input";
@@ -12,6 +18,9 @@ import { Image } from "expo-image";
 import { FontAwesome } from "@expo/vector-icons";
 import { toast } from "~/components/common/Toast";
 import ModalBottom from "~/components/common/ModalBottom";
+import { UpdateUserPayload, userService } from "~/services/api/user.service";
+import { useMutation } from "@tanstack/react-query";
+import { getErrorMessage } from "~/utils";
 // Define a type for our document
 type DocumentAsset = {
   name?: string;
@@ -19,6 +28,7 @@ type DocumentAsset = {
   uri: string;
   fileSize?: number;
   size?: number;
+  type?: string;
 };
 
 const BusinessVoucherScreen = () => {
@@ -27,6 +37,11 @@ const BusinessVoucherScreen = () => {
   const [document, setDocument] = useState<DocumentAsset | null>(null);
   const [showTypeSelector, setShowTypeSelector] = useState(false);
 
+  const mutationUploadDocument = useMutation({
+    mutationFn: (payload: UpdateUserPayload) => {
+      return userService.updateProfile(payload);
+    },
+  });
   const handleUploadDocument = () => {
     setShowTypeSelector(true);
   };
@@ -54,10 +69,8 @@ const BusinessVoucherScreen = () => {
       const maxSize = 5 * 1024 * 1024; // 5MB
 
       if (fileSize > maxSize) {
-        Alert.alert(
-          "Tệp quá lớn",
-          "Kích thước tệp không được vượt quá 5MB. Vui lòng chọn tệp khác.",
-          [{ text: "Đồng ý" }]
+        toast.error(
+          "Kích thước tệp không được vượt quá 5MB. Vui lòng chọn tệp khác."
         );
         return;
       }
@@ -66,6 +79,7 @@ const BusinessVoucherScreen = () => {
         uri: result.assets[0].uri,
         fileName: result.assets[0].fileName,
         fileSize: result.assets[0].fileSize,
+        type: result.assets[0].type,
       });
       setShowTypeSelector(false);
     } catch (error) {
@@ -79,7 +93,7 @@ const BusinessVoucherScreen = () => {
   const handleSelectDocument = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
-        type: ["application/pdf"],
+        type: ["application/pdf", "image/jpeg", "image/png", "image/heic"],
         copyToCacheDirectory: true,
       });
 
@@ -90,10 +104,8 @@ const BusinessVoucherScreen = () => {
       const maxSize = 5 * 1024 * 1024; // 5MB
 
       if (fileSize > maxSize) {
-        Alert.alert(
-          "Tệp quá lớn",
-          "Kích thước tệp không được vượt quá 5MB. Vui lòng chọn tệp khác.",
-          [{ text: "Đồng ý" }]
+        toast.error(
+          "Kích thước tệp không được vượt quá 5MB. Vui lòng chọn tệp khác."
         );
         return;
       }
@@ -102,13 +114,12 @@ const BusinessVoucherScreen = () => {
         uri: result.assets[0].uri,
         name: result.assets[0].name,
         size: result.assets[0].size,
+        type: "File",
       });
       setShowTypeSelector(false);
     } catch (error) {
       console.error("Error picking document:", error);
-      Alert.alert("Lỗi", "Đã xảy ra lỗi khi chọn tệp. Vui lòng thử lại.", [
-        { text: "Đồng ý" },
-      ]);
+      toast.error("Đã xảy ra lỗi khi chọn tệp. Vui lòng thử lại.");
     }
   };
 
@@ -118,28 +129,38 @@ const BusinessVoucherScreen = () => {
 
   const handleSave = () => {
     if (!taxCode.trim()) {
-      Alert.alert("Thiếu thông tin", "Vui lòng nhập mã số thuế", [
-        { text: "Đồng ý" },
-      ]);
+      toast.error("Vui lòng nhập mã số thuế");
       return;
     }
 
     if (!document) {
-      Alert.alert(
-        "Thiếu tài liệu",
-        "Vui lòng tải lên tài liệu chứng từ kinh doanh",
-        [{ text: "Đồng ý" }]
-      );
+      toast.error("Vui lòng tải lên tài liệu chứng từ kinh doanh");
       return;
     }
 
     // Implement save functionality
-    console.log("Saving:", { taxCode, document });
-
-    // Show success message
-    Alert.alert("Thành công", "Đã lưu thông tin chứng từ kinh doanh", [
-      { text: "Đồng ý" },
-    ]);
+    mutationUploadDocument.mutate(
+      {
+        taxNumber: taxCode,
+        taxCertificateFile: {
+          uri: document.uri,
+          type: "File",
+          name: document.name || "",
+        },
+      },
+      {
+        onSuccess: () => {
+          toast.success("Đã lưu thông tin chứng từ kinh doanh");
+        },
+        onError: (error) => {
+          const message = getErrorMessage(
+            error,
+            "Đã xảy ra lỗi khi lưu thông tin chứng từ kinh doanh"
+          );
+          toast.error(message);
+        },
+      }
+    );
   };
 
   return (
@@ -195,7 +216,11 @@ const BusinessVoucherScreen = () => {
             className="w-full h-11 bg-[#FCBA27] rounded-full items-center justify-center"
             onPress={handleSave}
           >
-            <Text className="text-base font-medium text-white">Lưu</Text>
+            {mutationUploadDocument.isPending ? (
+              <ActivityIndicator size="small" color="white" />
+            ) : (
+              <Text className="text-base font-medium text-white">Lưu</Text>
+            )}
           </TouchableOpacity>
         </View>
       </View>

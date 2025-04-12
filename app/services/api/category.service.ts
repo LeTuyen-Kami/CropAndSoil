@@ -1,27 +1,18 @@
-import { AxiosResponse } from "axios";
-import { axiosInstance } from "../base";
+import { axiosInstance, typedAxios } from "../base";
+import { PaginatedResponse, PaginationRequests } from "~/types";
 
-export interface Category {
-  id: string;
+export interface ICategory {
+  id: number;
   name: string;
-  description?: string;
-  image?: string;
-  parentId?: string;
-  createdAt: string;
-  updatedAt: string;
+  slug: string;
+  thumbnail: string;
 }
 
 class CategoryService {
-  async getCategories(): Promise<AxiosResponse<Category[]>> {
-    return axiosInstance.get("/categories");
-  }
-
-  async getCategoryById(id: string): Promise<AxiosResponse<Category>> {
-    return axiosInstance.get(`/categories/${id}`);
-  }
-
-  async getCategoryProducts(id: string): Promise<AxiosResponse<Category>> {
-    return axiosInstance.get(`/categories/${id}/products`);
+  async getCategories(payload: PaginationRequests) {
+    return typedAxios.get<PaginatedResponse<ICategory>>("/categories", {
+      params: payload,
+    });
   }
 }
 

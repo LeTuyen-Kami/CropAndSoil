@@ -1,7 +1,8 @@
 import { atom } from "jotai";
+import { ADDRESS_TYPE } from "~/utils/contants";
 
 export interface AddressType {
-  type: "office" | "home";
+  type: (typeof ADDRESS_TYPE)[keyof typeof ADDRESS_TYPE];
   isDefault: boolean;
 }
 
@@ -43,7 +44,7 @@ export const initialFormState: AddressFormState = {
   },
   streetAddress: "",
   addressType: {
-    type: "office",
+    type: ADDRESS_TYPE.OFFICE,
     isDefault: false,
   },
 };
@@ -69,7 +70,7 @@ export const wardAtom = atom<{
 }>({ id: "", name: "" });
 export const streetAddressAtom = atom<string>("");
 export const addressTypeAtom = atom<AddressType>({
-  type: "office",
+  type: ADDRESS_TYPE.OFFICE,
   isDefault: false,
 });
 
@@ -100,6 +101,17 @@ export const formStateAtom = atom(
       set(addressTypeAtom, newState.addressType);
   }
 );
+
+export const clearFormAtom = atom(null, (get, set) => {
+  set(fullNameAtom, "");
+  set(phoneNumberAtom, "");
+  set(phoneErrorAtom, undefined);
+  set(provinceAtom, { id: "", name: "" });
+  set(districtAtom, { id: "", name: "" });
+  set(wardAtom, { id: "", name: "" });
+  set(streetAddressAtom, "");
+  set(addressTypeAtom, { type: ADDRESS_TYPE.OFFICE, isDefault: false });
+});
 
 // Helper function to validate phone number
 export const validatePhoneNumber = (

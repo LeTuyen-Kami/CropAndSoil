@@ -5,20 +5,48 @@ import { imagePaths } from "~/assets/imagePath";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
-import { validatePhoneNumber } from "~/utils";
+import { getErrorMessage, validatePhoneNumber } from "~/utils";
 import Animated, { withTiming } from "react-native-reanimated";
 import { ResetPasswordStep, useStepAnimation } from "~/hooks/useStepAnimation";
-
+import { OtpInput } from "react-native-otp-entry";
+import { authService, SendSmsOtpResponse } from "~/services/api/auth.service";
+import { useMutation } from "@tanstack/react-query";
+import { toggleLoading } from "~/components/common/ScreenLoading";
+import { toast } from "~/components/common/Toast";
+import { userService } from "~/services/api/user.service";
+import { useAtom, useSetAtom } from "jotai";
+import { authAtom } from "~/store/atoms";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "~/navigation/types";
 const ResetPassword = () => {
   const [step, setStep] = useState<ResetPasswordStep>("phone");
   const [previousStep, setPreviousStep] = useState<ResetPasswordStep | null>(
     null
   );
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [hasInput, setHasInput] = useState(false);
   const [password, setPassword] = useState("");
   const [togglePassword, setTogglePassword] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
+  const [requestOtpData, setRequestOtpData] =
+    useState<SendSmsOtpResponse | null>(null);
+  const [countdown, setCountdown] = useState(60);
+
+  const setAuthState = useSetAtom(authAtom);
+  const mutationRegisterSendOtp = useMutation({
+    mutationFn: authService.registerSendOtp,
+  });
+
+  const mutationRegisterVerifyOtp = useMutation({
+    mutationFn: authService.registerVerifyOtp,
+  });
+
+  const mutationResetPassword = useMutation({
+    mutationFn: userService.changePassword,
+  });
 
   const { animationProgress, getEnteringAnimation, getExitingAnimation } =
     useStepAnimation<ResetPasswordStep>();
@@ -34,9 +62,27 @@ const ResetPassword = () => {
   };
 
   const handlePhoneContinue = () => {
-    setPreviousStep(step);
-    setStep("code");
-    animationProgress.value = withTiming(1, { duration: 300 });
+    toggleLoading(true);
+    mutationRegisterSendOtp.mutate(
+      {
+        flow: "FORGOT_PASSWORD",
+        phone: phoneNumber,
+      },
+      {
+        onSuccess: (data) => {
+          setRequestOtpData(data);
+          setPreviousStep(step);
+          setStep("code");
+          animationProgress.value = withTiming(1, { duration: 300 });
+        },
+        onError: (error) => {
+          toast.error(getErrorMessage(error, "Lỗi khi gửi mã xác thực"));
+        },
+        onSettled: () => {
+          toggleLoading(false);
+        },
+      }
+    );
   };
 
   const handleCodeContinue = () => {
@@ -64,8 +110,81 @@ const ResetPassword = () => {
     setTogglePassword(!togglePassword);
   };
 
+  const onOtpChange = (otp: string) => {
+    if (otp.length === 6) {
+      toggleLoading(true);
+      mutationRegisterVerifyOtp.mutate(
+        {
+          flow: "FORGOT_PASSWORD",
+          phone: phoneNumber,
+          transactionId: requestOtpData?.transactionId || "",
+          otp,
+          password,
+        },
+        {
+          onSuccess: (data) => {
+            setAuthState((prev) => ({
+              ...prev,
+              user: data,
+              token: data.token,
+              isLoggedIn: true,
+            }));
+            setStep("newPassword");
+            animationProgress.value = withTiming(1, { duration: 300 });
+          },
+          onError: (error) => {
+            toast.error(
+              getErrorMessage(error, "Lỗi khi xác thực mã OTP"),
+              "top",
+              3000
+            );
+          },
+          onSettled: () => {
+            toggleLoading(false);
+          },
+        }
+      );
+    }
+  };
+
+  const handleResetPassword = () => {
+    toggleLoading(true);
+    mutationResetPassword.mutate(
+      {
+        password,
+      },
+      {
+        onSuccess: (data) => {
+          toast.success("Đặt lại mật khẩu thành công");
+          navigation.replace("MainTabs", {
+            screen: "Profile",
+          });
+        },
+        onError: (error) => {
+          toast.error(getErrorMessage(error, "Lỗi khi đặt lại mật khẩu"));
+        },
+        onSettled: () => {
+          toggleLoading(false);
+        },
+      }
+    );
+  };
+
+  // Countdown timer effect
   useEffect(() => {
-    setStep("phone");
+    let timer: NodeJS.Timeout;
+    if (step === "code" && countdown > 0) {
+      timer = setTimeout(() => {
+        setCountdown(countdown - 1);
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [countdown, step]);
+
+  useEffect(() => {
+    setStep("code");
   }, []);
 
   return (
@@ -130,13 +249,13 @@ const ResetPassword = () => {
           />
 
           {/* Phone Changed Link */}
-          <View className="p-4">
+          {/* <View className="p-4">
             <TouchableOpacity onPress={handlePhoneChanged}>
               <Text className="text-sm text-[#159747] text-center">
                 Số điện thoại đã thay đổi?
               </Text>
             </TouchableOpacity>
-          </View>
+          </View> */}
 
           {/* Continue Button */}
           <Button
@@ -155,34 +274,45 @@ const ResetPassword = () => {
           exiting={getExitingAnimation(step, previousStep)}
         >
           {/* Verification Code Input */}
-          <Input
-            value={verificationCode}
-            onChangeText={setVerificationCode}
-            placeholder="Nhập mã xác thực"
-            keyboardType="number-pad"
-            className="bg-[#F5F5F5] my-4"
-            leftIcon={
-              <Image
-                source={imagePaths.icLock}
-                style={{ width: 20, height: 20 }}
-                contentFit="contain"
-              />
-            }
-          />
+          <View className="my-4">
+            <OtpInput
+              theme={{
+                pinCodeContainerStyle: {
+                  backgroundColor: "#DDF1E5",
+                },
+              }}
+              onTextChange={onOtpChange}
+            />
+          </View>
 
           {/* Resend Code Link */}
-          <View className="p-4">
-            <TouchableOpacity>
+          {countdown > 0 ? (
+            <Text className="mt-4 text-xs tracking-tight text-center text-zinc-600">
+              Vui lòng chờ{" "}
+              <Text className="text-xs font-bold text-[#159747]">
+                {countdown}
+              </Text>{" "}
+              giây để nhận lại mã xác thực.{"\n"}Lưu ý: Kiểm tra thông báo của
+              Zalo để nhận mã kịp thời.
+            </Text>
+          ) : (
+            <TouchableOpacity
+              className="mt-4"
+              onPress={() => {
+                setCountdown(60);
+                handlePhoneContinue();
+              }}
+            >
               <Text className="text-sm text-[#159747] text-center">
                 Gửi lại mã xác thực
               </Text>
             </TouchableOpacity>
-          </View>
+          )}
 
           {/* Continue Button */}
           <Button
             onPress={handleCodeContinue}
-            className="bg-[#FCBA27] disabled:opacity-50"
+            className="bg-[#FCBA27] disabled:opacity-50 mt-4"
             disabled={verificationCode.length < 4}
           >
             <Text className="font-medium text-white">Tiếp tục</Text>
@@ -236,7 +366,7 @@ const ResetPassword = () => {
           </View>
           {/* Continue Button */}
           <Button
-            onPress={() => {}}
+            onPress={handleResetPassword}
             className="bg-[#FCBA27] mt-4 disabled:opacity-50"
             disabled={password.length < 8}
           >

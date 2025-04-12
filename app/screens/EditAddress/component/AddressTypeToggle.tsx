@@ -1,13 +1,16 @@
 import React from "react";
 import { View, Text, Pressable } from "react-native";
-import { Feather, MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useAtom } from "jotai";
 import { addressTypeAtom } from "../formAtom";
+import { ADDRESS_TYPE } from "~/utils/contants";
 
 export function AddressTypeToggle() {
   const [addressType, setAddressType] = useAtom(addressTypeAtom);
 
-  const handleToggleType = (type: "office" | "home") => {
+  const handleToggleType = (
+    type: (typeof ADDRESS_TYPE)[keyof typeof ADDRESS_TYPE]
+  ) => {
     setAddressType((prev) => ({
       ...prev,
       type,
@@ -17,9 +20,9 @@ export function AddressTypeToggle() {
   return (
     <View className="flex-row gap-2">
       <Pressable
-        onPress={() => handleToggleType("office")}
+        onPress={() => handleToggleType(ADDRESS_TYPE.OFFICE)}
         className={`flex-row items-center px-4 py-2 rounded-full ${
-          addressType.type === "office"
+          addressType.type === ADDRESS_TYPE.OFFICE
             ? "bg-white border-[#159747] border"
             : "bg-white"
         }`}

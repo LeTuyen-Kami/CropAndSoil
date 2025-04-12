@@ -1,4 +1,4 @@
-import { PaginatedResponse, PaginationRequets } from "~/types";
+import { PaginatedResponse, PaginationRequests } from "~/types";
 import { typedAxios } from "../base";
 
 export interface User {
@@ -66,17 +66,16 @@ export interface Province {
 }
 
 export interface IAddress {
-  wooId: number;
+  id: number;
   name: string;
   phoneNumber: string;
   isDefault: boolean;
   addressLine: string;
-  ward: Ward;
-  district: District;
-  province: Province;
+  ward: Partial<Ward>;
+  district: Partial<District>;
+  province: Partial<Province>;
   addressType: string;
 }
-
 class UserService {
   async getProfile() {
     return typedAxios.get<User>("/account/profile");
@@ -112,7 +111,7 @@ class UserService {
   }
 
   async changePassword(payload: ChangePasswordPayload) {
-    return typedAxios.post<{
+    return typedAxios.put<{
       code: string;
       message: string;
     }>("/account/change-password", payload);
@@ -125,25 +124,28 @@ class UserService {
     }>("/account/change-device-token", payload);
   }
 
-  async getAddress(payload: PaginationRequets) {
-    return typedAxios.get<PaginatedResponse<IAddress>>("/account/address", {
+  async getAddress(payload: PaginationRequests) {
+    return typedAxios.get<PaginatedResponse<IAddress>>("/account/addresses", {
       params: payload,
     });
   }
 
   async addAddress(payload: IAddress) {
-    return typedAxios.post<IAddress>("/account/address", payload);
+    return typedAxios.post<IAddress>("/account/addresses", payload);
   }
 
   async updateAddress(payload: IAddress) {
-    return typedAxios.put<IAddress>("/account/address", payload);
+    return typedAxios.put<IAddress>(
+      `/account/addresses/${payload.id}`,
+      payload
+    );
   }
 
   async deleteAddress(wooId: number) {
     return typedAxios.delete<{
       code: string;
       message: string;
-    }>(`/account/address/${wooId}`);
+    }>(`/account/addresses/${wooId}`);
   }
 }
 

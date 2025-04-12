@@ -47,3 +47,42 @@ export const getErrorMessage = (error: any, defaultMessage?: string) => {
   }
   return defaultMessage || "Lỗi không xác định";
 };
+
+export const chunkArray = <T>(array: T[], size: number) => {
+  return array.reduce((acc, item, index) => {
+    const chunkIndex = Math.floor(index / size);
+    if (!acc[chunkIndex]) {
+      acc[chunkIndex] = [];
+    }
+    acc[chunkIndex].push(item);
+    return acc;
+  }, [] as T[][]);
+};
+
+export const applyTyoe = (
+  data: any[],
+  {
+    typeName,
+    handleId,
+  }: {
+    typeName: string;
+    handleId: (item: any) => string;
+  }
+) => {
+  return data?.map((item) => {
+    return {
+      type: typeName,
+      id: handleId(item),
+      items: item,
+    };
+  });
+};
+
+export const preHandleFlashListData = (data: any[]) => {
+  const chunkedData = chunkArray(data, 2);
+
+  return applyTyoe(chunkedData, {
+    typeName: "product",
+    handleId: (item) => item?.[0]?.id,
+  });
+};

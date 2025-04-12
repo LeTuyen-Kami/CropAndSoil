@@ -10,9 +10,10 @@ export interface ApiResponse<T> {
   message: string;
 }
 
-export interface PaginationRequets {
+export interface PaginationRequests {
   skip: number;
   take: number;
+  search?: string;
 }
 
 export interface PaginatedResponse<T> {

@@ -8,6 +8,7 @@ import {
   Feather,
 } from "@expo/vector-icons";
 import { cn } from "~/lib/utils";
+import Alert from "../common/Alert";
 
 interface DocumentUploaderProps {
   hasDocument: boolean;
@@ -24,11 +25,17 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({
   onRemove,
   className,
 }) => {
+  const extension = documentName?.split(".").pop();
+
   if (hasDocument && documentName) {
     return (
       <View className="px-2.5 w-full">
         <View className="flex-row items-center bg-[#F5F5F5] p-3 rounded-lg">
-          <AntDesign name="pdffile1" size={24} color="#FCBA27" />
+          {extension === "pdf" ? (
+            <AntDesign name="pdffile1" size={24} color="#FCBA27" />
+          ) : (
+            <MaterialIcons name="file-present" size={24} color="#FCBA27" />
+          )}
           <View className="flex-1 ml-2">
             <Text
               className="text-sm text-[#383B45] font-medium"
@@ -68,19 +75,10 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({
         </TouchableOpacity>
       </View>
       {!hasDocument && (
-        <View className="mb-2.5">
-          <View className="flex-row  bg-[#FFF5DF] p-2 rounded-lg border border-[#FCBA27]">
-            <MaterialIcons name="error" size={20} color="#FCBA27" />
-            <View className="flex-1 ml-2">
-              <Text className="text-sm text-black">
-                Chưa có tệp nào được chọn
-              </Text>
-              <Text className="text-xs text-[#676767]">
-                Vui lòng tải lên tệp bắt buộc để hoàn tất thông tin.
-              </Text>
-            </View>
-          </View>
-        </View>
+        <Alert
+          title="Chưa có tệp nào được chọn"
+          description="Vui lòng tải lên tệp bắt buộc để hoàn tất thông tin."
+        />
       )}
     </View>
   );

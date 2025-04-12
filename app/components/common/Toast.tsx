@@ -3,9 +3,6 @@ import { atom, useAtom } from "jotai";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, {
-  FadeIn,
-  FadeOut,
-  Layout,
   LinearTransition,
   SlideInDown,
   SlideInUp,
@@ -48,7 +45,19 @@ export const toast = (
     duration,
   };
 
-  jotaiStore.set(toastsAtom, (prev) => [...prev, newToast]);
+  jotaiStore.set(toastsAtom, (prev) => {
+    // Check if a toast with the same id already exists
+    const existingToastIndex = prev.findIndex((toast) => toast.id === id);
+
+    // If it exists, replace it; otherwise, add the new toast
+    if (existingToastIndex !== -1) {
+      const updatedToasts = [...prev];
+      updatedToasts[existingToastIndex] = newToast;
+      return updatedToasts;
+    } else {
+      return [...prev, newToast];
+    }
+  });
 
   // Auto remove toast after duration
   setTimeout(() => {
@@ -144,13 +153,14 @@ const Toast = ({ toast, onHide }: { toast: ToastData; onHide: () => void }) => {
       exiting={exiting}
       layout={LinearTransition}
       style={[styles.toast, { backgroundColor }]}
-      onTouchEnd={onHide}
     >
       <View style={styles.iconContainer}>{getToastIcon(toast.type)}</View>
       <Text style={styles.message}>{toast.message}</Text>
-      <TouchableOpacity style={styles.closeButton} onPress={onHide}>
-        <AntDesign name="close" size={16} color="#fff" />
-      </TouchableOpacity>
+      {onHide && (
+        <TouchableOpacity style={styles.closeButton} onPress={onHide}>
+          <AntDesign name="close" size={16} color="#fff" />
+        </TouchableOpacity>
+      )}
     </Animated.View>
   );
 };
@@ -170,6 +180,10 @@ export const ToastHolder = () => {
   const topToasts = toasts.filter((toast) => toast.position !== "bottom");
   const bottomToasts = toasts.filter((toast) => toast.position === "bottom");
 
+  const onHideToast = (toast: ToastData) => {
+    handleHideToast(toast.id);
+  };
+
   return (
     <>
       {topToasts.length > 0 && (
@@ -180,7 +194,7 @@ export const ToastHolder = () => {
               style={styles.toastWrapper}
               layout={LinearTransition}
             >
-              <Toast toast={toast} onHide={() => handleHideToast(toast.id)} />
+              <Toast toast={toast} onHide={() => onHideToast(toast)} />
             </Animated.View>
           ))}
         </View>
@@ -194,7 +208,7 @@ export const ToastHolder = () => {
               style={styles.toastWrapper}
               layout={LinearTransition}
             >
-              <Toast toast={toast} onHide={() => handleHideToast(toast.id)} />
+              <Toast toast={toast} onHide={() => onHideToast(toast)} />
             </Animated.View>
           ))}
         </View>

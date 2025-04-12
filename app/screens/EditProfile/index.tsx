@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Platform,
+  RefreshControl,
   ScrollView,
   TouchableOpacity,
   View,
@@ -33,6 +34,7 @@ import { authAtom } from "~/store/atoms";
 import { getErrorMessage } from "~/utils";
 import { GENDER_OPTIONS, MAX_IMAGE_SIZE } from "~/utils/contants";
 import EditProfileField from "./EditProfileField";
+import Alert from "~/components/common/Alert";
 
 type ProfileItemProps = {
   icon: React.ReactNode;
@@ -64,7 +66,7 @@ const ProfileItem = ({
       className="flex-row items-center p-3 mb-2 bg-white rounded-lg"
       onPress={onPress}
     >
-      <View className="mr-2">{icon}</View>
+      <View className="mr-2 h-full">{icon}</View>
       <View className="flex-1">
         <Text className="text-sm text-black">{label}</Text>
         <Text className={`text-sm ${value ? "text-gray-600" : "text-red-500"}`}>
@@ -89,7 +91,11 @@ const EditProfileScreen = () => {
     mutationFn: (data: UpdateUserPayload) => userService.updateProfile(data),
   });
 
-  const { data: profile } = useQuery({
+  const {
+    data: profile,
+    isRefetching,
+    refetch,
+  } = useQuery({
     queryKey: ["profile"],
     queryFn: () => userService.getProfile(),
     enabled: auth?.isLoggedIn,
@@ -165,7 +171,6 @@ const EditProfileScreen = () => {
         email: profileForm.email,
         gender: profileForm.gender,
         birthday: profileForm.birthDate,
-        taxNumber: "123",
         avatarFile:
           profileForm.avatar && profileForm.avatar.uri
             ? {
@@ -177,8 +182,6 @@ const EditProfileScreen = () => {
       },
       {
         onSuccess: (data) => {
-          console.log("data", data);
-
           toast.success("Thông tin hồ sơ đã được cập nhật");
           queryClient.invalidateQueries({ queryKey: ["profile"] });
         },
@@ -257,12 +260,12 @@ const EditProfileScreen = () => {
           <View>
             <View className="absolute top-[50%] left-0 right-0 bottom-0 bg-[#F2F2F2] rounded-t-3xl"></View>
 
-            <View className="items-center mt-6 mb-4">
+            <View className="items-center mb-4">
               <View className="relative">
-                <View className="w-[140px] h-[140px] rounded-full bg-[#DEF1E5] border-4 border-white justify-center items-center">
+                <View className="rounded-full bg-[#DEF1E5] border-4 border-white justify-center items-center">
                   <Image
                     source={profileForm.avatar?.uri}
-                    className="w-[140px] h-[140px] rounded-full"
+                    className="w-[120px] h-[120px] rounded-full"
                     contentFit="cover"
                     placeholder={imagePaths.icUser}
                     placeholderContentFit="cover"
@@ -279,7 +282,11 @@ const EditProfileScreen = () => {
             </View>
           </View>
           <View className="flex-col flex-1 bg-[#F2F2F2]">
-            <ScrollView>
+            <ScrollView
+              refreshControl={
+                <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+              }
+            >
               <View className="">
                 <ProfileItem
                   icon={
@@ -298,7 +305,7 @@ const EditProfileScreen = () => {
                 <ProfileItem
                   icon={
                     <Image
-                      source={imagePaths.icPhone}
+                      source={imagePaths.icPhone1}
                       className="size-6"
                       contentFit="contain"
                     />
@@ -402,8 +409,18 @@ const EditProfileScreen = () => {
                   placeholder="Nhập thông tin & tải lên tệp bắt buộc để hoàn tất"
                   onPress={() => {
                     navigation.navigate("BusinessVoucher");
+                    if (!profileForm.taxId) {
+                    } else {
+                      // toast.info("Bạn đã tải lên chứng từ kinh doanh");
+                    }
                   }}
                 />
+                <View className="px-2 py-4">
+                  <Alert
+                    title="Tài khoản đang chờ duyệt."
+                    description="Giấy phép kinh doanh đã được tải lên và đang trong quá trình xem xét, chờ phê duyệt từ Cropee."
+                  />
+                </View>
               </View>
             </ScrollView>
             <View className="px-2" style={{ paddingBottom: bottom }}>
