@@ -134,7 +134,6 @@ const DetailProduct = () => {
         estimatedItemSize={200}
         getItemType={(item) => item.type}
         keyExtractor={(item) => item.type}
-        ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
       />
     </ScreenWrapper>
   );

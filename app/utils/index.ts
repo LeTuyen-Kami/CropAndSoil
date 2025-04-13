@@ -141,14 +141,14 @@ export const onlineStatus = (lastOnlineAt?: string) => {
   }
 
   if (diffInMinutes < 60) {
-    return `Online ${diffInMinutes} phút trước`;
+    return `Online ${Math.floor(diffInMinutes)} phút trước`;
   }
 
   if (diffInMinutes < 24 * 60) {
-    return `Online ${diffInMinutes / 60} giờ trước`;
+    return `Online ${Math.floor(diffInMinutes / 60)} giờ trước`;
   }
 
-  return `Online ${diffInMinutes / (24 * 60)} ngày trước`;
+  return `Online ${Math.floor(diffInMinutes / (24 * 60))} ngày trước`;
 };
 
 export const getTimeAgo = (date?: string) => {

@@ -176,8 +176,14 @@ const TwoProductItem = ({ items }: { items: IProduct[] }) => {
   );
 };
 
-const NoData = () => {
-  return <Empty title="Không có sản phẩm nào" backgroundColor="#EEE" />;
+const NoData = ({ isLoading }: { isLoading: boolean }) => {
+  return (
+    <Empty
+      title="Không có sản phẩm nào"
+      backgroundColor="#EEE"
+      isLoading={isLoading}
+    />
+  );
 };
 const categoryData = [
   {
@@ -207,7 +213,7 @@ const SearchAdvance = () => {
   const { searchText } = route.params;
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const { data, hasNextPage, fetchNextPage, isRefresh, refresh } =
+  const { data, hasNextPage, fetchNextPage, isRefresh, refresh, isLoading } =
     usePagination(productService.searchProducts, {
       initialPagination: {
         skip: 0,
@@ -229,7 +235,7 @@ const SearchAdvance = () => {
     }
 
     if (item.type === "noData") {
-      return <NoData />;
+      return <NoData isLoading={isLoading} />;
     }
 
     return <TwoProductItem items={item.items} />;

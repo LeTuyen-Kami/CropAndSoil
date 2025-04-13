@@ -16,6 +16,21 @@ const TopProduct = ({ id }: { id: string | number }) => {
     staleTime: 1000 * 60 * 5,
   });
 
+  const { data: topProducts } = useQuery({
+    queryKey: ["topProducts", ...(productDetail?.upsellIds || [])],
+    queryFn: () =>
+      productService.searchProducts({
+        ids: productDetail?.upsellIds,
+        take: 10,
+      }),
+    enabled: !!productDetail?.upsellIds && productDetail?.upsellIds.length > 0,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  if (!topProducts?.data || topProducts?.data?.length === 0) {
+    return null;
+  }
+
   return (
     <View className="bg-white px-[10] py-[20]">
       <View className="flex-row justify-between items-center mb-[10]">

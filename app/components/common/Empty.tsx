@@ -1,4 +1,5 @@
-import { View } from "react-native";
+import React from "react";
+import { View, ActivityIndicator } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { Text } from "../ui/text";
 import { screen } from "~/utils";
@@ -6,9 +7,11 @@ import { screen } from "~/utils";
 const Empty = ({
   title,
   backgroundColor,
+  isLoading,
 }: {
   title: string;
   backgroundColor?: string;
+  isLoading?: boolean;
 }) => {
   return (
     <View
@@ -18,10 +21,16 @@ const Empty = ({
         backgroundColor: backgroundColor,
       }}
     >
-      <AntDesign name="folderopen" size={40} color="#6B7280" />
-      <Text className="text-center text-gray-500">
-        {title || "Không có địa chỉ nào"}
-      </Text>
+      {isLoading ? (
+        <ActivityIndicator size="large" color="#6B7280" />
+      ) : (
+        <>
+          <AntDesign name="folderopen" size={40} color="#6B7280" />
+          <Text className="text-center text-gray-500">
+            {title || "Không có địa chỉ nào"}
+          </Text>
+        </>
+      )}
     </View>
   );
 };
