@@ -9,10 +9,16 @@ import ScreenWrapper from "~/components/common/ScreenWrapper";
 import { Input } from "~/components/ui/input";
 import ShopInfo from "./ShopInfo";
 import Tabs from "./Tabs";
+import { useQuery } from "@tanstack/react-query";
+import { shopService } from "~/services/api/shop.service";
+import { RootStackRouteProp } from "~/navigation/types";
+import { useRoute } from "@react-navigation/native";
 
 const Shop = () => {
   const { top, bottom } = useSafeAreaInsets();
   const navigation = useNavigation();
+  const route = useRoute<RootStackRouteProp<"Shop">>();
+  const { id } = route.params;
 
   return (
     <View className="flex-1 bg-green-300">
@@ -54,7 +60,7 @@ const Shop = () => {
             <Image source={imagePaths.icThreeDot} className="size-[50px]" />
           </TouchableOpacity>
         </View>
-        <ShopInfo />
+        <ShopInfo id={id} />
       </View>
       <Tabs />
     </View>

@@ -1,11 +1,13 @@
 import { FlashList } from "@shopify/flash-list";
+import { deepEqual } from "fast-equals";
+import React from "react";
 import { View } from "react-native";
 import ProductItem from "~/components/common/ProductItem";
 import { Text } from "~/components/ui/text";
 import { cn } from "~/lib/utils";
 import { screen } from "~/utils";
 
-const MaybeLike = () => {
+const MaybeLike = ({ id }: { id: string | number }) => {
   return (
     <View className="mt-4">
       <View className="flex-row justify-between items-center px-4">
@@ -30,6 +32,7 @@ const MaybeLike = () => {
               totalCount={1000}
               rating={4.5}
               location={"Hà Nội"}
+              id={"123"}
             />
           </View>
         ))}
@@ -38,4 +41,6 @@ const MaybeLike = () => {
   );
 };
 
-export default MaybeLike;
+export default React.memo(MaybeLike, (prevProps, nextProps) => {
+  return deepEqual(prevProps, nextProps);
+});

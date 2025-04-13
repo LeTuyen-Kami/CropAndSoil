@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { Image } from "expo-image";
-import { TouchableOpacity, View } from "react-native";
+import { DimensionValue, TouchableOpacity, View } from "react-native";
 import { imagePaths } from "~/assets/imagePath";
 import { Text } from "~/components/ui/text";
 import { cn } from "~/lib/utils";
@@ -17,9 +17,11 @@ export interface ProductItemProps {
   location?: string;
   onPress?: () => void;
   width?: number;
-  height?: number;
+  height?: DimensionValue;
   className?: string;
   footer?: React.ReactNode;
+  onSale?: boolean;
+  id: string | number;
 }
 
 const ProductItem = ({
@@ -37,6 +39,8 @@ const ProductItem = ({
   onPress,
   className,
   footer,
+  onSale,
+  id,
 }: ProductItemProps) => {
   const navigation = useNavigation();
 
@@ -58,7 +62,7 @@ const ProductItem = ({
     if (onPress) {
       onPress();
     } else {
-      navigation.navigate("DetailProduct", { id: "123" });
+      navigation.navigate("DetailProduct", { id: id });
     }
   };
 
@@ -90,9 +94,9 @@ const ProductItem = ({
           </Text>
           <View className="flex-row gap-[6] items-center justify-between">
             <Text className="text-sm font-bold leading-tight text-error-500">
-              {formatPrice(price)}
+              {formatPrice(price || originalPrice || 0)}
             </Text>
-            {originalPrice && originalPrice > price && (
+            {onSale && originalPrice && (
               <Text className="text-xs tracking-tight line-through text-neutral-400">
                 {formatPrice(originalPrice)}
               </Text>

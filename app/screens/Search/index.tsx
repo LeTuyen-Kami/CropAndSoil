@@ -15,6 +15,8 @@ import Animated, {
 import { RootStackParamList, RootStackScreenProps } from "~/navigation/types";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import ScreenWrapper from "~/components/common/ScreenWrapper";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { searchService } from "~/services/api/search.services";
 
 // Mock data for search history and suggestions
 const MOCK_SEARCH_HISTORY = [
@@ -37,6 +39,22 @@ const SearchScreen = () => {
   const [searchHistory, setSearchHistory] = useState(MOCK_SEARCH_HISTORY);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const isFirstRender = useRef(true);
+
+  const { data: trending } = useQuery({
+    queryKey: ["trending"],
+    queryFn: () => searchService.getTrending(),
+  });
+
+  const mutation = useMutation({
+    mutationFn: (search: string) => searchService.searchSuggestions(search),
+  });
+
+  const { data: suggestions } = useQuery({
+    queryKey: ["suggestions", searchQuery],
+    queryFn: () => searchService.searchSuggestions(searchQuery),
+  });
+
+  console.log(trending);
 
   // Update visibility of suggestion grid based on query
   useEffect(() => {
@@ -74,6 +92,16 @@ const SearchScreen = () => {
   const handleViewMorePress = () => {
     console.log("View more pressed");
   };
+
+  useEffect(() => {
+    if (trending && trending.length > 0) {
+      mutation.mutate(trending[0], {
+        onSuccess: (data) => {
+          console.log("data", data);
+        },
+      });
+    }
+  }, [trending]);
 
   useEffect(() => {
     setTimeout(() => {

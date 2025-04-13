@@ -1,30 +1,32 @@
+import { FontAwesome5 } from "@expo/vector-icons";
 import {
   CommonActions,
   useNavigation,
   useRoute,
 } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { FlashList } from "@shopify/flash-list";
 import { Image } from "expo-image";
-import { ScrollView, TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useMemo } from "react";
+import {
+  ActivityIndicator,
+  RefreshControl,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { imagePaths } from "~/assets/imagePath";
-import GradientBackground from "~/components/common/GradientBackground";
+import Category from "~/components/common/Category";
+import Empty from "~/components/common/Empty";
 import ProductItem from "~/components/common/ProductItem";
-import ScreenContainer from "~/components/common/ScreenContainer";
+import ScreenWrapper from "~/components/common/ScreenWrapper";
 import { Text } from "~/components/ui/text";
+import useDisclosure from "~/hooks/useDisclosure";
+import { usePagination } from "~/hooks/usePagination";
 import { cn } from "~/lib/utils";
 import { RootStackParamList, RootStackRouteProp } from "~/navigation/types";
-import { chunkArray, preHandleFlashListData, screen } from "~/utils";
-import ContainerList from "../Home/ContainerList";
+import { IProduct, productService } from "~/services/api/product.service";
+import { getItemWidth, preHandleFlashListData } from "~/utils";
 import Filter from "./Filter";
-import useDisclosure from "~/hooks/useDisclosure";
-import Category from "~/components/common/Category";
-import { usePagination } from "~/hooks/usePagination";
-import { searchService } from "~/services/api/search.services";
-import ScreenWrapper from "~/components/common/ScreenWrapper";
-import { FontAwesome5 } from "@expo/vector-icons";
-import { FlashList } from "@shopify/flash-list";
-import { useEffect, useState } from "react";
 
 const ExploreCategory = () => {
   return (
@@ -115,7 +117,7 @@ const ContainerHeader = () => {
       <View className="mx-2 top-[-12px] absolute left-0 right-0 h-[76] rounded-[40] bg-secondary-50 opacity-20" />
 
       <View className="flex-row gap-2 items-center px-2 mb-4 w-full">
-        <Text className="text-xl font-bold text-black uppercase">
+        <Text className="mt-3 text-xl font-bold text-black uppercase">
           Tất cả sản phẩm
         </Text>
         <TouchableOpacity className="flex-row gap-2 items-center px-4 py-2 ml-auto bg-white rounded-full">
@@ -129,26 +131,54 @@ const ContainerHeader = () => {
   );
 };
 
-const TwoProductItem = ({ items }: { items: any[] }) => {
+const TwoProductItem = ({ items }: { items: IProduct[] }) => {
+  const width = useMemo(() => {
+    return getItemWidth({
+      containerPadding: 16,
+      itemGap: 8,
+    }).itemWidth;
+  }, []);
+
+  const calculateDiscount = (item: IProduct) => {
+    if (item?.regularPrice > item?.salePrice) {
+      return Math.round(
+        ((item?.regularPrice - item?.salePrice) / item?.regularPrice) * 100
+      );
+    }
+
+    return undefined;
+  };
+
   return (
-    <View className="flex-row gap-2 px-2 bg-[#EEE] pb-2">
+    <View
+      className="flex-row gap-2 px-2 bg-[#EEE] pb-2"
+      style={{
+        alignItems: "stretch",
+      }}
+    >
       {items.map((item, index) => (
         <ProductItem
-          width={(screen.width - 24) / 2}
-          key={index}
-          name={`Voluptate irure in laboris sit sunt pariatur. Sit  Voluptate irure in 123  ${index}`}
-          price={100000}
-          originalPrice={150000}
-          discount={20}
-          rating={4.5}
-          soldCount={100}
-          location={"Hà Nội"}
+          width={width}
+          key={item.id}
+          name={item?.name}
+          height={"100%"}
+          price={item?.salePrice}
+          originalPrice={item?.regularPrice}
+          discount={calculateDiscount(item)}
+          rating={item?.averageRating}
+          soldCount={item?.reviewCount}
+          image={item?.images[0]}
+          onSale={item?.regularPrice > item?.salePrice}
+          id={item?.id}
         />
       ))}
     </View>
   );
 };
 
+const NoData = () => {
+  return <Empty title="Không có sản phẩm nào" backgroundColor="#EEE" />;
+};
 const categoryData = [
   {
     id: "category",
@@ -163,6 +193,13 @@ const containerHeaderData = [
   },
 ];
 
+const noDataData = [
+  {
+    id: "noData",
+    type: "noData",
+  },
+];
+
 const SearchAdvance = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -170,11 +207,8 @@ const SearchAdvance = () => {
   const { searchText } = route.params;
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const [flashListData, setFlashListData] = useState<any[]>([]);
-
-  const { data, hasNextPage, fetchNextPage } = usePagination(
-    searchService.searchProducts,
-    {
+  const { data, hasNextPage, fetchNextPage, isRefresh, refresh } =
+    usePagination(productService.searchProducts, {
       initialPagination: {
         skip: 0,
         take: 10,
@@ -183,8 +217,7 @@ const SearchAdvance = () => {
       initialParams: {
         search: searchText,
       },
-    }
-  );
+    });
 
   const renderItem = ({ item }: { item: any }) => {
     if (item.type === "category") {
@@ -195,19 +228,21 @@ const SearchAdvance = () => {
       return <ContainerHeader />;
     }
 
+    if (item.type === "noData") {
+      return <NoData />;
+    }
+
     return <TwoProductItem items={item.items} />;
   };
 
-  useEffect(() => {
-    const tempData = preHandleFlashListData(
-      [...Array(100)]?.map((_, index) => ({
-        type: "product",
-        id: index,
-      }))
-    );
+  const flashListData = useMemo(() => {
+    const handledData = preHandleFlashListData(data);
 
-    setFlashListData([...categoryData, ...containerHeaderData, ...tempData]);
-  }, []);
+    if (!data || data.length === 0) {
+      return [...categoryData, ...containerHeaderData, ...noDataData];
+    }
+    return [...categoryData, ...containerHeaderData, ...handledData];
+  }, [data]);
 
   return (
     <ScreenWrapper hasGradient hasSafeBottom={false}>
@@ -220,6 +255,25 @@ const SearchAdvance = () => {
           keyExtractor={(item) => item.id}
           estimatedItemSize={302}
           getItemType={(item) => item.type}
+          onEndReached={fetchNextPage}
+          onEndReachedThreshold={0.5}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefresh}
+              onRefresh={refresh}
+              colors={["white"]}
+              tintColor="white"
+            />
+          }
+          ListFooterComponent={
+            hasNextPage ? (
+              <View className="flex-row justify-center items-center w-full h-10 bg-[#EEE]">
+                <ActivityIndicator size="large" color="#39CA71" />
+              </View>
+            ) : (
+              <View className="h-10 w-full bg-[#EEE]" />
+            )
+          }
         />
       </View>
       <Filter isOpen={isOpen} onClose={onClose} />

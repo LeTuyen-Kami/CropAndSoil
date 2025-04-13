@@ -1,10 +1,14 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import { imagePaths } from "~/assets/imagePath";
-import { useState } from "react";
+import React, { useMemo, useState } from "react";
 import ProductTypeChip from "~/components/common/ProductTypeChip";
 import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { deepEqual } from "fast-equals";
+import { IProduct, productService } from "~/services/api/product.service";
+import { useQuery } from "@tanstack/react-query";
+import { formatPrice } from "~/utils";
 
 const BrandBadge = () => {
   return (
@@ -36,13 +40,15 @@ const AuthenticBadge = () => {
   );
 };
 
-const SalesCount = () => {
+const SalesCount = ({ quantity }: { quantity: number | undefined }) => {
   const navigation = useNavigation();
 
   return (
     <TouchableOpacity onPress={() => navigation.navigate("LikedProduct")}>
       <View style={styles.salesCountContainer}>
-        <Text style={styles.salesCountText}>Đã bán 62</Text>
+        <Text style={styles.salesCountText}>
+          Đã bán {(quantity || 0)?.toLocaleString()}
+        </Text>
         <AntDesign name="heart" size={15} color="#E01739" />
       </View>
     </TouchableOpacity>
@@ -68,16 +74,51 @@ const PromotionBadge = () => {
   );
 };
 
-const Info = () => {
+const Atribute = ({
+  attributes,
+}: {
+  attributes: IProduct["attributes"] | undefined;
+}) => {
+  return (
+    <React.Fragment>
+      {attributes?.map((attribute) => {
+        return (
+          <View style={styles.typeContainer} key={attribute.id}>
+            <Text style={styles.typeTitle}>{attribute.name}</Text>
+            <View style={styles.typeContent}>
+              {attribute.options?.map((option, index) => (
+                <ProductTypeChip
+                  key={option.id}
+                  label={option.name}
+                  // isSelected={selectedType === option.name}
+                  // onPress={() => setSelectedType(option.name)}
+                />
+              ))}
+            </View>
+          </View>
+        );
+      })}
+    </React.Fragment>
+  );
+};
+
+const Info = ({ id }: { id: string | number }) => {
   const [selectedType, setSelectedType] = useState("NPK rau 500gr");
 
-  const productTypes = [
-    "NPK rau 500gr",
-    "NPK củ 250gr",
-    "NPK trái 500gr",
-    "NPK hoa Phú Mỹ 500gr",
-    "NPK củ 250gr",
-  ];
+  const { data: productDetail } = useQuery({
+    queryKey: ["product-detail", id],
+    queryFn: () => productService.getProductDetail(id),
+    staleTime: 1000 * 60 * 5,
+    enabled: !!id,
+  });
+
+  const productTypes = useMemo(() => {
+    return (
+      productDetail?.attributes?.flatMap((attribute) =>
+        attribute?.options?.map((option) => option?.name)
+      ) ?? []
+    );
+  }, [productDetail]);
 
   return (
     <View style={styles.container}>
@@ -98,39 +139,42 @@ const Info = () => {
           <BrandBadge />
           <AuthenticBadge />
         </View>
-        <SalesCount />
+        <SalesCount quantity={productDetail?.totalSales} />
       </View>
 
-      <Text style={styles.productTitle}>
-        Phân Bón NPK Greenhome, Chuyên Rau Ăn Lá, Củ, Cây Ăn Trái, Hoa, Chắc Rễ,
-        Khoẻ Cây, Bông To, Sai Quả
-      </Text>
+      <Text style={styles.productTitle}>{productDetail?.name}</Text>
 
       <View style={styles.priceContainer}>
         <View style={styles.priceContent}>
-          <Text style={styles.discountedPrice}>646.000đ</Text>
-          <Text style={styles.originalPrice}>680.000đ</Text>
+          <Text style={styles.discountedPrice}>
+            {formatPrice(
+              productDetail?.salePrice || productDetail?.regularPrice
+            )}
+          </Text>
+          {productDetail?.regularPrice &&
+            productDetail?.regularPrice > productDetail?.salePrice && (
+              <Text style={styles.originalPrice}>
+                {formatPrice(productDetail?.regularPrice)}
+              </Text>
+            )}
         </View>
-        <View style={styles.discountBadge}>
-          <Text style={styles.discountText}>Giảm 5%</Text>
-        </View>
+        {productDetail?.regularPrice &&
+          productDetail?.salePrice &&
+          productDetail?.regularPrice > productDetail?.salePrice && (
+            <View style={styles.discountBadge}>
+              <Text style={styles.discountText}>
+                {((productDetail?.regularPrice - productDetail?.salePrice) /
+                  productDetail?.regularPrice) *
+                  100}
+                %
+              </Text>
+            </View>
+          )}
       </View>
 
       <PromotionBadge />
 
-      <View style={styles.typeContainer}>
-        <Text style={styles.typeTitle}>Phân loại:</Text>
-        <View style={styles.typeContent}>
-          {productTypes.map((type, index) => (
-            <ProductTypeChip
-              key={index}
-              label={type}
-              isSelected={selectedType === type}
-              onPress={() => setSelectedType(type)}
-            />
-          ))}
-        </View>
-      </View>
+      <Atribute attributes={productDetail?.attributes} />
     </View>
   );
 };
@@ -349,4 +393,6 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Info;
+export default React.memo(Info, (prevProps, nextProps) => {
+  return deepEqual(prevProps, nextProps);
+});

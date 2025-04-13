@@ -8,29 +8,35 @@ import {
 } from "react-native";
 import { Text } from "~/components/ui/text";
 import { usePagination } from "~/hooks/usePagination";
-import { categoryService } from "~/services/api/category.service";
+import { categoryService, ICategory } from "~/services/api/category.service";
+import { PaginatedResponse, PaginationRequests } from "~/types";
 
 interface ItemProps {
   title: string;
   image: string;
+  itemBgColor?: string;
+  textColor?: string;
 }
 
-interface CategoryProps {
-  data: ItemProps[];
-}
-
-const Item = ({ title, image }: ItemProps) => {
+const Item = ({ title, image, itemBgColor, textColor }: ItemProps) => {
   return (
     <TouchableOpacity>
       <View className="w-[71] flex-col gap-2 items-center">
-        <View className="size-[60] rounded-full bg-[rgba(0,0,0,0.25)] flex items-center justify-center p-3">
+        <View
+          className={`flex justify-center items-center p-3 rounded-full size-[60]`}
+          style={{ backgroundColor: itemBgColor }}
+        >
           <Image
             source={image}
             style={{ width: "100%", height: "100%" }}
             contentFit="contain"
           />
         </View>
-        <Text className="text-center text-white" numberOfLines={2}>
+        <Text
+          className="text-center"
+          style={{ color: textColor }}
+          numberOfLines={2}
+        >
           {title}
         </Text>
       </View>
@@ -38,14 +44,23 @@ const Item = ({ title, image }: ItemProps) => {
   );
 };
 
-const Category = () => {
-  const { data, fetchNextPage, hasNextPage } = usePagination(
-    categoryService.getCategories,
-    {
-      queryKey: ["categories"],
-      initialPagination: { skip: 0, take: 10 },
-    }
-  );
+interface CategoryProps {
+  getCategoriesApi?: (
+    payload: PaginationRequests
+  ) => Promise<PaginatedResponse<ICategory>>;
+  itemBgColor?: string;
+  textColor?: string;
+}
+
+const Category = ({
+  getCategoriesApi = categoryService.getCategories,
+  itemBgColor = "rgba(0,0,0,0.25)",
+  textColor = "white",
+}: CategoryProps) => {
+  const { data, fetchNextPage, hasNextPage } = usePagination(getCategoriesApi, {
+    queryKey: ["categories"],
+    initialPagination: { skip: 0, take: 10 },
+  });
 
   if (!data) return null;
 
@@ -54,7 +69,12 @@ const Category = () => {
       <FlatList
         data={data}
         renderItem={({ item }) => (
-          <Item title={item.name} image={item.thumbnail} />
+          <Item
+            title={item.name}
+            image={item.thumbnail}
+            itemBgColor={itemBgColor}
+            textColor={textColor}
+          />
         )}
         horizontal
         showsHorizontalScrollIndicator={false}

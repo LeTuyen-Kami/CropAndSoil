@@ -5,10 +5,15 @@ import { imagePaths } from "~/assets/imagePath";
 import AllMedia from "./AllMedia";
 import ReviewItem, { ReviewItemProps } from "~/components/common/ReviewItem";
 import { Text } from "~/components/ui/text";
+import { deepEqual } from "fast-equals";
+import { useQuery } from "@tanstack/react-query";
+import { productService } from "~/services/api/product.service";
+
 type RatingProps = {
   rating?: number;
   totalReviews?: number;
   onViewAllPress?: () => void;
+  id: string | number;
 };
 
 // Mock data for reviews
@@ -73,11 +78,18 @@ const MOCK_REVIEWS: ReviewItemProps[] = [
 ];
 
 const Rating: React.FC<RatingProps> = ({
-  rating = 5,
   totalReviews = 20,
   onViewAllPress,
+  id,
 }) => {
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
+
+  const { data: productDetail } = useQuery({
+    queryKey: ["productDetail", id],
+    queryFn: () => productService.getProductDetail(id),
+    enabled: !!id,
+    staleTime: 1000 * 60 * 5,
+  });
 
   // Render stars based on rating
   const renderStars = () => {
@@ -127,8 +139,12 @@ const Rating: React.FC<RatingProps> = ({
         {/* Rating Summary */}
         <View className="flex-row items-center mt-1">
           <View className="flex-row items-center">{renderStars()}</View>
-          <Text className="ml-2 text-[#159747]">{`${rating}/5`}</Text>
-          <Text className="ml-2 text-[#676767]">{`(${totalReviews} đánh giá)`}</Text>
+          <Text className="ml-2 text-[#159747]">{`${(
+            productDetail?.averageRating || 0
+          )?.toFixed(1)}/5`}</Text>
+          <Text className="ml-2 text-[#676767]">{`(${
+            productDetail?.reviewCount || 0
+          } đánh giá)`}</Text>
         </View>
 
         {/* Filters */}
@@ -185,4 +201,6 @@ const Rating: React.FC<RatingProps> = ({
   );
 };
 
-export default Rating;
+export default React.memo(Rating, (prevProps, nextProps) => {
+  return deepEqual(prevProps, nextProps);
+});

@@ -123,6 +123,12 @@ import shopBackground from "~/assets/images/shop_cover_photo.png";
 import icPhone2 from "~/assets/icons/phone_icon.svg";
 import icPhone3 from "~/assets/icons/phone_icon.png";
 import icUserPlus from "~/assets/icons/user_plus_icon.png";
+import icFire from "~/assets/icons/fire_icon.png";
+import voucherBackground from "~/assets/images/voucher_background.png";
+import icFire1 from "~/assets/icons/fire1_icon.png";
+import icLightning from "~/assets/icons/lighning_icon.png";
+import lightningBadge from "~/assets/images/lightning_badge.png";
+
 export const imagePaths = {
   //images
   logo: logo,
@@ -248,4 +254,9 @@ export const imagePaths = {
   icPhone2: icPhone2,
   icPhone3: icPhone3,
   icUserPlus: icUserPlus,
+  icFire: icFire,
+  voucherBackground: voucherBackground,
+  icFire1: icFire1,
+  icLightning: icLightning,
+  lightningBadge: lightningBadge,
 };

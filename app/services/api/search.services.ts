@@ -9,18 +9,12 @@ export interface ISearchTrending {
 
 class SearchService {
   async getTrending() {
-    return typedAxios.get<ISearchTrending[]>("/search/trending");
+    return typedAxios.get<string[]>("/search/trending");
   }
 
   async searchSuggestions(search: string) {
     return typedAxios.get<string[]>("/search/suggestions", {
       params: { search },
-    });
-  }
-
-  async searchProducts(params: { search: string; skip: number; take: number }) {
-    return typedAxios.get<PaginatedResponse<string>>("/products", {
-      params,
     });
   }
 }

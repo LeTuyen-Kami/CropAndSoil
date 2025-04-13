@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { PaginatedResponse, PaginationRequests } from "../types";
 
@@ -33,15 +33,20 @@ export function usePagination<T, P = Record<string, any>>(
   const [isRefresh, setIsRefresh] = useState(false);
 
   // Calculate effective pagination parameters
-  const effectivePagination: PaginationRequests = {
-    skip: initialPagination.skip ?? 0,
-    take: initialPagination.take ?? 10,
-  };
+  const effectivePagination = useMemo<PaginationRequests>(
+    () => ({
+      skip: initialPagination.skip ?? 0,
+      take: initialPagination.take ?? 10,
+    }),
+    [initialPagination.skip, initialPagination.take]
+  );
 
   // Create query key with pagination and filter params
-  const effectiveQueryKey = Array.isArray(queryKey)
-    ? [...queryKey, effectivePagination, currentParams]
-    : [queryKey, effectivePagination, currentParams];
+  const effectiveQueryKey = useMemo(() => {
+    return Array.isArray(queryKey)
+      ? [...queryKey, effectivePagination, currentParams]
+      : [queryKey, effectivePagination, currentParams];
+  }, [queryKey, effectivePagination, currentParams]);
 
   // React Query for first page
   const {
@@ -51,7 +56,10 @@ export function usePagination<T, P = Record<string, any>>(
     refetch,
   } = useQuery<PaginatedResponse<T>, Error>({
     queryKey: effectiveQueryKey,
-    queryFn: () => fetchFunction({ ...effectivePagination, ...currentParams }),
+    queryFn: useCallback(
+      () => fetchFunction({ ...effectivePagination, ...currentParams }),
+      [fetchFunction, effectivePagination, currentParams]
+    ),
     ...queryOptions,
   });
 
@@ -61,15 +69,21 @@ export function usePagination<T, P = Record<string, any>>(
   }, [currentParams, firstPageData?.skip, firstPageData?.take]);
 
   // Combined data from all pages
-  const combinedData = firstPageData
-    ? [...firstPageData.data, ...additionalPagesData]
-    : [];
+  const combinedData = useMemo(
+    () =>
+      firstPageData ? [...firstPageData.data, ...additionalPagesData] : [],
+    [firstPageData, additionalPagesData]
+  );
 
   // Check if there's a next page
-  const hasNextPage = firstPageData
-    ? firstPageData.skip + firstPageData.take + additionalPagesData.length <
-      firstPageData.total
-    : false;
+  const hasNextPage = useMemo(
+    () =>
+      firstPageData
+        ? firstPageData.skip + firstPageData.take + additionalPagesData.length <
+          firstPageData.total
+        : false,
+    [firstPageData, additionalPagesData.length]
+  );
 
   // Fetch next page
   const fetchNextPage = useCallback(async () => {
@@ -112,15 +126,30 @@ export function usePagination<T, P = Record<string, any>>(
     setCurrentParams((prev) => ({ ...prev, ...newParams }));
   }, []);
 
-  return {
-    data: combinedData,
-    paginationData: firstPageData,
-    isLoading,
-    isFetching,
-    isRefresh,
-    hasNextPage,
-    fetchNextPage,
-    refresh,
-    updateParams,
-  };
+  const returnValue = useMemo(
+    () => ({
+      data: combinedData,
+      paginationData: firstPageData,
+      isLoading,
+      isFetching,
+      isRefresh,
+      hasNextPage,
+      fetchNextPage,
+      refresh,
+      updateParams,
+    }),
+    [
+      combinedData,
+      firstPageData,
+      isLoading,
+      isFetching,
+      isRefresh,
+      hasNextPage,
+      fetchNextPage,
+      refresh,
+      updateParams,
+    ]
+  );
+
+  return returnValue;
 }

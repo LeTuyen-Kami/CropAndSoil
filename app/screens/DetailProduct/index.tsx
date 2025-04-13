@@ -1,9 +1,10 @@
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { Image } from "expo-image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   FlatList,
   Pressable,
+  RefreshControl,
   ScrollView,
   TouchableOpacity,
   View,
@@ -20,6 +21,13 @@ import ShopInfo from "./ShopInfo";
 import TopProduct from "./TopProduct";
 import Detail from "./Detail";
 import MaybeLike from "./MaybeLike";
+import ScreenWrapper from "~/components/common/ScreenWrapper";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { searchService } from "~/services/api/search.services";
+import { productService } from "~/services/api/product.service";
+import { RootStackRouteProp } from "~/navigation/types";
+import ListImage from "./ListImage";
+import { FlashList } from "@shopify/flash-list";
 const Header = () => {
   const { top } = useSafeAreaInsets();
   const navigation = useNavigation();
@@ -45,154 +53,90 @@ const Header = () => {
 };
 
 const DetailProduct = () => {
-  const [isGalleryVisible, setIsGalleryVisible] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [images, setImages] = useState<GalleryItem[]>([]);
-  const flatListRef = useRef<FlatList>(null);
-  const { bottom } = useSafeAreaInsets();
+  const route = useRoute<RootStackRouteProp<"DetailProduct">>();
+  const { id } = route.params;
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const queryClient = useQueryClient();
 
-  console.log("bottom", bottom);
-
-  useEffect(() => {
-    setImages([
-      { url: "https://picsum.photos/seed/seed1/200/200", type: "image" },
-      { url: "https://picsum.photos/seed/seed2/200/200", type: "image" },
-      { url: "https://picsum.photos/seed/seed3/200/200", type: "image" },
-      { url: "https://picsum.photos/seed/seed4/200/200", type: "image" },
-      { url: "https://picsum.photos/seed/seed5/200/200", type: "image" },
-      { url: "https://picsum.photos/seed/seed6/200/200", type: "image" },
-      { url: "https://picsum.photos/seed/seed7/200/200", type: "image" },
-      { url: "https://picsum.photos/seed/seed8/200/200", type: "image" },
-    ]);
-  }, []);
-
-  useEffect(() => {
-    if (
-      flatListRef.current &&
-      currentIndex !== undefined &&
-      images.length > 0 &&
-      !isGalleryVisible
-    ) {
-      flatListRef.current.scrollToIndex({
-        index: currentIndex,
-        animated: false,
-      });
+  const renderItem = ({ item }: { item: any }) => {
+    switch (item.type) {
+      case "images":
+        return <ListImage id={id} />;
+      case "info":
+        return <Info id={id} />;
+      case "rating":
+        return <Rating id={id} />;
+      case "shopInfo":
+        return <ShopInfo id={id} />;
+      case "topProduct":
+        return <TopProduct id={id} />;
+      case "detail":
+        return <Detail id={id} />;
+      case "maybeLike":
+        return <MaybeLike id={id} />;
+      default:
+        return null;
     }
-  }, [isGalleryVisible]);
+  };
+
+  const flashListData = useMemo(() => {
+    return [
+      {
+        type: "info",
+        height: 200,
+      },
+      {
+        type: "rating",
+        height: 200,
+      },
+      {
+        type: "shopInfo",
+        height: 200,
+      },
+      {
+        type: "topProduct",
+        height: 200,
+      },
+      {
+        type: "detail",
+        height: 200,
+      },
+      {
+        type: "maybeLike",
+        height: 200,
+      },
+    ];
+  }, [id]);
+
+  const onRefresh = async () => {
+    setIsRefreshing(true);
+    await queryClient.refetchQueries({
+      queryKey: ["productDetail", id],
+    });
+    setIsRefreshing(false);
+  };
 
   return (
-    <ScreenContainer
-      safeArea={false}
-      paddingHorizontal={0}
-      paddingVertical={0}
-      paddingBottom={0}
-      scrollable={false}
+    <ScreenWrapper
+      hasGradient={false}
+      hasSafeTop={false}
+      hasSafeBottom={false}
+      backgroundColor="#EEE"
     >
       <Header />
-      <ScrollView>
-        <View>
-          <FlatList
-            ref={flatListRef}
-            className="rounded-b-[32px] overflow-hidden"
-            data={images}
-            horizontal
-            viewabilityConfig={{
-              itemVisiblePercentThreshold: 100,
-            }}
-            onViewableItemsChanged={({ viewableItems }) => {
-              if (viewableItems.length > 0) {
-                setCurrentIndex(viewableItems[0].index ?? 0);
-              }
-            }}
-            keyExtractor={(item, index) => index.toString()}
-            getItemLayout={(data, index) => ({
-              length: screen.width,
-              offset: screen.width * index,
-              index,
-            })}
-            windowSize={3}
-            initialNumToRender={3}
-            maxToRenderPerBatch={3}
-            showsHorizontalScrollIndicator={false}
-            pagingEnabled
-            renderItem={({ item, index }) => (
-              <Pressable
-                key={index}
-                onPress={() => {
-                  setCurrentIndex(index);
-                  setIsGalleryVisible(true);
-                }}
-              >
-                <Image
-                  source={{
-                    uri: item.url,
-                  }}
-                  style={{
-                    width: screen.width,
-                    aspectRatio: 1,
-                  }}
-                  contentFit="cover"
-                />
-              </Pressable>
-            )}
-          />
-          <View className="absolute right-3 bottom-3 rounded-2xl bg-[#E3E3E3] px-3 py-1">
-            <Text>
-              {currentIndex + 1}/{images.length}
-            </Text>
-          </View>
-        </View>
-        <Info />
-        <Rating />
-        <ShopInfo />
-        <TopProduct />
-        <Detail />
-        <MaybeLike />
-      </ScrollView>
-      <View
-        className="w-full h-[60px] bg-[#159747] rounded-t-[32px] flex-row"
-        style={{
-          bottom: bottom,
-        }}
-      >
-        <TouchableOpacity className="flex-row gap-2 items-center py-[10px] px-[20px] border-r border-[#12853E]">
-          <Image
-            source={imagePaths.chatIcon}
-            className="size-6"
-            style={{
-              tintColor: "white",
-            }}
-          />
-          <Text className="text-sm font-medium leading-tight text-white">
-            Chat
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity className="flex-row gap-2 items-center py-[10px] px-[20px]">
-          <Image
-            source={imagePaths.icCart}
-            className="size-6"
-            style={{
-              tintColor: "white",
-            }}
-          />
-          <Text className="text-sm font-medium leading-tight text-white">
-            Thêm sản phẩm
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity className="flex-row gap-2 items-center py-[10px] px-[20px] bg-[#FCBA26] flex-1 justify-center rounded-tr-[32px]">
-          <Text className="text-sm font-bold leading-tight text-white">
-            Mua ngay
-          </Text>
-        </TouchableOpacity>
-      </View>
-      <Gallery
-        visible={isGalleryVisible}
-        images={images}
-        initialIndex={currentIndex}
-        onChangeIndex={(index) => setCurrentIndex(index)}
-        onClose={() => setIsGalleryVisible(false)}
+      <FlashList
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+        }
+        ListHeaderComponent={<ListImage id={id} />}
+        data={flashListData}
+        renderItem={renderItem}
+        estimatedItemSize={200}
+        getItemType={(item) => item.type}
+        keyExtractor={(item) => item.type}
+        ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
       />
-    </ScreenContainer>
+    </ScreenWrapper>
   );
 };
 

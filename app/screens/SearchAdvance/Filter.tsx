@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { useQuery } from "@tanstack/react-query";
 import { atom, useAtom, useStore } from "jotai";
 import { selectAtom } from "jotai/utils";
 import React, { useEffect, useState } from "react";
@@ -17,6 +18,8 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text } from "~/components/ui/text";
+import { categoryService } from "~/services/api/category.service";
+import { searchService } from "~/services/api/search.services";
 import { screen } from "~/utils";
 
 const atomInfo = atom({
@@ -187,6 +190,14 @@ const Filter = ({
   const { top, bottom } = useSafeAreaInsets();
 
   const store = useStore();
+
+  // const { data: categories } = useQuery({
+  //   queryKey: ["categories"],
+  //   queryFn: () => categoryService.getCategories({
+  //     skip: 0,
+  //     take: 10,
+  //   }),
+  // });
 
   const [categories, setCategories] = useState({
     fertilizer: true,

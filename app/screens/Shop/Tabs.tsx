@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { TouchableOpacity, View } from "react-native";
 import Animated, { ZoomIn, ZoomOut } from "react-native-reanimated";
 import { Text } from "~/components/ui/text";
@@ -6,6 +6,10 @@ import PagerView from "react-native-pager-view";
 import { useAtom } from "jotai";
 import { activeIndexAtom } from "./atom";
 import ShopScreen from "./ShopScreen";
+import ShopCategory from "./ShopCategory";
+import ShopVoucher from "./ShopVoucher";
+import ShopProduct from "./ShopProduct";
+import { deepEqual } from "fast-equals";
 
 const tabs = [
   {
@@ -34,6 +38,12 @@ const Tabs = () => {
   const handlePageChange = (index: number) => {
     setActiveIndex(index);
   };
+
+  useEffect(() => {
+    return () => {
+      setActiveIndex(0);
+    };
+  }, []);
 
   return (
     <View className="flex-col flex-1 -mt-16">
@@ -65,21 +75,35 @@ const Tabs = () => {
           handlePageChange(e.nativeEvent.position);
         }}
       >
-        <View className="flex-1 bg-red-500 rounded-t-2xl" key="1">
+        <View
+          className="overflow-hidden flex-1 bg-[#EEE] rounded-t-2xl"
+          key="1"
+        >
           <ShopScreen />
         </View>
-        <View className="flex-1 bg-blue-500 rounded-t-2xl" key="2">
-          <Text>Khuyến mãi</Text>
+        <View
+          className="overflow-hidden flex-1 bg-[#EEE] rounded-t-2xl"
+          key="2"
+        >
+          <ShopVoucher />
         </View>
-        <View className="flex-1 bg-green-500 rounded-t-2xl" key="3">
-          <Text>Sản phẩm</Text>
+        <View
+          className="overflow-hidden flex-1 bg-[#EEE] rounded-t-2xl"
+          key="3"
+        >
+          <ShopProduct />
         </View>
-        <View className="flex-1 bg-green-500 rounded-t-2xl" key="4">
-          <Text>Danh mục</Text>
+        <View
+          className="overflow-hidden flex-1 bg-[#EEE] rounded-t-2xl"
+          key="4"
+        >
+          <ShopCategory />
         </View>
       </PagerView>
     </View>
   );
 };
 
-export default Tabs;
+export default React.memo(Tabs, (prevProps, nextProps) => {
+  return deepEqual(prevProps, nextProps);
+});

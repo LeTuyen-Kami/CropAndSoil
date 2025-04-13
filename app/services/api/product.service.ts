@@ -1,51 +1,125 @@
 import { AxiosResponse } from "axios";
-import { axiosInstance } from "../base";
+import { typedAxios } from "../base";
+import { PaginatedResponse } from "~/types";
 
-export interface Product {
-  id: string;
+export interface Value {
+  id: number;
   name: string;
+  slug: string;
+}
+
+export interface Property {
+  name: string;
+  key: string;
+  values: Value[];
+}
+
+export interface Category {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+export interface Brand {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+export interface Option {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+export interface Attribute {
+  id: number;
+  name: string;
+  slug: string;
+  options: Option[];
+}
+
+export interface Attribute {
+  slug: string;
+  optionSlug: string;
+}
+
+export interface Variation {
+  id: number;
+  regularPrice: number;
+  salePrice?: any;
   description: string;
-  price: number;
-  images: string[];
-  categoryId: string;
+  totalSales: number;
+  weight: number;
+  length?: any;
+  width?: any;
+  height?: any;
+  thumbnail: string;
   stock: number;
-  rating: number;
-  numReviews: number;
-  createdAt: string;
-  updatedAt: string;
+  stockStatus: string;
+  averageRating: number;
+  reviewCount: number;
+  attributes: Attribute[];
+  name: string;
 }
 
-export interface ProductQuery {
-  page?: number;
-  limit?: number;
-  search?: string;
-  categoryId?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  sortBy?: string;
-  order?: "asc" | "desc";
+export interface IProduct {
+  id: number;
+  name: string;
+  slug: string;
+  sellerId: number;
+  description: string;
+  shortDescription: string;
+  totalSales: number;
+  sku: string;
+  regularPrice: number;
+  salePrice: number;
+  featured: boolean;
+  onSale: boolean;
+  stock?: any;
+  stockStatus: string;
+  averageRating: number;
+  reviewCount: number;
+  purchaseNote: string;
+  shopId: number;
+  weight?: any;
+  length?: any;
+  width?: any;
+  height?: any;
+  upsellIds: any[];
+  unavailableLocations: string[];
+  thumbnail: string;
+  video: string;
+  images: string[];
+  properties: Property[];
+  categories: Category[];
+  tags: any[];
+  brands: Brand[];
+  attributes: Attribute[];
+  variations: Variation[];
 }
 
-export interface ProductResponse {
-  products: Product[];
-  total: number;
-  page: number;
-  limit: number;
+export interface IProductResquest {
+  skip: number;
+  take: number;
+  search: string;
+  categoryId: number;
+  minPrice: number;
+  maxPrice: number;
+  location: string;
+  averageRatingFrom: number;
+  ids: number[];
 }
 
 class ProductService {
-  async getProducts(
-    query: ProductQuery = {}
-  ): Promise<AxiosResponse<ProductResponse>> {
-    return axiosInstance.get("/products", { params: query });
+  async searchProducts(params: Partial<IProductResquest>) {
+    return typedAxios.get<PaginatedResponse<IProduct>>("/products", {
+      params,
+    });
   }
 
-  async getProductById(id: string): Promise<AxiosResponse<Product>> {
-    return axiosInstance.get(`/products/${id}`);
-  }
-
-  async getRelatedProducts(id: string): Promise<AxiosResponse<Product[]>> {
-    return axiosInstance.get(`/products/${id}/related`);
+  async getProductDetail(id: string | number) {
+    return typedAxios.get<IProduct>(`/products/${id}`);
   }
 }
 

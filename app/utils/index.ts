@@ -2,6 +2,8 @@ import { Dimensions, Platform } from "react-native";
 import { mmkvStore } from "~/store/atomWithMMKV";
 import "react-native-get-random-values";
 import { v4 as uuidv4 } from "uuid";
+import { BREAKPOINTS } from "./contants";
+import dayjs from "dayjs";
 
 export const ENV = process.env;
 
@@ -54,6 +56,7 @@ export const chunkArray = <T>(array: T[], size: number) => {
     if (!acc[chunkIndex]) {
       acc[chunkIndex] = [];
     }
+
     acc[chunkIndex].push(item);
     return acc;
   }, [] as T[][]);
@@ -85,4 +88,88 @@ export const preHandleFlashListData = (data: any[]) => {
     typeName: "product",
     handleId: (item) => item?.[0]?.id,
   });
+};
+
+type Options = {
+  containerPadding: number; // tổng trái + phải
+  itemGap: number;
+};
+
+export const getItemWidth = ({ containerPadding, itemGap }: Options) => {
+  const screenWidth = Dimensions.get("window").width;
+
+  const sorted = Object.keys(BREAKPOINTS)
+    .map(Number)
+    .sort((a, b) => a - b);
+
+  let columns = 1;
+  for (let i = 0; i < sorted.length; i++) {
+    if (screenWidth >= sorted[i]) {
+      columns = BREAKPOINTS[sorted[i] as keyof typeof BREAKPOINTS];
+    }
+  }
+
+  const totalGap = itemGap * (columns - 1);
+  const availableWidth = screenWidth - containerPadding - totalGap;
+  const itemWidth = availableWidth / columns;
+
+  return {
+    itemWidth,
+    columns,
+  };
+};
+
+export const formatPrice = (price?: number) => {
+  if (!price) return "";
+
+  return price.toLocaleString("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  });
+};
+
+export const onlineStatus = (lastOnlineAt?: string) => {
+  if (!lastOnlineAt) return "";
+
+  if (!dayjs(lastOnlineAt)?.isValid()) return "";
+
+  const now = dayjs();
+  const lastOnline = dayjs(lastOnlineAt);
+  const diffInMinutes = now.diff(lastOnline, "minutes");
+  if (diffInMinutes < 5) {
+    return "Online vài phút trước";
+  }
+
+  if (diffInMinutes < 60) {
+    return `Online ${diffInMinutes} phút trước`;
+  }
+
+  if (diffInMinutes < 24 * 60) {
+    return `Online ${diffInMinutes / 60} giờ trước`;
+  }
+
+  return `Online ${diffInMinutes / (24 * 60)} ngày trước`;
+};
+
+export const getTimeAgo = (date?: string) => {
+  if (!date) return "";
+
+  if (!dayjs(date)?.isValid()) return "";
+
+  const now = dayjs();
+  const dateObj = dayjs(date);
+
+  const diffInYears = now.diff(dateObj, "years");
+  const diffInMonths = now.diff(dateObj, "months");
+  const diffInDays = now.diff(dateObj, "days");
+
+  if (diffInYears > 0) {
+    return `${diffInYears} năm`;
+  } else if (diffInMonths > 0) {
+    return `${diffInMonths} tháng`;
+  } else if (diffInDays > 0) {
+    return `${diffInDays} ngày`;
+  } else {
+    return "Hôm nay";
+  }
 };

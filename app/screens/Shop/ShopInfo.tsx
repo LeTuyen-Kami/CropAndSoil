@@ -8,14 +8,24 @@ import {
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import { imagePaths } from "~/assets/imagePath";
+import { RootStackRouteProp } from "~/navigation/types";
+import { useQuery } from "@tanstack/react-query";
+import { shopService } from "~/services/api/shop.service";
+import { onlineStatus } from "~/utils";
 
-const ShopInfo = () => {
+const ShopInfo = ({ id }: { id: string | number }) => {
+  const { data: shopDetail } = useQuery({
+    queryKey: ["shopDetail", id],
+    queryFn: () => shopService.getShopDetail(id),
+    enabled: !!id,
+    staleTime: 1000 * 60 * 5,
+  });
   return (
     <View className="w-full">
       {/* Shop intro section */}
       <View className="flex-row justify-between items-center px-2">
         <Image
-          source={{ uri: "https://picsum.photos/200" }}
+          source={{ uri: shopDetail?.shopLogoUrl }}
           className="size-[60px] rounded-full"
           contentFit="cover"
         />
@@ -23,7 +33,7 @@ const ShopInfo = () => {
         <View className="flex-1 ml-2.5 justify-center gap-0.5">
           <View className="flex-row gap-2 items-center">
             <Text className="text-base font-medium text-white">
-              Siêu thị làm vườn Greenhome
+              {shopDetail?.shopName}
             </Text>
             <Image
               source={imagePaths.icRightArrow}
@@ -34,19 +44,21 @@ const ShopInfo = () => {
           </View>
 
           <Text className="text-[10px] tracking-wide text-white">
-            Online 10 phút trước
+            {onlineStatus(shopDetail?.lastOnlineAt)}
           </Text>
 
           <View className="flex-row items-center gap-3 mt-0.5">
             <View className="flex-row items-center gap-1.5">
               <AntDesign name="star" size={14} color="#FCBA27" />
-              <Text className="text-xs tracking-wide text-white">4.9/5.0</Text>
+              <Text className="text-xs tracking-wide text-white">
+                {shopDetail?.shopRating}
+              </Text>
             </View>
 
             <View className="w-[1px] h-3.5 bg-white" />
 
             <Text className="text-xs tracking-wide text-white">
-              2,6k Người theo dõi
+              {shopDetail?.totalFollowers} Người theo dõi
             </Text>
           </View>
         </View>

@@ -152,6 +152,7 @@ const ProfileScreen = () => {
                   rating={4.5}
                   soldCount={100}
                   location="Hà Nội"
+                  id={"123"}
                 />
               ))}
             </View>
@@ -178,6 +179,7 @@ const ProfileScreen = () => {
                     rating={4.5}
                     soldCount={100}
                     location="Hà Nội"
+                    id={"123"}
                   />
                 ))}
               </View>

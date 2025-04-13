@@ -1,22 +1,32 @@
+import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import { useState } from "react";
-import { TouchableOpacity, View } from "react-native";
-import WebView from "react-native-webview";
+import { deepEqual } from "fast-equals";
+import React, { useState } from "react";
+import { Platform, TouchableOpacity, View } from "react-native";
+import WebView, { WebViewMessageEvent } from "react-native-webview";
 import { imagePaths } from "~/assets/imagePath";
 import { Text } from "~/components/ui/text";
+import { productService } from "~/services/api/product.service";
 
-const Detail = () => {
+const Detail = ({ id }: { id: string | number }) => {
   const [expanded, setExpanded] = useState(false);
+  const [webViewHeight, setWebViewHeight] = useState(0);
 
-  // Mock product details data (this could be fetched from an API in a real app)
-  const productDetails = {
-    mainComponent: "Abamectin",
-    usageTarget: "Đạo ôn cho cây lúa",
-    toxicGroup: "Cây ăn quả",
-    manufacturer: "Greenhome",
-    origin: "Long An",
-    description: "<h1>Mô tả sản phẩm</h1>",
+  const { data: productDetail } = useQuery({
+    queryKey: ["productDetail", id],
+    queryFn: () => productService.getProductDetail(id),
+    enabled: !!id,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const productDescription = productDetail?.properties;
+
+  const onWebViewMessage = (event: WebViewMessageEvent) => {
+    console.log(event.nativeEvent.data);
+    setWebViewHeight(Number(event.nativeEvent.data));
   };
+
+  console.log(webViewHeight);
 
   return (
     <View className="flex-1 mt-2 bg-white rounded-b-3xl">
@@ -45,51 +55,22 @@ const Detail = () => {
 
         <View className="flex flex-col gap-5 px-5 py-2 mt-2">
           {/* Product description items */}
-          <View className="flex-row justify-between">
-            <Text className="text-[#979797] text-sm w-36">
-              Thành phần chính
-            </Text>
-            <Text className="text-[#545454] text-sm flex-1">
-              {productDetails.mainComponent}
-            </Text>
-          </View>
-
-          <View className="flex-row justify-between">
-            <Text className="text-[#979797] text-sm w-36">
-              Đối tượng sử dụng
-            </Text>
-            <Text className="text-[#545454] text-sm flex-1">
-              {productDetails.usageTarget}
-            </Text>
-          </View>
-
-          <View className="flex-row justify-between">
-            <Text className="text-[#979797] text-sm w-36">Nhóm độc</Text>
-            <Text className="text-[#545454] text-sm flex-1">
-              {productDetails.toxicGroup}
-            </Text>
-          </View>
-
-          <View className="flex-row justify-between">
-            <Text className="text-[#979797] text-sm w-36">Nhà sản xuất</Text>
-            <Text className="text-[#545454] text-sm flex-1">
-              {productDetails.manufacturer}
-            </Text>
-          </View>
-
-          <View className="flex-row justify-between">
-            <Text className="text-[#979797] text-sm w-36">Xuất xứ</Text>
-            <Text className="text-[#545454] text-sm flex-1">
-              {productDetails.origin}
-            </Text>
-          </View>
+          {productDescription?.map((item) => (
+            <View className="flex-row justify-between" key={item?.key}>
+              <Text className="text-[#979797] text-sm w-36">{item?.name}</Text>
+              <Text className="text-[#545454] text-sm flex-1">
+                {item?.values?.map((value) => value?.name).join(", ")}
+              </Text>
+            </View>
+          ))}
         </View>
 
         {expanded && (
           <View className="px-5">
             <WebView
-              source={{ html: productDetails.description }}
-              style={{ width: "100%", height: 100 }}
+              source={{ html: productDetail?.description || "" }}
+              style={{ width: "100%", height: 500 }}
+              onMessage={onWebViewMessage}
             />
           </View>
         )}
@@ -117,4 +98,6 @@ const Detail = () => {
   );
 };
 
-export default Detail;
+export default React.memo(Detail, (prevProps, nextProps) => {
+  return deepEqual(prevProps, nextProps);
+});

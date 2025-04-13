@@ -2,13 +2,13 @@ import { StyleSheet, Text, TouchableOpacity } from "react-native";
 
 interface ProductTypeChipProps {
   label: string;
-  isSelected: boolean;
-  onPress: () => void;
+  isSelected?: boolean;
+  onPress?: () => void;
 }
 
 const ProductTypeChip = ({
   label,
-  isSelected,
+  isSelected = false,
   onPress,
 }: ProductTypeChipProps) => {
   return (

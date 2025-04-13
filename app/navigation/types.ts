@@ -23,7 +23,7 @@ export type RootStackParamList = {
     searchText: string;
   };
   DetailProduct: {
-    id: string;
+    id: string | number;
   };
   test: undefined;
   LikedProduct: undefined;
@@ -45,7 +45,9 @@ export type RootStackParamList = {
   TalkWithCropee: undefined;
   FAQs: undefined;
   FAQsDetail: undefined;
-  Shop: undefined;
+  Shop: {
+    id: string | number;
+  };
 };
 
 // Create a type for the navigation prop for stack screens

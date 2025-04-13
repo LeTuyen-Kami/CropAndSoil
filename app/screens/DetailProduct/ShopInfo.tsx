@@ -6,16 +6,61 @@ import { Text } from "~/components/ui/text";
 import { cssInterop } from "nativewind";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
+import { deepEqual } from "fast-equals";
+import React from "react";
+import { productService } from "~/services/api/product.service";
+import { useQuery } from "@tanstack/react-query";
+import { shopService } from "~/services/api/shop.service";
+import dayjs from "dayjs";
+import { getTimeAgo, onlineStatus } from "~/utils";
 
 cssInterop(Image, {
   className: "style",
 });
 
-const ShopInfo = () => {
+const IsOfficialBadge = () => {
+  return (
+    <LinearGradient
+      colors={["#F6C33E", "#159747"]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 0 }}
+      className="absolute bottom-0 left-1 right-1 rounded-lg p-0.5 border border-white"
+    >
+      <View className="flex-row items-center justify-center gap-[2px]">
+        <Image
+          source={imagePaths.officialBadgeIcon}
+          className="size-[6px]"
+          contentFit="contain"
+        />
+        <Image
+          source={imagePaths.icOfficial}
+          className="h-[4px] w-[27px]"
+          contentFit="contain"
+        />
+      </View>
+    </LinearGradient>
+  );
+};
+
+const ShopInfo = ({ id }: { id: string | number }) => {
   const navigation = useNavigation();
 
+  const { data: productDetail } = useQuery({
+    queryKey: ["productDetail", id],
+    queryFn: () => productService.getProductDetail(id),
+    enabled: !!id,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const { data: shopDetail } = useQuery({
+    queryKey: ["shopDetail", productDetail?.shopId],
+    queryFn: () => shopService.getShopDetail(productDetail?.shopId || ""),
+    enabled: !!productDetail?.shopId,
+    staleTime: 1000 * 60 * 5,
+  });
+
   const handleOpenShop = () => {
-    navigation.navigate("Shop");
+    navigation.navigate("Shop", { id: shopDetail?.id || "" });
   };
 
   return (
@@ -25,39 +70,23 @@ const ShopInfo = () => {
           <View className="flex-row gap-2">
             <View>
               <Image
-                source={imagePaths.shopImage}
+                source={{ uri: shopDetail?.shopLogoUrl }}
                 className="size-[60px] rounded-full"
               />
-              <LinearGradient
-                colors={["#F6C33E", "#159747"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                className="absolute bottom-0 left-1 right-1 rounded-lg p-0.5 border border-white"
-              >
-                <View className="flex-row items-center justify-center gap-[2px]">
-                  <Image
-                    source={imagePaths.officialBadgeIcon}
-                    className="size-[6px]"
-                    contentFit="contain"
-                  />
-                  <Image
-                    source={imagePaths.icOfficial}
-                    className="h-[4px] w-[27px]"
-                    contentFit="contain"
-                  />
-                </View>
-              </LinearGradient>
+              {shopDetail?.isOfficial && <IsOfficialBadge />}
             </View>
             <View className="gap-1">
               <Text className="text-[#383B45] text-sm font-medium">
-                Siêu thị Làm Vườn Greenhome
+                {shopDetail?.shopName}
               </Text>
               <Text className="text-[#AEAEAE] text-xs">
-                Online vài phút trước
+                {onlineStatus(shopDetail?.lastOnlineAt)}
               </Text>
               <View className="flex-row gap-1 items-center">
                 <Image source={imagePaths.icLocation} className="w-3 h-3" />
-                <Text className="text-[#383B45] text-xs">Đà Nẵng</Text>
+                <Text className="text-[#383B45] text-xs">
+                  {shopDetail?.shopWarehouseLocation?.province?.name}
+                </Text>
               </View>
             </View>
           </View>
@@ -75,19 +104,27 @@ const ShopInfo = () => {
       <View className="items-center mt-3 px-2.5">
         <View className="bg-[#F5F5F5] rounded-xl p-2 flex-row items-center">
           <View className="items-center flex-1 border-r border-[#E3E3E3]">
-            <Text className="text-[#383B45] text-xs font-medium">7 năm</Text>
+            <Text className="text-[#383B45] text-xs font-medium">
+              {getTimeAgo(shopDetail?.createdAt)}
+            </Text>
             <Text className="text-[#676767] text-xs">Tham gia</Text>
           </View>
           <View className="items-center flex-1 border-r border-[#E3E3E3]">
-            <Text className="text-[#383B45] text-xs font-medium">398</Text>
+            <Text className="text-[#383B45] text-xs font-medium">
+              {(shopDetail?.totalProducts || 0).toLocaleString()}
+            </Text>
             <Text className="text-[#676767] text-xs">Sản phẩm</Text>
           </View>
           <View className="items-center flex-1 border-r border-[#E3E3E3]">
-            <Text className="text-[#383B45] text-xs font-medium">100%</Text>
+            <Text className="text-[#383B45] text-xs font-medium">
+              {shopDetail?.replyRate}
+            </Text>
             <Text className="text-[#676767] text-xs">Tỉ lệ phản hồi</Text>
           </View>
           <View className="flex-1 items-center">
-            <Text className="text-[#383B45] text-xs font-medium">Vài giờ</Text>
+            <Text className="text-[#383B45] text-xs font-medium">
+              {shopDetail?.replyIn}
+            </Text>
             <Text className="text-[#676767] text-xs">Giờ phản hồi</Text>
           </View>
         </View>
@@ -108,4 +145,6 @@ const ShopInfo = () => {
   );
 };
 
-export default ShopInfo;
+export default React.memo(ShopInfo, (prevProps, nextProps) => {
+  return deepEqual(prevProps, nextProps);
+});
