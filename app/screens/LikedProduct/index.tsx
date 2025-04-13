@@ -11,42 +11,36 @@ import { FlashList } from "@shopify/flash-list";
 import ProductItem from "~/components/common/ProductItem";
 import { screen } from "~/utils";
 import { cn } from "~/lib/utils";
+import ScreenWrapper from "~/components/common/ScreenWrapper";
 const LikedProductScreen = () => {
-  const { top } = useSafeAreaInsets();
+  const { top, bottom } = useSafeAreaInsets();
 
   return (
-    <ScreenContainer
-      safeArea={false}
-      paddingHorizontal={0}
-      paddingVertical={0}
-      paddingBottom={0}
-    >
-      <GradientBackground
-        gradientStyle={{ paddingTop: top, paddingBottom: 24 }}
-      >
-        <Header
-          title="Lượt thích"
-          className="bg-transparent border-0"
-          textColor="white"
-          leftClassName="w-10"
-          rightComponent={
-            <TouchableOpacity>
-              <View className="relative items-end w-10">
-                <Image
-                  source={imagePaths.icMessages}
-                  style={{ width: 24, height: 24 }}
-                />
-                <Badge count={9} className="absolute -top-[10] -right-[10]" />
-              </View>
-            </TouchableOpacity>
-          }
-        />
-      </GradientBackground>
-      <View className="flex-1  pt-5 pb-3 bg-[#EEE] rounded-t-[28px] -mt-6">
+    <ScreenWrapper hasGradient={true} hasSafeBottom={false}>
+      <Header
+        title="Lượt thích"
+        className="bg-transparent border-0"
+        textColor="white"
+        leftClassName="w-10"
+        hasSafeTop={false}
+        rightComponent={
+          <TouchableOpacity>
+            <View className="relative items-end w-10">
+              <Image
+                source={imagePaths.icMessages}
+                style={{ width: 24, height: 24 }}
+              />
+              <Badge count={9} className="absolute -top-[10] -right-[10]" />
+            </View>
+          </TouchableOpacity>
+        }
+      />
+      <View className="flex-1 bg-[#EEE] rounded-t-2xl overflow-hidden">
         <FlashList
           data={[...Array(10)]}
           ItemSeparatorComponent={() => <View className="h-2" />}
           numColumns={2}
+          contentContainerClassName="pt-2"
           estimatedItemSize={200}
           renderItem={({ item, index }) => (
             <ProductItem
@@ -55,6 +49,7 @@ const LikedProductScreen = () => {
               name={
                 "Voluptate irure in laboris sit sunt pariatur. Sit  Voluptate irure in 123 "
               }
+              id={index}
               price={100000}
               originalPrice={150000}
               discount={20}
@@ -78,14 +73,18 @@ const LikedProductScreen = () => {
             />
           )}
           ListFooterComponent={() => (
-            <View className="rounded-[28px] bg-white">
+            <View
+              className="rounded-[28px] bg-white"
+              style={{ marginBottom: bottom }}
+            >
               <Text className="px-2 py-3 text-sm font-medium leading-tight">
                 Có thể bạn cũng thích
               </Text>
-              <View className="flex-row flex-wrap gap-2 px-2 mt-2">
+              <View className="flex-row flex-wrap gap-2 px-2 pb-2 mt-2">
                 {Array.from({ length: 10 }).map((_, index) => (
                   <ProductItem
                     key={index}
+                    id={index}
                     width={(screen.width - 24) / 2}
                     name={
                       "Voluptate irure in laboris sit sunt pariatur. Sit  Voluptate irure in 123 "
@@ -120,7 +119,7 @@ const LikedProductScreen = () => {
           )}
         />
       </View>
-    </ScreenContainer>
+    </ScreenWrapper>
   );
 };
 

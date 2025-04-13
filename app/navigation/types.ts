@@ -48,6 +48,9 @@ export type RootStackParamList = {
   Shop: {
     id: string | number;
   };
+  DetailNotification: {
+    id: string | number;
+  };
 };
 
 // Create a type for the navigation prop for stack screens

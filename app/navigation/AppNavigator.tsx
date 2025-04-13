@@ -33,6 +33,7 @@ import FAQs from "~/screens/FAQs";
 import HelpCenterDetail from "~/screens/HelpCenterDetail";
 import TalkWithCropee from "~/screens/TalkWithCropee";
 import FAQsDetail from "~/screens/FAQsDetail";
+import DetailNotification from "~/screens/DetailNotification";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -107,6 +108,10 @@ export const AppNavigator = () => {
         <Stack.Screen name="FAQs" component={FAQs} />
         <Stack.Screen name="FAQsDetail" component={FAQsDetail} />
         <Stack.Screen name="Shop" component={Shop} />
+        <Stack.Screen
+          name="DetailNotification"
+          component={DetailNotification}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

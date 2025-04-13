@@ -128,6 +128,8 @@ import voucherBackground from "~/assets/images/voucher_background.png";
 import icFire1 from "~/assets/icons/fire1_icon.png";
 import icLightning from "~/assets/icons/lighning_icon.png";
 import lightningBadge from "~/assets/images/lightning_badge.png";
+import statusDelivery from "~/assets/images/status_delivery.png";
+import statusPromotion from "~/assets/images/status_promotion.png";
 
 export const imagePaths = {
   //images
@@ -259,4 +261,6 @@ export const imagePaths = {
   icFire1: icFire1,
   icLightning: icLightning,
   lightningBadge: lightningBadge,
+  statusDelivery: statusDelivery,
+  statusPromotion: statusPromotion,
 };
