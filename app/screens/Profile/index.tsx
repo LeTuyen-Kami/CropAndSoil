@@ -20,6 +20,7 @@ import UtilityItem from "./UlitityItem";
 import { authAtom } from "~/store/atoms";
 import { useQueryClient } from "@tanstack/react-query";
 import { RootStackScreenProps } from "~/navigation/types";
+import SupportSection from "./SupportSecction";
 // Main profile component
 const ProfileScreen = () => {
   const { top } = useSafeAreaInsets();
@@ -207,18 +208,7 @@ const ProfileScreen = () => {
         </View>
 
         {/* Support section */}
-        <View className="mb-6 bg-white rounded-xl">
-          <SectionTitle title="Hỗ trợ" />
-          <SupportItem
-            icon={imagePaths.icQuestion}
-            title="Trung tâm trợ giúp"
-          />
-          <View className="mx-2 h-px bg-gray-100" />
-          <SupportItem
-            icon={imagePaths.icHeadphone}
-            title="Trò chuyện với Cropee"
-          />
-        </View>
+        <SupportSection />
       </View>
       <View className="h-20 bg-[#EEEEEE]" />
     </ScreenContainer>

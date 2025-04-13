@@ -23,6 +23,7 @@ import { PaginationRequests } from "~/types";
 import { getErrorMessage, screen } from "~/utils";
 import { ADDRESS_TYPE_OPTIONS } from "~/utils/contants";
 import AddressItem from "./AddressItem";
+import Empty from "~/components/common/Empty";
 
 const Address = () => {
   const { top, bottom } = useSafeAreaInsets();
@@ -124,19 +125,7 @@ const Address = () => {
           ItemSeparatorComponent={() => <View className="h-2.5" />}
           contentContainerStyle={{ paddingBottom: 120 }}
           showsVerticalScrollIndicator={false}
-          ListEmptyComponent={() => (
-            <View
-              className="flex-1 justify-center items-center"
-              style={{
-                height: screen.height / 2,
-              }}
-            >
-              <AntDesign name="folderopen" size={40} color="#6B7280" />
-              <Text className="text-center text-gray-500">
-                Không có địa chỉ nào
-              </Text>
-            </View>
-          )}
+          ListEmptyComponent={() => <Empty title="Không có địa chỉ nào" />}
           onEndReached={fetchNextPage}
           onEndReachedThreshold={0.5}
           ListFooterComponent={() =>

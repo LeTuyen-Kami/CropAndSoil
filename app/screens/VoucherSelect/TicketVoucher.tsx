@@ -105,6 +105,7 @@ const TicketVoucher = ({
               style={{
                 transform: [{ rotate: "60deg" }],
                 borderColor: borderColor,
+                overflow: "hidden",
               }}
             ></View>
             <View
@@ -113,19 +114,27 @@ const TicketVoucher = ({
                 transform: [{ rotate: "60deg" }],
                 borderColor: borderColor,
                 backgroundColor: shadowColor,
+                overflow: "hidden",
               }}
             ></View>
             <View
+              className="absolute h-[70%] top-[15%]"
               style={{
-                borderStyle: "dashed",
-                borderWidth: 1,
-                borderColor: borderColor,
-                width: 1,
-                height: "70%",
                 marginLeft: 9,
-                marginVertical: "auto",
               }}
-            ></View>
+            >
+              <Svg height="100%" width="2">
+                <Line
+                  x1="1"
+                  y1="0"
+                  x2="1"
+                  y2="100%"
+                  stroke={borderColor}
+                  strokeWidth="1"
+                  strokeDasharray="5,5"
+                />
+              </Svg>
+            </View>
           </View>
           <View
             className="flex-1 justify-center pr-4 pl-1 h-full rounded-r-xl border-t border-r border-b"

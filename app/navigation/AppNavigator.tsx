@@ -26,6 +26,13 @@ import VoucherSelectScreen from "~/screens/VoucherSelect";
 import CustomTabBar from "./CustomTabbar";
 import { RootStackParamList, TabParamList } from "./types";
 import MyRating from "~/screens/MyRating";
+import EditReview from "~/screens/EditReview";
+import HelpCenter from "~/screens/HelpCenter";
+import Shop from "~/screens/Shop";
+import FAQs from "~/screens/FAQs";
+import HelpCenterDetail from "~/screens/HelpCenterDetail";
+import TalkWithCropee from "~/screens/TalkWithCropee";
+import FAQsDetail from "~/screens/FAQsDetail";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -93,6 +100,13 @@ export const AppNavigator = () => {
           component={BusinessVoucherScreen}
         />
         <Stack.Screen name="MyRating" component={MyRating} />
+        <Stack.Screen name="EditReview" component={EditReview} />
+        <Stack.Screen name="HelpCenter" component={HelpCenter} />
+        <Stack.Screen name="HelpCenterDetail" component={HelpCenterDetail} />
+        <Stack.Screen name="TalkWithCropee" component={TalkWithCropee} />
+        <Stack.Screen name="FAQs" component={FAQs} />
+        <Stack.Screen name="FAQsDetail" component={FAQsDetail} />
+        <Stack.Screen name="Shop" component={Shop} />
       </Stack.Navigator>
     </NavigationContainer>
   );

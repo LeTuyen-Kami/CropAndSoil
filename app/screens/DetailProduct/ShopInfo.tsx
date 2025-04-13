@@ -4,12 +4,20 @@ import { imagePaths } from "~/assets/imagePath";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import { cssInterop } from "nativewind";
+import { LinearGradient } from "expo-linear-gradient";
+import { useNavigation } from "@react-navigation/native";
 
 cssInterop(Image, {
   className: "style",
 });
 
 const ShopInfo = () => {
+  const navigation = useNavigation();
+
+  const handleOpenShop = () => {
+    navigation.navigate("Shop");
+  };
+
   return (
     <View className="py-5 mt-4 bg-white rounded-t-3xl border-b-2 border-gray-100">
       <View className="px-4">
@@ -18,19 +26,27 @@ const ShopInfo = () => {
             <View>
               <Image
                 source={imagePaths.shopImage}
-                className="w-12 h-12 rounded-full"
+                className="size-[60px] rounded-full"
               />
-              <View className="absolute bottom-0 right-0 bg-gradient-to-r from-yellow-400 to-green-500 rounded-lg p-0.5 border border-white">
-                <View className="flex-row items-center justify-center gap-1.5">
+              <LinearGradient
+                colors={["#F6C33E", "#159747"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                className="absolute bottom-0 left-1 right-1 rounded-lg p-0.5 border border-white"
+              >
+                <View className="flex-row items-center justify-center gap-[2px]">
                   <Image
                     source={imagePaths.officialBadgeIcon}
-                    className="w-3 h-3"
+                    className="size-[6px]"
+                    contentFit="contain"
                   />
-                  <Text className="text-white text-[7px] font-medium">
-                    OFFICIAL
-                  </Text>
+                  <Image
+                    source={imagePaths.icOfficial}
+                    className="h-[4px] w-[27px]"
+                    contentFit="contain"
+                  />
                 </View>
-              </View>
+              </LinearGradient>
             </View>
             <View className="gap-1">
               <Text className="text-[#383B45] text-sm font-medium">
@@ -78,7 +94,10 @@ const ShopInfo = () => {
       </View>
 
       <View className="flex-row justify-center gap-1.5 mt-3 mx-4">
-        <TouchableOpacity className="bg-[#159747] rounded-full px-4 py-2.5 items-center flex-1">
+        <TouchableOpacity
+          className="bg-[#159747] rounded-full px-4 py-2.5 items-center flex-1"
+          onPress={handleOpenShop}
+        >
           <Text className="text-sm font-medium text-white">Xem shop</Text>
         </TouchableOpacity>
         <TouchableOpacity className="bg-[#DEF1E5] border border-[#BEE2CC] rounded-full px-4 py-2.5 items-center flex-1">

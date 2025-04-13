@@ -9,6 +9,7 @@ import { Input } from "~/components/ui/input";
 import { useMemo, useState } from "react";
 import { FlashList } from "@shopify/flash-list";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import ScreenWrapper from "~/components/common/ScreenWrapper";
 const mockData = [
   {
     type: "shippingHeader",
@@ -159,30 +160,15 @@ const VoucherSelectScreen = () => {
   }, []);
 
   return (
-    <ScreenContainer
-      paddingBottom={0}
-      paddingHorizontal={0}
-      paddingVertical={0}
-      hasBottomTabs={false}
-      safeArea={false}
-      scrollable={false}
-      header={
-        <GradientBackground
-          gradientStyle={{
-            paddingTop: top,
-            paddingBottom: 30,
-          }}
-        >
-          <Header
-            title="Chọn Cropee Voucher"
-            titleClassName="font-bold"
-            className="bg-transparent border-0"
-            textColor="white"
-          />
-        </GradientBackground>
-      }
-    >
-      <View className="flex-1 -mt-5 bg-[#EEE] rounded-t-3xl overflow-hidden">
+    <ScreenWrapper hasGradient={true} hasSafeBottom={false}>
+      <Header
+        title="Chọn Cropee Voucher"
+        titleClassName="font-bold"
+        className="bg-transparent border-0"
+        textColor="white"
+        hasSafeTop={false}
+      />
+      <View className="flex-1 bg-[#EEE] rounded-t-3xl overflow-hidden">
         <Input
           placeholder="Nhập mã Cropee Voucher"
           className="mt-5 bg-white mb-2.5 mx-2"
@@ -197,11 +183,10 @@ const VoucherSelectScreen = () => {
             renderItem={renderItem}
             getItemType={(item) => item.type}
             estimatedItemSize={100}
-            // stickyHeaderIndices={stickyHeaderIndices}
           />
         </View>
       </View>
-    </ScreenContainer>
+    </ScreenWrapper>
   );
 };
 

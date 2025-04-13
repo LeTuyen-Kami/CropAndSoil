@@ -107,7 +107,22 @@ import icDocument from "~/assets/icons/ic_document.svg";
 import icPhone1 from "~/assets/icons/ic_phone.svg";
 import icLetter from "~/assets/icons/ic_letter.svg";
 import icUser1 from "~/assets/icons/ic_user.svg";
+import icEdit from "~/assets/icons/ic_edit.svg";
 
+// Help center icons
+import phoneIcon from "~/assets/icons/phone_icon.svg";
+import chatIcon2 from "~/assets/icons/chat_icon.svg";
+import searchIconSvg from "~/assets/icons/search_icon.svg";
+
+import icLike from "~/assets/icons/like_icon.png";
+import icDislike from "~/assets/icons/dislike_icon.png";
+import icOfficial from "~/assets/icons/official_icon.png";
+import icThreeDot from "~/assets/icons/threedot_icon.png";
+
+import shopBackground from "~/assets/images/shop_cover_photo.png";
+import icPhone2 from "~/assets/icons/phone_icon.svg";
+import icPhone3 from "~/assets/icons/phone_icon.png";
+import icUserPlus from "~/assets/icons/user_plus_icon.png";
 export const imagePaths = {
   //images
   logo: logo,
@@ -218,4 +233,19 @@ export const imagePaths = {
   icPhone1: icPhone1,
   icLetter: icLetter,
   icUser1: icUser1,
+  icEdit: icEdit,
+
+  // Help center icons
+  phoneIcon: phoneIcon,
+  chatIcon2: chatIcon2,
+  searchIconSvg: searchIconSvg,
+  icLike: icLike,
+  icDislike: icDislike,
+  icOfficial: icOfficial,
+  icThreeDot: icThreeDot,
+
+  shopBackground: shopBackground,
+  icPhone2: icPhone2,
+  icPhone3: icPhone3,
+  icUserPlus: icUserPlus,
 };

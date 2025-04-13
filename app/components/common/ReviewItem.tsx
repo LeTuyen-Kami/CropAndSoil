@@ -1,4 +1,4 @@
-import { Image as ExpoImage } from "expo-image";
+import { Image as ExpoImage, Image } from "expo-image";
 import React, { memo, useState } from "react";
 import {
   FlatList,
@@ -16,11 +16,19 @@ import Animated, {
 import { imagePaths } from "~/assets/imagePath";
 import Gallery from "~/components/common/Galery";
 import useDisclosure from "~/hooks/useDisclosure";
+import { AntDesign } from "@expo/vector-icons";
+
 type ReviewMedia = {
   type: "image" | "video";
   uri: string;
   duration?: string;
   thumbnail?: string;
+};
+
+type ReviewProduct = {
+  id: string;
+  name: string;
+  image: string;
 };
 
 export type ReviewItemProps = {
@@ -36,6 +44,10 @@ export type ReviewItemProps = {
   likes: number;
   media?: ReviewMedia[];
   sellerResponse?: string;
+  product?: ReviewProduct;
+  isLikeButtonInBottom?: boolean;
+  onPressEdit?: () => void;
+  onPressLike?: () => void;
 };
 
 const ReviewItem: React.FC<ReviewItemProps> = ({
@@ -48,6 +60,10 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
   likes,
   media,
   sellerResponse,
+  product,
+  isLikeButtonInBottom = false,
+  onPressEdit,
+  onPressLike,
 }) => {
   const { isOpen, onOpen, onClose, openValue } = useDisclosure({
     initialOpenValue: 0,
@@ -60,11 +76,12 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
     const stars = [];
     for (let i = 0; i < 5; i++) {
       stars.push(
-        <ExpoImage
+        <AntDesign
           key={i}
-          source={imagePaths.starFilled}
-          style={{ width: 12, height: 12, marginRight: 2 }}
-          contentFit="contain"
+          name={i < rating ? "star" : "staro"}
+          size={12}
+          color="#FCBA27"
+          style={{ marginRight: 2 }}
         />
       );
     }
@@ -103,7 +120,15 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
           <View className="flex-row items-center mt-1">{renderStars()}</View>
 
           {/* Quality */}
-          <Text className="text-[#575964] text-sm mt-1">{quality}</Text>
+          <Text className="mt-1 text-sm text-[#AEAEAE]">
+            Chất lượng sản phẩm:{" "}
+            <Text className="text-sm text-[#575964]">{quality}</Text>
+          </Text>
+
+          {/* comment */}
+          {comment && (
+            <Text className="mt-1 text-sm text-[#676767]">{comment}</Text>
+          )}
 
           {/* Date and Product Variant */}
           <View className="flex-row items-center mt-1">
@@ -144,22 +169,28 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
           )}
 
           {/* Like Button */}
-          <View className="flex-row items-center mt-1">
-            <TouchableOpacity className="flex-row items-center">
-              <ExpoImage
-                source={imagePaths.icHeart}
-                style={{ width: 16, height: 16, tintColor: "#AEAEAE" }}
-                contentFit="contain"
-              />
-              <Text className="text-[#AEAEAE] text-sm ml-1">{likes}</Text>
-            </TouchableOpacity>
-          </View>
+          {!isLikeButtonInBottom && (
+            <View className="flex-row items-center mt-1.5">
+              <TouchableOpacity
+                className="flex-row items-center"
+                onPress={onPressLike}
+              >
+                <AntDesign
+                  name="like1"
+                  size={20}
+                  color="#AEAEAE"
+                  style={{ marginRight: 4 }}
+                />
+                <Text className="text-[#AEAEAE] text-sm">{likes}</Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
           {/* Seller Response */}
           {sellerResponse && (
             <Pressable onPress={handleSallerCollapsed}>
               <Animated.View
-                className="bg-[#FFF9ED] p-3 rounded-xl mt-2 overflow-hidden"
+                className="bg-[#FFF9ED] p-3 rounded-xl mt-1.5 overflow-hidden"
                 layout={LinearTransition}
               >
                 <View className="flex-row justify-between items-center">
@@ -194,6 +225,58 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
                 </View>
               </Animated.View>
             </Pressable>
+          )}
+          {/* product */}
+
+          {product && (
+            <View className="flex-row my-2 rounded-lg border border-[#F0F0F0]">
+              <View className="p-2.5 bg-white rounded-l-lg">
+                <Image
+                  source={"https://picsum.photos/200/300"}
+                  style={{ width: 40, height: 40, borderRadius: 5 }}
+                  contentFit="cover"
+                />
+              </View>
+              <View className="flex-1 justify-center items-center bg-[#F0F0F0] pl-1.5">
+                <Text
+                  numberOfLines={2}
+                  className="text-[#383B45] text-xs leading-tight"
+                >
+                  lorem ipsum dolor sit amet consectetur adipisicing elit.
+                  Quisquam, quos. Lorem ipsum dolor sit amet consectetur
+                </Text>
+              </View>
+            </View>
+          )}
+
+          {isLikeButtonInBottom && (
+            <View className="flex-row items-center justify-between mt-1.5">
+              <TouchableOpacity
+                className="flex-row items-center"
+                hitSlop={20}
+                onPress={onPressLike}
+              >
+                <AntDesign
+                  name="like1"
+                  size={20}
+                  color="#AEAEAE"
+                  style={{ marginRight: 4 }}
+                />
+                <Text className="text-[#AEAEAE] text-sm">{likes}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="flex-row gap-2 items-center"
+                hitSlop={20}
+                onPress={onPressEdit}
+              >
+                <Text className="text-sm text-primary">Sửa</Text>
+                <Image
+                  source={imagePaths.icEdit}
+                  style={{ width: 16, height: 16 }}
+                  contentFit="contain"
+                />
+              </TouchableOpacity>
+            </View>
           )}
         </View>
       </View>

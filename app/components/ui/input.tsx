@@ -17,6 +17,7 @@ interface InputProps extends TextInputProps {
   textInputClassName?: string;
   clearable?: boolean;
   focusedStyle?: string;
+  placeholderTextColor?: string;
 }
 
 const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
@@ -30,6 +31,7 @@ const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
       textInputClassName,
       clearable,
       focusedStyle,
+      placeholderTextColor = "#AEAEAE",
       ...props
     },
     ref
@@ -56,7 +58,7 @@ const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
               "flex-1 py-4 text-base leading-5",
               textInputClassName
             )}
-            placeholderTextColor="#AEAEAE"
+            placeholderTextColor={placeholderTextColor}
             {...props}
           />
           {rightIcon && <View className="ml-2">{rightIcon}</View>}
