@@ -3,10 +3,31 @@ import { imagePaths } from "~/assets/imagePath";
 import { LinearGradient } from "expo-linear-gradient";
 import { TouchableOpacity, View } from "react-native";
 import { Text } from "~/components/ui/text";
-import { getItemWidth } from "~/utils";
+import { checkCanRender, getItemWidth } from "~/utils";
 import Timer from "./Timer";
 import { AntDesign } from "@expo/vector-icons";
-const ProductItem = () => {
+import { IProduct, productService } from "~/services/api/product.service";
+import { useQuery } from "@tanstack/react-query";
+import { formatCurrency } from "~/utils/format";
+import { useMemo } from "react";
+
+interface IProductItem {
+  image: string;
+  id: number;
+  name: string;
+  price: string;
+  oldPrice: string;
+  discount: number;
+}
+
+const ProductItem = ({
+  image,
+  id,
+  name,
+  price,
+  oldPrice,
+  discount,
+}: IProductItem) => {
   const { itemWidth } = getItemWidth({
     containerPadding: 16,
     itemGap: 8,
@@ -15,47 +36,51 @@ const ProductItem = () => {
   return (
     <View
       style={{ width: itemWidth }}
-      className="overflow-hidden bg-white rounded-2xl shadow-sm"
+      className="overflow-hidden flex-col bg-white rounded-2xl shadow-sm"
     >
       <View className="relative">
         {/* Image placeholder */}
         <View className="w-full aspect-square bg-neutral-100">
           <Image
-            source={"https://picsum.photos/200/300"}
+            source={image}
             style={{ width: "100%", aspectRatio: 1 }}
             contentFit="contain"
           />
         </View>
 
         {/* Discount tag */}
-        <View className="absolute left-0 top-5 flex-row items-center w-[42px] h-5">
-          <Image
-            source={imagePaths.lightningBadge}
-            className="absolute top-0 right-0 bottom-0 left-0"
-            contentFit="cover"
-          />
-          <Text className="text-[10px] font-bold text-white ml-0.5">-20%</Text>
-        </View>
+        {discount > 0 && (
+          <View className="absolute left-0 top-5 flex-row items-center w-[42px] h-5">
+            <Image
+              source={imagePaths.lightningBadge}
+              className="absolute top-0 right-0 bottom-0 left-0"
+              contentFit="cover"
+            />
+            <Text className="text-[10px] font-bold text-white ml-0.5">
+              {discount}%
+            </Text>
+          </View>
+        )}
       </View>
 
-      <View className="p-2">
+      <View className="flex-1 p-2">
         {/* Product name */}
         <Text
           className="text-xs tracking-tight text-[#383B45]"
           numberOfLines={2}
         >
-          Thuốc trừ bệnh Sumi Eight 12.5WP 100gr
+          {name}
         </Text>
 
         {/* Prices */}
         <View className="flex-row gap-2 items-center mb-2">
-          <Text className="text-sm font-bold text-[#C42424]">160.000đ</Text>
+          <Text className="text-sm font-bold text-[#C42424]">{price}</Text>
           <Text className="text-sm line-through text-neutral-400">
-            220.000đ
+            {oldPrice}
           </Text>
         </View>
 
-        <View className="">
+        <View className="mt-auto">
           <View className="w-full h-[14px] bg-[#FFD99F] rounded-full">
             <LinearGradient
               colors={["#F55D20", "#FFCA3D"]}
@@ -77,9 +102,27 @@ const ProductItem = () => {
   );
 };
 
-const Deal = () => {
+const Deal = ({
+  recommendedProducts,
+  expanded,
+  onPress,
+}: {
+  recommendedProducts: IProduct[] | undefined;
+  expanded: boolean;
+  onPress: () => void;
+}) => {
+  if (!checkCanRender(recommendedProducts)) return null;
+
+  const products = useMemo(() => {
+    if (expanded) {
+      return recommendedProducts;
+    }
+
+    return recommendedProducts?.slice(0, 4);
+  }, [recommendedProducts, expanded]);
+
   return (
-    <View className="mt-6">
+    <View className="mt-3 mb-4">
       <LinearGradient
         colors={["#F5FFF9", "#BEE2CC"]}
         start={{ x: 0, y: 0 }}
@@ -108,21 +151,34 @@ const Deal = () => {
         </View>
       </View>
       <Timer expiredTime={new Date(Date.now() + 1000 * 60 * 60 * 24)} />
-      <View className="flex flex-row flex-wrap gap-2 px-2">
-        {[...Array(4)].map((_, index) => (
-          <ProductItem key={index} />
+      <View className="flex flex-row flex-wrap gap-2 px-2 pb-2">
+        {products?.map((product) => (
+          <ProductItem
+            key={product.id}
+            image={product.thumbnail}
+            id={product.id}
+            name={product.name}
+            price={formatCurrency(product.salePrice)}
+            oldPrice={formatCurrency(product.regularPrice)}
+            discount={0}
+          />
         ))}
       </View>
-      <View className="flex-row gap-1 justify-center items-center w-full mt-[18px] mb-2.5">
-        <Text className="flex-row gap-1 items-center text-sm font-medium text-[#0B5226]">
-          Xem thêm Deal hot{" "}
-        </Text>
-        <Image
-          source={imagePaths.icArrowRight}
-          className="size-[18px] rotate-90"
-          style={{ tintColor: "#0B5226" }}
-        />
-      </View>
+      {!expanded && (
+        <TouchableOpacity
+          className="flex-row gap-1 justify-center items-center w-full mt-[18px] mb-4"
+          onPress={onPress}
+        >
+          <Text className="flex-row gap-1 items-center text-sm font-medium text-[#0B5226]">
+            Xem thêm Deal hot{" "}
+          </Text>
+          <Image
+            source={imagePaths.icArrowRight}
+            className="size-[18px] rotate-90"
+            style={{ tintColor: "#0B5226" }}
+          />
+        </TouchableOpacity>
+      )}
     </View>
   );
 };

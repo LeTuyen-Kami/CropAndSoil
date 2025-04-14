@@ -1,15 +1,15 @@
+import { deepEqual } from "fast-equals";
+import { useAtom } from "jotai";
 import React, { useEffect, useRef } from "react";
 import { TouchableOpacity, View } from "react-native";
+import PagerView from "react-native-pager-view";
 import Animated, { ZoomIn, ZoomOut } from "react-native-reanimated";
 import { Text } from "~/components/ui/text";
-import PagerView from "react-native-pager-view";
-import { useAtom } from "jotai";
 import { activeIndexAtom } from "./atom";
-import ShopScreen from "./ShopScreen";
 import ShopCategory from "./ShopCategory";
-import ShopVoucher from "./ShopVoucher";
 import ShopProduct from "./ShopProduct";
-import { deepEqual } from "fast-equals";
+import ShopScreen from "./ShopScreen";
+import ShopVoucher from "./ShopVoucher";
 
 const tabs = [
   {

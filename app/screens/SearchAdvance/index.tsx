@@ -25,7 +25,11 @@ import { usePagination } from "~/hooks/usePagination";
 import { cn } from "~/lib/utils";
 import { RootStackParamList, RootStackRouteProp } from "~/navigation/types";
 import { IProduct, productService } from "~/services/api/product.service";
-import { getItemWidth, preHandleFlashListData } from "~/utils";
+import {
+  calculateDiscount,
+  getItemWidth,
+  preHandleFlashListData,
+} from "~/utils";
 import Filter from "./Filter";
 
 const ExploreCategory = () => {
@@ -139,16 +143,6 @@ const TwoProductItem = ({ items }: { items: IProduct[] }) => {
     }).itemWidth;
   }, []);
 
-  const calculateDiscount = (item: IProduct) => {
-    if (item?.regularPrice > item?.salePrice) {
-      return Math.round(
-        ((item?.regularPrice - item?.salePrice) / item?.regularPrice) * 100
-      );
-    }
-
-    return undefined;
-  };
-
   return (
     <View
       className="flex-row gap-2 px-2 bg-[#EEE] pb-2"
@@ -166,7 +160,7 @@ const TwoProductItem = ({ items }: { items: IProduct[] }) => {
           originalPrice={item?.regularPrice}
           discount={calculateDiscount(item)}
           rating={item?.averageRating}
-          soldCount={item?.reviewCount}
+          soldCount={item?.totalSales}
           image={item?.images[0]}
           onSale={item?.regularPrice > item?.salePrice}
           id={item?.id}
@@ -207,23 +201,28 @@ const noDataData = [
 ];
 
 const SearchAdvance = () => {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RootStackRouteProp<"SearchAdvance">>();
   const { searchText } = route.params;
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const { data, hasNextPage, fetchNextPage, isRefresh, refresh, isLoading } =
-    usePagination(productService.searchProducts, {
-      initialPagination: {
-        skip: 0,
-        take: 10,
-      },
-      queryKey: ["search-products", searchText],
-      initialParams: {
-        search: searchText,
-      },
-    });
+  const {
+    data,
+    hasNextPage,
+    fetchNextPage,
+    isRefresh,
+    refresh,
+    isLoading,
+    isFetching,
+  } = usePagination(productService.searchProducts, {
+    initialPagination: {
+      skip: 0,
+      take: 10,
+    },
+    queryKey: ["search-products", searchText],
+    initialParams: {
+      search: searchText,
+    },
+  });
 
   const renderItem = ({ item }: { item: any }) => {
     if (item.type === "category") {
@@ -272,7 +271,7 @@ const SearchAdvance = () => {
             />
           }
           ListFooterComponent={
-            hasNextPage ? (
+            hasNextPage && isFetching ? (
               <View className="flex-row justify-center items-center w-full h-10 bg-[#EEE]">
                 <ActivityIndicator size="large" color="#39CA71" />
               </View>

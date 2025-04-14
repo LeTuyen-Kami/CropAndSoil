@@ -50,6 +50,32 @@ export interface IListShopRequest extends PaginationRequests {
   ids?: string[];
 }
 
+export interface IVoucher {
+  id: number;
+  shopId: number;
+  title: string;
+  description: string;
+  code: string;
+  amount: number;
+  discountType: string;
+  voucherType: string;
+  freeShipping: boolean;
+  usageLimit: number;
+  usageLimitPerUser: number;
+  minimumAmount: number;
+  maximumReduction: number;
+  productBrands: any[];
+  excludeProductBrands: any[];
+  allowedUsers: any[];
+  usedCount: number;
+  isIndividualUsage: boolean;
+  startDate: string;
+  expiryDate: string;
+  isAvailable: boolean;
+}
+
+export interface IListVoucherRequest extends PaginationRequests {}
+
 class ShopService {
   async getShopDetail(id: string | number) {
     return typedAxios.get<IShop>(`/shops/${id}`);
@@ -57,6 +83,12 @@ class ShopService {
 
   async getListShop(params: IListShopRequest) {
     return typedAxios.get<PaginatedResponse<IShop>>("/shops", {
+      params,
+    });
+  }
+
+  async getListVoucher(params: IListVoucherRequest) {
+    return typedAxios.get<PaginatedResponse<IVoucher>>(`/vouchers`, {
       params,
     });
   }

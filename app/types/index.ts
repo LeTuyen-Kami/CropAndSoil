@@ -11,8 +11,8 @@ export interface ApiResponse<T> {
 }
 
 export interface PaginationRequests {
-  skip: number;
-  take: number;
+  skip?: number;
+  take?: number;
   search?: string;
 }
 

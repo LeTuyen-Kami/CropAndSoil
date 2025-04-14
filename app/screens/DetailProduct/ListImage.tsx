@@ -1,17 +1,17 @@
 import { Image } from "expo-image";
-import React, { useRef, useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Pressable } from "react-native";
 
 import { FlatList } from "react-native";
 
-import Gallery from "~/components/common/Galery";
-import { View } from "react-native";
-import { GalleryItem } from "~/components/common/Galery";
-import { Text } from "~/components/ui/text";
-import { screen } from "~/utils";
-import { deepEqual } from "fast-equals";
 import { useQuery } from "@tanstack/react-query";
+import { deepEqual } from "fast-equals";
+import { View } from "react-native";
+import Gallery, { GalleryItem } from "~/components/common/Galery";
+import { Text } from "~/components/ui/text";
 import { productService } from "~/services/api/product.service";
+import { shopService } from "~/services/api/shop.service";
+import { screen } from "~/utils";
 const ListImage = ({ id }: { id: string | number }) => {
   const [isGalleryVisible, setIsGalleryVisible] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -23,6 +23,24 @@ const ListImage = ({ id }: { id: string | number }) => {
     queryFn: () => productService.getProductDetail(id),
     staleTime: 1000 * 60 * 5,
     enabled: !!id,
+  });
+
+  useQuery({
+    queryKey: ["shopDetail", productDetail?.shopId],
+    queryFn: () => shopService.getShopDetail(productDetail?.shopId || ""),
+    enabled: !!productDetail?.shopId,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  useQuery({
+    queryKey: ["topProducts", ...(productDetail?.upsellIds || [])],
+    queryFn: () =>
+      productService.searchProducts({
+        ids: productDetail?.upsellIds,
+        take: 10,
+      }),
+    enabled: !!productDetail?.upsellIds && productDetail?.upsellIds.length > 0,
+    staleTime: 1000 * 60 * 5,
   });
 
   useEffect(() => {

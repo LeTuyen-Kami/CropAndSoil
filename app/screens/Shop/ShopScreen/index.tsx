@@ -8,16 +8,37 @@ import ListProduct from "./ListProduct";
 import Category from "~/components/common/Category";
 import { FlashList } from "@shopify/flash-list";
 import { useEffect, useState } from "react";
+import useGetShopId from "../useGetShopId";
+import { productService } from "~/services/api/product.service";
+import { useQuery } from "@tanstack/react-query";
+import { checkCanRender } from "~/utils";
+import { categoryService } from "~/services/api/category.service";
 
 const SuggestForYouSection = () => {
+  const { data: suggestForYou } = useQuery({
+    queryKey: ["suggestForYou", "shop"],
+    queryFn: () => productService.getRecommendedProducts(),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  if (!checkCanRender(suggestForYou)) return null;
+
   return (
     <ShopScreenContainer title="Gợi ý cho bạn" onPress={() => {}}>
-      <ListProduct data={[...Array(10)]} />
+      <ListProduct data={suggestForYou!} />
     </ShopScreenContainer>
   );
 };
 
 const PromotionSection = () => {
+  const { data: promotion } = useQuery({
+    queryKey: ["promotion", "shop"],
+    queryFn: () => productService.getRecommendedProducts(),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  if (!checkCanRender(promotion)) return null;
+
   return (
     <ShopScreenContainer
       onPress={() => {}}
@@ -32,24 +53,35 @@ const PromotionSection = () => {
         </View>
       }
     >
-      <ListProduct data={[...Array(10)]} />
+      <ListProduct data={promotion!} />
     </ShopScreenContainer>
   );
 };
 
 const CategorySection = () => {
+  const shopId = useGetShopId();
+
   return (
     <ShopScreenContainer title="Danh mục của Shop" onPress={() => {}}>
-      <View className="p-2">
-        <Category itemBgColor="#FFF5DF" textColor="#676767" />
-      </View>
+      <Category
+        itemBgColor="#FFF5DF"
+        textColor="#676767"
+        className="p-2"
+        getCategoriesApi={(payload) => {
+          return categoryService.getCategoryByShopId({
+            ...payload,
+            shopId: shopId,
+          });
+        }}
+        queryKey={["categoryByShopId", (shopId || 0)?.toString()]}
+      />
     </ShopScreenContainer>
   );
 };
 
 const BannerSection = () => {
   return (
-    <View className="px-2">
+    <View className="px-2 mb-2">
       <TouchableOpacity>
         <Image
           source={imagePaths.shopBackground}
@@ -62,46 +94,87 @@ const BannerSection = () => {
 };
 
 const BestSellerSection = () => {
+  const { data: bestSeller } = useQuery({
+    queryKey: ["bestSeller", "shop"],
+    queryFn: () => productService.getRecommendedProducts(),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  if (!checkCanRender(bestSeller)) return null;
+
   return (
     <ShopScreenContainer title="Sản phẩm bán chạy" onPress={() => {}}>
-      <ListProduct data={[...Array(10)]} />
+      <ListProduct data={bestSeller!} />
     </ShopScreenContainer>
   );
 };
 
 const GardeningToolsSection = () => {
+  const { data: gardeningTools } = useQuery({
+    queryKey: ["gardeningTools", "shop"],
+    queryFn: () => productService.getRecommendedProducts(),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  if (!checkCanRender(gardeningTools)) return null;
+
   return (
     <ShopScreenContainer title="Dụng cụ làm vườn" onPress={() => {}}>
-      <ListProduct data={[...Array(10)]} />
+      <ListProduct data={gardeningTools!} />
     </ShopScreenContainer>
   );
 };
 
 const FertilizerSection = () => {
+  const { data: fertilizer } = useQuery({
+    queryKey: ["fertilizer", "shop"],
+    queryFn: () => productService.getRecommendedProducts(),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  if (!checkCanRender(fertilizer)) return null;
+
   return (
     <ShopScreenContainer title="Phân bón, bảo vệ cây trồng" onPress={() => {}}>
-      <ListProduct data={[...Array(10)]} />
+      <ListProduct data={fertilizer!} />
     </ShopScreenContainer>
   );
 };
 
 const SoilSection = () => {
+  const { data: soil } = useQuery({
+    queryKey: ["soil", "shop"],
+    queryFn: () => productService.getRecommendedProducts(),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  if (!checkCanRender(soil)) return null;
+
   return (
     <ShopScreenContainer title="Đất trồng giá thể" onPress={() => {}}>
-      <ListProduct data={[...Array(10)]} />
+      <ListProduct data={soil!} />
     </ShopScreenContainer>
   );
 };
 
 const SeedSection = () => {
+  const { data: seed } = useQuery({
+    queryKey: ["seed", "shop"],
+    queryFn: () => productService.getRecommendedProducts(),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  if (!checkCanRender(seed)) return null;
+
   return (
     <ShopScreenContainer title="Hạt giống chất lượng" onPress={() => {}}>
-      <ListProduct data={[...Array(10)]} />
+      <ListProduct data={seed!} />
     </ShopScreenContainer>
   );
 };
 
 const ShopScreen = () => {
+  const shopId = useGetShopId();
   const [flashListData, setFlashListData] = useState<any[]>([]);
 
   const renderItem = ({ item }: { item: any }) => {
@@ -170,7 +243,6 @@ const ShopScreen = () => {
         renderItem={renderItem}
         estimatedItemSize={320}
         getItemType={(item) => item.type}
-        ItemSeparatorComponent={() => <View className="h-2" />}
       />
     </View>
   );

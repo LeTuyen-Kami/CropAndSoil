@@ -1,21 +1,13 @@
-import React, { useState, useEffect, useRef } from "react";
-import { View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import Header from "~/components/common/Header";
-import ScreenContainer from "~/components/common/ScreenContainer";
-import SearchBar from "~/components/common/SearchBar";
-import SearchSuggestions from "~/components/search/SearchSuggestions";
-import SearchResults from "~/components/search/SearchResults";
-import Animated, {
-  FadeIn,
-  FadeOut,
-  FlipInYLeft,
-  FlipInYRight,
-} from "react-native-reanimated";
-import { RootStackParamList, RootStackScreenProps } from "~/navigation/types";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import ScreenWrapper from "~/components/common/ScreenWrapper";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import React, { useEffect, useRef, useState } from "react";
+import { View } from "react-native";
+import Header from "~/components/common/Header";
+import ScreenWrapper from "~/components/common/ScreenWrapper";
+import SearchBar from "~/components/common/SearchBar";
+import SearchResults from "~/components/search/SearchResults";
+import { RootStackParamList } from "~/navigation/types";
 import { searchService } from "~/services/api/search.services";
 
 // Mock data for search history and suggestions

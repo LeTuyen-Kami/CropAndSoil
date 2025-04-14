@@ -184,7 +184,7 @@ const ResetPassword = () => {
   }, [countdown, step]);
 
   useEffect(() => {
-    setStep("code");
+    setStep("phone");
   }, []);
 
   return (
@@ -324,7 +324,6 @@ const ResetPassword = () => {
         <Animated.View
           entering={getEnteringAnimation(step, previousStep)}
           exiting={getExitingAnimation(step, previousStep)}
-          className="flex-1"
         >
           <Input
             placeholder="Mật khẩu"

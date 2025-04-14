@@ -22,8 +22,8 @@ interface SearchParams {
 
 // Example API function that would fetch paginated data
 const fetchItems = async (params: {
-  skip: number;
-  take: number;
+  skip?: number;
+  take?: number;
   searchTerm?: string;
   filterBy?: string;
 }) => {

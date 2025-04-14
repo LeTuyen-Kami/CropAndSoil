@@ -75,6 +75,11 @@ export function usePagination<T, P = Record<string, any>>(
     [firstPageData, additionalPagesData]
   );
 
+  // Total number of items
+  const total = useMemo(() => {
+    return firstPageData?.total ?? 0;
+  }, [firstPageData]);
+
   // Check if there's a next page
   const hasNextPage = useMemo(
     () =>
@@ -130,6 +135,7 @@ export function usePagination<T, P = Record<string, any>>(
     () => ({
       data: combinedData,
       paginationData: firstPageData,
+      total,
       isLoading,
       isFetching,
       isRefresh,
@@ -148,6 +154,7 @@ export function usePagination<T, P = Record<string, any>>(
       fetchNextPage,
       refresh,
       updateParams,
+      total,
     ]
   );
 

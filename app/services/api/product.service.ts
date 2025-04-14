@@ -121,6 +121,10 @@ class ProductService {
   async getProductDetail(id: string | number) {
     return typedAxios.get<IProduct>(`/products/${id}`);
   }
+
+  async getRecommendedProducts() {
+    return typedAxios.get<IProduct[]>(`/recommended-products`);
+  }
 }
 
 export const productService = new ProductService();

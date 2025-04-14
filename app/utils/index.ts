@@ -4,6 +4,7 @@ import "react-native-get-random-values";
 import { v4 as uuidv4 } from "uuid";
 import { BREAKPOINTS } from "./contants";
 import dayjs from "dayjs";
+import { IProduct } from "~/services/api/product.service";
 
 export const ENV = process.env;
 
@@ -81,11 +82,14 @@ export const applyTyoe = (
   });
 };
 
-export const preHandleFlashListData = (data: any[]) => {
+export const preHandleFlashListData = (
+  data: any[],
+  typeName: string = "product"
+) => {
   const chunkedData = chunkArray(data, 2);
 
   return applyTyoe(chunkedData, {
-    typeName: "product",
+    typeName,
     handleId: (item) => item?.[0]?.id,
   });
 };
@@ -172,4 +176,36 @@ export const getTimeAgo = (date?: string) => {
   } else {
     return "Hôm nay";
   }
+};
+
+export const calculateDiscount = (item: IProduct) => {
+  if (item?.regularPrice > item?.salePrice) {
+    return Math.round(
+      ((item?.regularPrice - item?.salePrice) / item?.regularPrice) * 100
+    );
+  }
+
+  return undefined;
+};
+
+export const formatDate = (date?: string) => {
+  if (!date) return "";
+
+  if (!dayjs(date)?.isValid()) return "";
+
+  return dayjs(date).format("DD/MM/YYYY");
+};
+
+export const convertToK = (value: number) => {
+  return Math.round(value / 1000);
+};
+
+export const checkCanRender = (data: any) => {
+  if (!data) return false;
+
+  if (Array.isArray(data) && data.length === 0) return false;
+
+  if (data?.some((item: any) => !item)) return false;
+
+  return true;
 };

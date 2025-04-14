@@ -27,7 +27,7 @@ const PaymentStore = () => {
     {
       id: "1",
       name: "Phân Bón NPK Greenhome, Chuyên Rau Ăn Lá, Củ, Cây Ăn Trái, Hoa, Chắc Rễ, Khoẻ Cây, Bông To, Sai Quả",
-      image: imagePaths.productPhanbon,
+      image: imagePaths.backArrow,
       price: 160000,
       originalPrice: 220000,
       type: "NPK Rau Phú Mỹ",
@@ -36,7 +36,7 @@ const PaymentStore = () => {
     {
       id: "2",
       name: "Phân Bón NPK Greenhome, Chuyên Rau Ăn Lá, Củ, Cây Ăn Trái, Hoa, Chắc Rễ, Khoẻ Cây, Bông To, Sai Quả",
-      image: imagePaths.productPhanbon,
+      image: imagePaths.backArrow,
       price: 75000,
       originalPrice: 220000,
       type: "NPK Rau Phú Mỹ",
@@ -45,7 +45,7 @@ const PaymentStore = () => {
     {
       id: "3",
       name: "Phân Bón NPK Greenhome, Chuyên Rau Ăn Lá, Củ, Cây Ăn Trái, Hoa, Chắc Rễ, Khoẻ Cây, Bông To, Sai Quả",
-      image: imagePaths.productPhanbon,
+      image: imagePaths.backArrow,
       price: 180000,
       originalPrice: 220000,
       type: "NPK Rau Phú Mỹ",

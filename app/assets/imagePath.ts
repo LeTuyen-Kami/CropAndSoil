@@ -63,14 +63,6 @@ import historyIcon from "~/assets/icons/history-icon.png";
 import closeCircleIcon from "~/assets/icons/close-circle-icon.png";
 import magnifierBlueIcon from "~/assets/icons/magnifier-blue-icon.png";
 
-// Search suggestion products
-import productGiathe from "~/assets/images/product-giathe.png";
-import productDungcu from "~/assets/images/product-dungcu.png";
-import productPhanbon from "~/assets/images/product-phanbon.png";
-import productThuoc from "~/assets/images/product-thuoc.png";
-import productHatgiong from "~/assets/images/product-hatgiong.png";
-import productVattu from "~/assets/images/product-vattu.png";
-
 // Product detail icons
 import icBrandBadge2 from "~/assets/icons/brand_badge_icon_2.svg";
 import icBrandBadge3 from "~/assets/icons/brand_badge_icon_3.svg";
@@ -198,14 +190,6 @@ export const imagePaths = {
   historyIcon: historyIcon,
   closeCircleIcon: closeCircleIcon,
   magnifierBlueIcon: magnifierBlueIcon,
-
-  // Search suggestion products
-  productGiathe: productGiathe,
-  productDungcu: productDungcu,
-  productPhanbon: productPhanbon,
-  productThuoc: productThuoc,
-  productHatgiong: productHatgiong,
-  productVattu: productVattu,
 
   // Product detail icons
   icBrandBadge2: icBrandBadge2,

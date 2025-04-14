@@ -8,16 +8,17 @@ import {
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import { imagePaths } from "~/assets/imagePath";
-import { RootStackRouteProp } from "~/navigation/types";
 import { useQuery } from "@tanstack/react-query";
 import { shopService } from "~/services/api/shop.service";
 import { onlineStatus } from "~/utils";
+import useGetShopId from "./useGetShopId";
 
-const ShopInfo = ({ id }: { id: string | number }) => {
+const ShopInfo = () => {
+  const shopId = useGetShopId();
   const { data: shopDetail } = useQuery({
-    queryKey: ["shopDetail", id],
-    queryFn: () => shopService.getShopDetail(id),
-    enabled: !!id,
+    queryKey: ["shopDetail", shopId],
+    queryFn: () => shopService.getShopDetail(shopId!),
+    enabled: !!shopId,
     staleTime: 1000 * 60 * 5,
   });
   return (

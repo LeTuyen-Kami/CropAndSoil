@@ -36,6 +36,7 @@ const Address = () => {
     isRefresh,
     refresh,
     hasNextPage,
+    isFetching,
     fetchNextPage,
   } = usePagination<IAddress, PaginationRequests>(userService.getAddress, {
     queryKey: ["address"],
@@ -129,7 +130,7 @@ const Address = () => {
           onEndReached={fetchNextPage}
           onEndReachedThreshold={0.5}
           ListFooterComponent={() =>
-            hasNextPage ? (
+            hasNextPage && isFetching ? (
               <ActivityIndicator
                 size="large"
                 color="#18A24D"

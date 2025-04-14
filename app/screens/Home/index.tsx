@@ -76,11 +76,7 @@ export const HomeScreen: React.FC = () => {
     }
 
     if (item.type === "category") {
-      return (
-        <View className="px-2 pt-2">
-          <Category />
-        </View>
-      );
+      return <Category className="px-2 pt-2" />;
     }
 
     if (item.type === "flashSale") {

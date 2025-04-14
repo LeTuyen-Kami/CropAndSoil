@@ -2,21 +2,26 @@ import { View } from "react-native";
 
 import { FlatList } from "react-native";
 import ProductItem from "~/components/common/ProductItem";
+import { IProduct } from "~/services/api/product.service";
+import { calculateDiscount, checkCanRender } from "~/utils";
 
-const ListProduct = ({ data }: { data: any[] }) => {
+const ListProduct = ({ data }: { data: IProduct[] }) => {
+  if (!checkCanRender(data)) return null;
+
   return (
     <FlatList
       data={data}
-      renderItem={() => (
+      renderItem={({ item }) => (
         <ProductItem
-          discount={20}
-          name={"Sản phẩm 1"}
-          price={100000}
-          originalPrice={120000}
-          soldCount={100}
-          rating={4.5}
-          location="Hà Nội"
-          id={"123"}
+          discount={calculateDiscount(item)}
+          name={item.name}
+          price={item.salePrice}
+          originalPrice={item.regularPrice}
+          soldCount={item.totalSales}
+          rating={item.averageRating}
+          id={item.id}
+          image={item.thumbnail}
+          className="flex-1"
         />
       )}
       horizontal

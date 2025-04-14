@@ -18,7 +18,7 @@ const ShopScreenContainer = ({
   children,
 }: ShopScreenContainerProps) => {
   return (
-    <View className="bg-white rounded-xl">
+    <View className="bg-white rounded-xl mb-2.5">
       <View className="flex-row justify-between items-center px-2 py-3">
         {!!componentTitle ? (
           componentTitle

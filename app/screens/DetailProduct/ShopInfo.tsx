@@ -13,6 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { shopService } from "~/services/api/shop.service";
 import dayjs from "dayjs";
 import { getTimeAgo, onlineStatus } from "~/utils";
+import { toast } from "~/components/common/Toast";
 
 cssInterop(Image, {
   className: "style",
@@ -60,6 +61,11 @@ const ShopInfo = ({ id }: { id: string | number }) => {
   });
 
   const handleOpenShop = () => {
+    if (!shopDetail || !shopDetail.id) {
+      toast.error("Hiện chưa có thông tin shop");
+      return;
+    }
+
     navigation.navigate("Shop", { id: shopDetail?.id || "" });
   };
 

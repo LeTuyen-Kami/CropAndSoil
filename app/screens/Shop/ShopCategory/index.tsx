@@ -1,8 +1,20 @@
 import { FlashList } from "@shopify/flash-list";
 import { Image } from "expo-image";
-import { TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  RefreshControl,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Text } from "~/components/ui/text";
 import { imagePaths } from "~/assets/imagePath";
+import { useQuery } from "@tanstack/react-query";
+import { shopService } from "~/services/api/shop.service";
+import { categoryService } from "~/services/api/category.service";
+import { usePagination } from "~/hooks/usePagination";
+import Empty from "~/components/common/Empty";
+import { COLORS } from "~/constants/theme";
+import useGetShopId from "../useGetShopId";
 
 interface ItemProps {
   title: string;
@@ -33,20 +45,59 @@ const Item = ({ title, image, count }: ItemProps) => {
 };
 
 const ShopCategory = () => {
+  const shopId = useGetShopId();
+  // const { data: categoryByShopId } = useQuery({
+  //   queryKey: ["categoryByShopId", shopId],
+  //   queryFn: () => categoryService.getCategoryByShopId(shopId),
+  //   enabled: !!shopId,
+  // });
+
+  const {
+    data,
+    isLoading,
+    isRefresh,
+    refresh,
+    hasNextPage,
+    fetchNextPage,
+    isFetching,
+  } = usePagination(categoryService.getCategoryByShopId, {
+    queryKey: ["categoryByShopId", (shopId || "")?.toString()],
+    enabled: !!shopId,
+    initialParams: {
+      shopId: shopId,
+    },
+  });
+
   return (
     <FlashList
       showsVerticalScrollIndicator={false}
-      data={[...Array(10)]}
+      data={data}
       renderItem={({ item }) => (
         <Item
-          title="Phân bón Phú Mỹ"
-          image="https://picsum.photos/200/200"
-          count={3}
+          title={item.name}
+          image={item.thumbnail}
+          count={item.totalProducts}
         />
       )}
+      ListEmptyComponent={() => (
+        <Empty title={"Không có danh mục"} isLoading={isLoading} />
+      )}
+      refreshControl={
+        <RefreshControl refreshing={isRefresh} onRefresh={refresh} />
+      }
       estimatedItemSize={200}
       ItemSeparatorComponent={() => <View className="h-[1px] bg-transparent" />}
-      ListFooterComponent={() => <View className="h-[100px]" />}
+      onEndReached={fetchNextPage}
+      onEndReachedThreshold={0.5}
+      ListFooterComponent={() => {
+        return hasNextPage && isFetching ? (
+          <View className="flex-row justify-center items-center py-4">
+            <ActivityIndicator size="small" color={COLORS.primary} />
+          </View>
+        ) : (
+          <View className="h-[100px]" />
+        );
+      }}
     />
   );
 };

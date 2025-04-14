@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { Text } from "~/components/ui/text";
 import { usePagination } from "~/hooks/usePagination";
+import { cn } from "~/lib/utils";
 import { categoryService, ICategory } from "~/services/api/category.service";
 import { PaginatedResponse, PaginationRequests } from "~/types";
 
@@ -48,24 +49,26 @@ interface CategoryProps {
   getCategoriesApi?: (
     payload: PaginationRequests
   ) => Promise<PaginatedResponse<ICategory>>;
+  queryKey?: string[];
   itemBgColor?: string;
   textColor?: string;
+  className?: string;
 }
 
 const Category = ({
   getCategoriesApi = categoryService.getCategories,
+  queryKey = ["categories"],
   itemBgColor = "rgba(0,0,0,0.25)",
   textColor = "white",
+  className,
 }: CategoryProps) => {
   const { data, fetchNextPage, hasNextPage } = usePagination(getCategoriesApi, {
-    queryKey: ["categories"],
+    queryKey: queryKey,
     initialPagination: { skip: 0, take: 10 },
   });
 
-  if (!data) return null;
-
   return (
-    <View className="min-h-[90px]">
+    <View className={cn("min-h-[90px]", className)}>
       <FlatList
         data={data}
         renderItem={({ item }) => (
