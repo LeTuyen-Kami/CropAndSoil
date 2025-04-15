@@ -45,7 +45,10 @@ const TopProduct = ({ items }: { items: IProduct[] | undefined }) => {
           originalPrice={item.regularPrice}
           rating={item.averageRating}
           soldCount={item.totalSales}
+          location={item.shop?.shopWarehouseLocation?.province?.name}
           id={item.id}
+          image={item.thumbnail}
+          height={"100%"}
         />
       ))}
     </VoucherContainer>
@@ -72,7 +75,10 @@ const PrivateVoucher = ({ items }: { items: IProduct[] | undefined }) => {
           originalPrice={item.regularPrice}
           rating={item.averageRating}
           soldCount={item.totalSales}
+          location={item.shop?.shopWarehouseLocation?.province?.name}
           id={item.id}
+          image={item.thumbnail}
+          height={"100%"}
         />
       ))}
     </VoucherContainer>
@@ -126,6 +132,7 @@ const RenderTwoProduct = memo(
             width={itemWidth.itemWidth}
             height={"100%"}
             image={item.thumbnail}
+            location={item.shop?.shopWarehouseLocation?.province?.name}
           />
         ))}
       </View>

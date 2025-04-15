@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   View,
   ScrollView,
   TouchableOpacity,
   ImageSourcePropType,
+  Pressable,
 } from "react-native";
 import { Text } from "~/components/ui/text";
 import { Image } from "expo-image";
@@ -11,47 +12,25 @@ import { Feather } from "@expo/vector-icons";
 import { imagePaths } from "~/assets/imagePath";
 import ScreenContainer from "~/components/common/ScreenContainer";
 import PaymentItem from "./PaymentItem";
+import { Store } from "../types";
+import { useNavigation } from "@react-navigation/native";
+import { RootStackRouteProp, RootStackScreenProps } from "~/navigation/types";
+import { cn } from "~/lib/utils";
 
-interface Product {
-  id: string;
-  name: string;
-  image: ImageSourcePropType;
-  price: number;
-  originalPrice: number;
-  type: string;
-  quantity: number;
-}
+const PaymentStore = ({
+  store,
+  onMessagePress,
+  message,
+}: {
+  store: Store;
+  onMessagePress: () => void;
+  message: string;
+}) => {
+  const navigation = useNavigation<RootStackScreenProps<"Payment">>();
 
-const PaymentStore = () => {
-  const [products] = useState<Product[]>([
-    {
-      id: "1",
-      name: "Phân Bón NPK Greenhome, Chuyên Rau Ăn Lá, Củ, Cây Ăn Trái, Hoa, Chắc Rễ, Khoẻ Cây, Bông To, Sai Quả",
-      image: imagePaths.backArrow,
-      price: 160000,
-      originalPrice: 220000,
-      type: "NPK Rau Phú Mỹ",
-      quantity: 1,
-    },
-    {
-      id: "2",
-      name: "Phân Bón NPK Greenhome, Chuyên Rau Ăn Lá, Củ, Cây Ăn Trái, Hoa, Chắc Rễ, Khoẻ Cây, Bông To, Sai Quả",
-      image: imagePaths.backArrow,
-      price: 75000,
-      originalPrice: 220000,
-      type: "NPK Rau Phú Mỹ",
-      quantity: 2,
-    },
-    {
-      id: "3",
-      name: "Phân Bón NPK Greenhome, Chuyên Rau Ăn Lá, Củ, Cây Ăn Trái, Hoa, Chắc Rễ, Khoẻ Cây, Bông To, Sai Quả",
-      image: imagePaths.backArrow,
-      price: 180000,
-      originalPrice: 220000,
-      type: "NPK Rau Phú Mỹ",
-      quantity: 2,
-    },
-  ]);
+  const products = useMemo(() => {
+    return store.items.filter((item) => item.isSelected);
+  }, [store]);
 
   const formatPrice = (value: number) => {
     return value.toLocaleString() + "đ";
@@ -67,11 +46,19 @@ const PaymentStore = () => {
     0
   );
 
+  const navigationToShop = () => {
+    navigation.navigate("Shop", { id: store.id });
+  };
+
+  const navigationToProduct = (productId: string) => {
+    navigation.navigate("DetailProduct", { id: productId });
+  };
+
   return (
-    <View className="bg-white rounded-2xl">
+    <View className="bg-white rounded-2xl mb-2.5">
       {/* Header */}
       <View className="border-b border-[#F5F5F5] p-3">
-        <View className="flex-row items-center">
+        <Pressable className="flex-row items-center" onPress={navigationToShop}>
           <Image
             source={imagePaths.icShop}
             className="mr-2"
@@ -79,9 +66,9 @@ const PaymentStore = () => {
             style={{ tintColor: "#676767", width: 18, height: 18 }}
           />
           <Text className="font-medium text-sm text-[#383B45]">
-            Super Lâm Thao
+            {store.name}
           </Text>
-        </View>
+        </Pressable>
       </View>
 
       {/* Products */}
@@ -96,6 +83,7 @@ const PaymentStore = () => {
             originalPrice={product.originalPrice}
             type={product.type}
             quantity={product.quantity}
+            onPress={() => navigationToProduct(product.productId)}
           />
         ))}
       </View>
@@ -110,10 +98,20 @@ const PaymentStore = () => {
       </TouchableOpacity>
 
       {/* Message */}
-      <TouchableOpacity className="flex-row justify-between items-center p-3 border-t border-[#F0F0F0]">
+      <TouchableOpacity
+        className="flex-row justify-between items-center p-3 border-t border-[#F0F0F0]"
+        onPress={onMessagePress}
+      >
         <Text className="text-sm text-[#676767]">Lời nhắn cho Shop</Text>
         <View className="flex-row items-center">
-          <Text className="text-sm text-[#AEAEAE] mr-2">Để lại lời nhắn</Text>
+          <Text
+            className={cn(
+              "text-sm text-[#AEAEAE] mr-2",
+              message && "text-[#383B45]"
+            )}
+          >
+            {message || "Để lại lời nhắn"}
+          </Text>
           <Feather name="chevron-right" size={16} color="#AEAEAE" />
         </View>
       </TouchableOpacity>

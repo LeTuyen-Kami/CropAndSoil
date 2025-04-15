@@ -156,9 +156,7 @@ const ResetPassword = () => {
       {
         onSuccess: (data) => {
           toast.success("Đặt lại mật khẩu thành công");
-          navigation.replace("MainTabs", {
-            screen: "Profile",
-          });
+          navigation.goBack();
         },
         onError: (error) => {
           toast.error(getErrorMessage(error, "Lỗi khi đặt lại mật khẩu"));

@@ -3,31 +3,35 @@ import { Image } from "expo-image";
 import { deepEqual } from "fast-equals";
 import React from "react";
 import { ScrollView, TouchableOpacity, View } from "react-native";
+import { FlatList } from "react-native-gesture-handler";
 import { imagePaths } from "~/assets/imagePath";
 import ProductItem from "~/components/common/ProductItem";
 import { Text } from "~/components/ui/text";
 import { productService } from "~/services/api/product.service";
+import { calculateDiscount } from "~/utils";
 
 const TopProduct = ({ id }: { id: string | number }) => {
-  const { data: productDetail } = useQuery({
+  const { data: upsellIds } = useQuery({
     queryKey: ["productDetail", id],
     queryFn: () => productService.getProductDetail(id),
     enabled: !!id,
     staleTime: 1000 * 60 * 5,
+    select: (data) => data.upsellIds,
   });
 
   const { data: topProducts } = useQuery({
-    queryKey: ["topProducts", ...(productDetail?.upsellIds || [])],
+    queryKey: ["topProducts", ...(upsellIds || [])],
     queryFn: () =>
       productService.searchProducts({
-        ids: productDetail?.upsellIds,
-        take: 10,
+        ids: upsellIds?.join(","),
+        take: 30,
       }),
-    enabled: !!productDetail?.upsellIds && productDetail?.upsellIds.length > 0,
+    enabled: !!upsellIds && upsellIds.length > 0,
     staleTime: 1000 * 60 * 5,
+    select: (data) => data.data,
   });
 
-  if (!topProducts?.data || topProducts?.data?.length === 0) {
+  if (!topProducts || topProducts?.length === 0) {
     return null;
   }
 
@@ -47,26 +51,27 @@ const TopProduct = ({ id }: { id: string | number }) => {
         </TouchableOpacity>
       </View>
 
-      <ScrollView
+      <FlatList
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ gap: 6 }}
-      >
-        <View className="flex-row gap-2">
-          {productDetail?.variations?.map((product) => (
-            <ProductItem
-              className="flex-1"
-              key={product.id}
-              name={product.name}
-              price={product.salePrice}
-              originalPrice={product.regularPrice}
-              image={product.thumbnail}
-              width={150}
-              id={product.id}
-            />
-          ))}
-        </View>
-      </ScrollView>
+        data={topProducts}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <ProductItem
+            name={item.name}
+            price={item.salePrice}
+            originalPrice={item.regularPrice}
+            discount={calculateDiscount(item)}
+            soldCount={item.totalSales}
+            rating={item.averageRating}
+            location={item.shop?.shopWarehouseLocation?.province?.name}
+            id={item.id}
+            image={item.thumbnail}
+            className="flex-1"
+          />
+        )}
+      />
     </View>
   );
 };

@@ -14,6 +14,7 @@ import { shopService } from "~/services/api/shop.service";
 import dayjs from "dayjs";
 import { getTimeAgo, onlineStatus } from "~/utils";
 import { toast } from "~/components/common/Toast";
+import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 
 cssInterop(Image, {
   className: "style",
@@ -44,20 +45,14 @@ const IsOfficialBadge = () => {
 };
 
 const ShopInfo = ({ id }: { id: string | number }) => {
-  const navigation = useNavigation();
+  const navigation = useSmartNavigation();
 
-  const { data: productDetail } = useQuery({
+  const { data: shopDetail } = useQuery({
     queryKey: ["productDetail", id],
     queryFn: () => productService.getProductDetail(id),
     enabled: !!id,
     staleTime: 1000 * 60 * 5,
-  });
-
-  const { data: shopDetail } = useQuery({
-    queryKey: ["shopDetail", productDetail?.shopId],
-    queryFn: () => shopService.getShopDetail(productDetail?.shopId || ""),
-    enabled: !!productDetail?.shopId,
-    staleTime: 1000 * 60 * 5,
+    select: (data) => data?.shop,
   });
 
   const handleOpenShop = () => {
@@ -66,7 +61,7 @@ const ShopInfo = ({ id }: { id: string | number }) => {
       return;
     }
 
-    navigation.navigate("Shop", { id: shopDetail?.id || "" });
+    navigation.smartNavigate("Shop", { id: shopDetail?.id || "" });
   };
 
   return (

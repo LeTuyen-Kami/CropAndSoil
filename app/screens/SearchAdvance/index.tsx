@@ -7,7 +7,7 @@ import {
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
 import { Image } from "expo-image";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import {
   ActivityIndicator,
   RefreshControl,
@@ -29,6 +29,7 @@ import {
   calculateDiscount,
   getItemWidth,
   preHandleFlashListData,
+  screen,
 } from "~/utils";
 import Filter from "./Filter";
 
@@ -62,6 +63,15 @@ const Header = ({
     navigation.dispatch((state) => {
       // Remove all the screens after `Profile`
       const index = state.routes.findIndex((r) => r.name === "Search");
+
+      if (index === -1) {
+        return CommonActions.reset({
+          ...state,
+          routes: [...state.routes, { name: "Search" }],
+          index: 0,
+        });
+      }
+
       const routes = state.routes.slice(0, index + 1);
 
       return CommonActions.reset({
@@ -213,15 +223,13 @@ const SearchAdvance = () => {
     refresh,
     isLoading,
     isFetching,
+    updateParams,
   } = usePagination(productService.searchProducts, {
     initialPagination: {
       skip: 0,
       take: 10,
     },
-    queryKey: ["search-products", searchText],
-    initialParams: {
-      search: searchText,
-    },
+    queryKey: ["search-products"],
   });
 
   const renderItem = ({ item }: { item: any }) => {
@@ -248,6 +256,12 @@ const SearchAdvance = () => {
     }
     return [...categoryData, ...containerHeaderData, ...handledData];
   }, [data]);
+
+  useEffect(() => {
+    updateParams({
+      search: searchText,
+    });
+  }, [searchText]);
 
   return (
     <ScreenWrapper hasGradient hasSafeBottom={false}>
@@ -276,7 +290,12 @@ const SearchAdvance = () => {
                 <ActivityIndicator size="large" color="#39CA71" />
               </View>
             ) : (
-              <View className="h-10 w-full bg-[#EEE]" />
+              <View
+                className="w-full bg-[#EEE]"
+                style={{
+                  height: flashListData?.length > 3 ? 40 : 200,
+                }}
+              />
             )
           }
         />

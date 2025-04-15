@@ -1,41 +1,29 @@
-import { AxiosResponse } from "axios";
-import { axiosInstance } from "../base";
+import { PaginatedResponse, PaginationRequests } from "~/types";
+import { typedAxios } from "../base";
 
-export interface Notification {
-  id: string;
-  userId: string;
-  title: string;
-  message: string;
-  type: "order" | "product" | "system" | "promotion";
-  isRead: boolean;
-  data?: Record<string, any>;
+export interface Payload {
+  id: number;
+}
+
+export interface INotification {
+  content: string;
   createdAt: string;
-  updatedAt: string;
+  id: number;
+  payload: Payload;
+  thumbnail: string;
+  title: string;
+  type: string;
 }
 
 class NotificationService {
-  async getNotifications(): Promise<AxiosResponse<Notification[]>> {
-    return axiosInstance.get("/notifications");
+  async getNotifications(data: PaginationRequests) {
+    return typedAxios.get<PaginatedResponse<INotification>>("/notifications", {
+      params: data,
+    });
   }
 
-  async getUnreadCount(): Promise<AxiosResponse<{ count: number }>> {
-    return axiosInstance.get("/notifications/unread-count");
-  }
-
-  async markAsRead(
-    notificationId: string
-  ): Promise<AxiosResponse<Notification>> {
-    return axiosInstance.patch(`/notifications/${notificationId}/read`);
-  }
-
-  async markAllAsRead(): Promise<AxiosResponse<void>> {
-    return axiosInstance.patch("/notifications/mark-all-read");
-  }
-
-  async deleteNotification(
-    notificationId: string
-  ): Promise<AxiosResponse<void>> {
-    return axiosInstance.delete(`/notifications/${notificationId}`);
+  async getNotificationsDetail(id: string) {
+    return typedAxios.get<INotification>(`/notifications/${id}`);
   }
 }
 

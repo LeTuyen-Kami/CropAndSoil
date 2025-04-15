@@ -40,15 +40,14 @@ type TabsProps = {
   fullWidth?: boolean;
 };
 
+export type TabsRef = {
+  setPage: (page: number) => void;
+  getPage: () => number;
+};
+
 const screenWidth = Dimensions.get("window").width;
 
-const Tabs = forwardRef<
-  {
-    setPage: (page: number) => void;
-    getPage: () => number;
-  },
-  TabsProps
->(
+const Tabs = forwardRef<TabsRef, TabsProps>(
   (
     {
       items,

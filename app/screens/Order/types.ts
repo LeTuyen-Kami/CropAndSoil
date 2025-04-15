@@ -7,6 +7,11 @@ export interface StoreItem {
   type: string;
   quantity: number;
   isSelected?: boolean;
+  productId: string;
+  variation: {
+    id: number;
+    name: string;
+  };
 }
 
 export interface Store {

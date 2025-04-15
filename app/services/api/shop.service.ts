@@ -47,7 +47,7 @@ export interface IShop {
 }
 
 export interface IListShopRequest extends PaginationRequests {
-  ids?: string[];
+  ids?: string; // comma separated
 }
 
 export interface IVoucher {

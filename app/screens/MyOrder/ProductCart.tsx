@@ -18,6 +18,9 @@ interface ProductCartProps {
   totalPrice?: string;
   onCancelOrder?: () => void;
   onViewDetails?: () => void;
+  status?: string;
+  quantity?: number;
+  statusColor?: string;
 }
 
 const ProductItem = ({
@@ -30,11 +33,11 @@ const ProductItem = ({
 }: ProductItemProps) => {
   return (
     <View className="flex-row gap-1.5 py-3">
-      <View className="flex-row justify-center items-center rounded-2xl border border-[#F0F0F0]">
+      <View className="flex-row p-2.5 justify-center items-center rounded-2xl border border-[#F0F0F0]">
         <Image
           source={{ uri: imageUri }}
-          className="w-[80px] h-[80px] rounded-lg"
-          contentFit="cover"
+          className="w-[64px] h-[64px] rounded-lg"
+          contentFit="contain"
         />
       </View>
       <View className="flex-1">
@@ -58,14 +61,18 @@ const ProductItem = ({
         </View>
         <View className="items-end self-stretch">
           <View className="flex-row items-center gap-1.5 py-1.5">
-            <View className="flex-row justify-center items-center">
-              <Text className="text-[#AEAEAE] text-xs leading-[18px] ">
-                {originalPrice}
-              </Text>
-            </View>
+            {discountedPrice &&
+              originalPrice &&
+              discountedPrice !== originalPrice && (
+                <View className="flex-row justify-center items-center">
+                  <Text className="text-[#AEAEAE] text-xs leading-[18px] line-through">
+                    {originalPrice}
+                  </Text>
+                </View>
+              )}
             <View className="flex-row justify-center items-center">
               <Text className="text-[#676767] text-sm leading-[20px]">
-                {discountedPrice}
+                {discountedPrice || originalPrice}
               </Text>
             </View>
           </View>
@@ -76,15 +83,18 @@ const ProductItem = ({
 };
 
 const ProductCart = ({
-  shopName = "Greenhomevn",
+  shopName,
   products = [],
   totalPrice,
   onCancelOrder,
   onViewDetails,
+  quantity,
+  status,
+  statusColor,
 }: ProductCartProps) => {
   return (
     <View className="px-2 w-full bg-white rounded-2xl">
-      <View className="flex-row items-center gap-2.5 py-3">
+      <View className="flex-row items-center justify-between gap-2.5 py-3">
         <View className="flex-row gap-2 items-center">
           <Image
             source={imagePaths.icShop}
@@ -96,6 +106,14 @@ const ProductCart = ({
             {shopName}
           </Text>
         </View>
+        {status && (
+          <Text
+            className="text-[#383B45] text-sm font-medium leading-[20px]"
+            style={{ color: statusColor }}
+          >
+            {status}
+          </Text>
+        )}
       </View>
 
       {products.map((product, index) => (
@@ -105,7 +123,10 @@ const ProductCart = ({
       {totalPrice && (
         <View className="flex-row justify-end items-center self-stretch">
           <Text className="text-[#676767] text-sm leading-[20px]">
-            {totalPrice}
+            Tổng số tiền ({quantity} sản phẩm):{" "}
+            <Text className="text-[#383B45] text-sm leading-[20px]">
+              {totalPrice}
+            </Text>
           </Text>
         </View>
       )}

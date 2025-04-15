@@ -1,3 +1,4 @@
+import { useNavigation } from "@react-navigation/native";
 import { Image } from "expo-image";
 import {
   ActivityIndicator,
@@ -9,6 +10,7 @@ import {
 import { Text } from "~/components/ui/text";
 import { usePagination } from "~/hooks/usePagination";
 import { cn } from "~/lib/utils";
+import { RootStackScreenProps } from "~/navigation/types";
 import { categoryService, ICategory } from "~/services/api/category.service";
 import { PaginatedResponse, PaginationRequests } from "~/types";
 
@@ -17,11 +19,12 @@ interface ItemProps {
   image: string;
   itemBgColor?: string;
   textColor?: string;
+  onPress: () => void;
 }
 
-const Item = ({ title, image, itemBgColor, textColor }: ItemProps) => {
+const Item = ({ title, image, itemBgColor, textColor, onPress }: ItemProps) => {
   return (
-    <TouchableOpacity>
+    <TouchableOpacity onPress={onPress}>
       <View className="w-[71] flex-col gap-2 items-center">
         <View
           className={`flex justify-center items-center p-3 rounded-full size-[60]`}
@@ -62,10 +65,18 @@ const Category = ({
   textColor = "white",
   className,
 }: CategoryProps) => {
+  const navigation = useNavigation<RootStackScreenProps<"MainTabs">>();
+
   const { data, fetchNextPage, hasNextPage } = usePagination(getCategoriesApi, {
     queryKey: queryKey,
     initialPagination: { skip: 0, take: 10 },
   });
+
+  const handlePressCategory = (category: ICategory) => {
+    navigation.navigate("SearchAdvance", {
+      searchText: category.name,
+    });
+  };
 
   return (
     <View className={cn("min-h-[90px]", className)}>
@@ -77,6 +88,7 @@ const Category = ({
             image={item.thumbnail}
             itemBgColor={itemBgColor}
             textColor={textColor}
+            onPress={() => handlePressCategory(item)}
           />
         )}
         horizontal

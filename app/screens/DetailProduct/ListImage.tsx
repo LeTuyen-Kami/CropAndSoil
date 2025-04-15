@@ -23,20 +23,19 @@ const ListImage = ({ id }: { id: string | number }) => {
     queryFn: () => productService.getProductDetail(id),
     staleTime: 1000 * 60 * 5,
     enabled: !!id,
-  });
-
-  useQuery({
-    queryKey: ["shopDetail", productDetail?.shopId],
-    queryFn: () => shopService.getShopDetail(productDetail?.shopId || ""),
-    enabled: !!productDetail?.shopId,
-    staleTime: 1000 * 60 * 5,
+    select: (data) => {
+      return {
+        images: data?.images,
+        upsellIds: data?.upsellIds,
+      };
+    },
   });
 
   useQuery({
     queryKey: ["topProducts", ...(productDetail?.upsellIds || [])],
     queryFn: () =>
       productService.searchProducts({
-        ids: productDetail?.upsellIds,
+        ids: productDetail?.upsellIds?.join(","),
         take: 10,
       }),
     enabled: !!productDetail?.upsellIds && productDetail?.upsellIds.length > 0,

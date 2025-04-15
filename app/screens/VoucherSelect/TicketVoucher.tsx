@@ -1,14 +1,13 @@
-import { View, Text, StyleSheet, Pressable } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import Svg, { Path, Circle, Defs, Stop, G, Line } from "react-native-svg";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { screen } from "~/utils";
+import { LinearGradient } from "expo-linear-gradient";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import Svg, { Line } from "react-native-svg";
 import { imagePaths } from "~/assets/imagePath";
+import { screen } from "~/utils";
 
 type TicketVoucherProps = {
   title?: string;
-  maxDiscount?: string;
+  description?: string;
   minOrder?: string;
   usagePercent?: number;
   expiryDate?: string;
@@ -20,6 +19,7 @@ type TicketVoucherProps = {
   onPress?: () => void;
   paddingHorizontal?: number;
   linearGradientColors?: [string, string];
+  image?: any;
 };
 
 const ProgressBar = ({ usagePercent }: { usagePercent: number }) => {
@@ -38,7 +38,7 @@ const ProgressBar = ({ usagePercent }: { usagePercent: number }) => {
 
 const TicketVoucher = ({
   title = "Mã vận chuyển",
-  maxDiscount = "Giảm tối đa 200k",
+  description = "Mã vận chuyển",
   minOrder = "Đơn tối thiểu 0đ",
   usagePercent = 62,
   expiryDate = "20/01/2025",
@@ -50,6 +50,7 @@ const TicketVoucher = ({
   paddingHorizontal = 12,
   onPress,
   linearGradientColors,
+  image = imagePaths.freeShipping,
 }: TicketVoucherProps) => {
   return (
     <Pressable style={styles.container} onPress={onPress}>
@@ -91,12 +92,12 @@ const TicketVoucher = ({
             }}
           >
             <Image
-              source={imagePaths.icShop}
+              source={image}
               contentFit="contain"
               className="size-[50px]"
             />
             <Text className="text-[10px] font-medium tracking-tight text-[#676767]">
-              Voucher toàn sàn
+              {title}
             </Text>
           </View>
           <View className="w-5 h-full">
@@ -144,22 +145,22 @@ const TicketVoucher = ({
           >
             <View className="flex-col gap-[2px] -mt-1.5">
               <Text className="text-base font-medium leading-normal text-primary">
-                {maxDiscount}
+                {description}
               </Text>
               <View className="flex-row justify-between">
-                <Text className="text-[10px] leading-none tracking-tight text-[#575964]">
+                <Text className="text-[10px] tracking-tight text-[#575964]">
                   {minOrder}
                 </Text>
-                <Text className="text-[10px] leading-none tracking-tight text-[#AEAEAE]">
-                  Đã dùng {usagePercent}%
+                <Text className="text-[10px] tracking-tight text-[#AEAEAE]">
+                  Đã dùng {Math.min(usagePercent, 100)}%
                 </Text>
               </View>
-              <ProgressBar usagePercent={62} />
+              <ProgressBar usagePercent={Math.min(usagePercent, 100)} />
               <View className="flex-row justify-between">
-                <Text className="text-[10px] leading-none tracking-tight text-[#676767]">
+                <Text className="text-[10px] tracking-tight text-[#676767]">
                   {expiryDate}
                 </Text>
-                <Text className="text-[10px] leading-none tracking-tight text-[#E8AB24]">
+                <Text className="text-[10px] tracking-tight text-[#E8AB24]">
                   Điều kiện
                 </Text>
               </View>

@@ -1,48 +1,28 @@
-import { useState } from "react";
-import { View, TouchableOpacity, ScrollView } from "react-native";
-import { Image } from "expo-image";
-import { Text } from "~/components/ui/text";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { AntDesign, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
-import Header from "~/components/common/Header";
+import { Image } from "expo-image";
+import { useState } from "react";
+import { TouchableOpacity, View } from "react-native";
 import { imagePaths } from "~/assets/imagePath";
-
+import { Text } from "~/components/ui/text";
+import { IPaymentMethod } from "~/services/api/payment.service";
+import { checkCanRender } from "~/utils";
 // Payment method option type
-interface PaymentOption {
-  id: string;
-  title: string;
-  subtitle?: string;
-  icon: JSX.Element;
-}
 
-const PaymentMethod = () => {
-  const [selectedPaymentMethod, setSelectedPaymentMethod] =
-    useState<string>("cash");
-  const navigation = useNavigation();
-
-  // Payment options
-  const paymentOptions: PaymentOption[] = [
-    {
-      id: "cash",
-      title: "Thanh toán khi nhận hàng",
-      icon: <FontAwesome5 name="dollar-sign" size={20} color="#383B45" />,
-    },
-    {
-      id: "online",
-      title: "Thanh toán Online",
-      icon: <MaterialIcons name="payment" size={20} color="#383B45" />,
-    },
-    {
-      id: "credit",
-      title: "Thẻ tín dụng/Ghi nợ/ATM",
-      subtitle: "Nhấn để thêm thẻ",
-      icon: <AntDesign name="creditcard" size={20} color="#383B45" />,
-    },
-  ];
+const PaymentMethod = ({
+  paymentMethods,
+  selectedPaymentMethod,
+  onSelectPaymentMethod,
+}: {
+  paymentMethods?: IPaymentMethod[];
+  selectedPaymentMethod: string;
+  onSelectPaymentMethod: (id: string) => void;
+}) => {
+  if (!checkCanRender(paymentMethods)) return null;
 
   // Handle payment method selection
   const handleSelectPaymentMethod = (id: string) => {
-    setSelectedPaymentMethod(id);
+    onSelectPaymentMethod(id);
   };
 
   return (
@@ -58,30 +38,34 @@ const PaymentMethod = () => {
         />
       </View>
       <View>
-        {paymentOptions.map((option, index) => (
+        {paymentMethods?.map((option, index) => (
           <TouchableOpacity
-            key={option.id}
+            key={option.key}
             className={`flex-row justify-between items-center px-3`}
-            onPress={() => handleSelectPaymentMethod(option.id)}
+            onPress={() => handleSelectPaymentMethod(option.key)}
             activeOpacity={0.7}
           >
             <View className="flex-row items-center">
               <View className="justify-center items-center mr-2 size-10">
-                {option.icon}
+                <Image
+                  source={imagePaths.icDollar}
+                  style={{ width: 20, height: 20 }}
+                  contentFit="contain"
+                />
               </View>
               <View>
                 <Text className="text-[14px] text-[#383B45]">
                   {option.title}
                 </Text>
-                {option.subtitle && (
+                {option.description && (
                   <Text className="text-[10px] text-[#159747]">
-                    {option.subtitle}
+                    {option.description}
                   </Text>
                 )}
               </View>
             </View>
             <View className="justify-center items-center w-6 h-6">
-              {selectedPaymentMethod === option.id ? (
+              {selectedPaymentMethod === option.key ? (
                 <MaterialIcons name="check-circle" size={24} color="#159747" />
               ) : (
                 <MaterialIcons

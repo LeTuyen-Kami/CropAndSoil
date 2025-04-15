@@ -4,19 +4,27 @@ import { useAtomValue } from "jotai";
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { imagePaths } from "~/assets/imagePath";
+import { useSmartNavigation } from "~/hooks/useSmartNavigation";
+import { RootStackScreenProps } from "~/navigation/types";
 import { authAtom } from "~/store/atoms";
 
 const HeaderSearch = () => {
-  const navigation = useNavigation();
+  const navigation = useSmartNavigation();
   const auth = useAtomValue(authAtom);
+
+  const navigateCart = () => {
+    navigation.smartNavigate("ShoppingCart");
+  };
 
   return (
     <React.Fragment>
       <View className="px-3 py-4">
         <Text className="text-white">
-          <Text className="font-bold">
-            Hello {auth?.user?.name || auth?.user?.phone},{" "}
-          </Text>
+          {auth?.isLoggedIn && (
+            <Text className="font-bold">
+              Hello {auth?.user?.name || auth?.user?.phone},{" "}
+            </Text>
+          )}
           Hôm nay bạn cần tìm gì ?
         </Text>
       </View>
@@ -33,7 +41,7 @@ const HeaderSearch = () => {
             style={{ width: 20, height: 20 }}
           />
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={navigateCart}>
           <View className="bg-secondary-500 size-[50] flex items-center justify-center rounded-full">
             <Image
               source={imagePaths.icCart}

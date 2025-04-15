@@ -7,8 +7,13 @@ import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { deepEqual } from "fast-equals";
 import { IProduct, productService } from "~/services/api/product.service";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatPrice } from "~/utils";
+import { wishlistService } from "~/services/api/wishlist.service";
+import { toast } from "~/components/common/Toast";
+import { authAtom } from "~/store/atoms";
+import { useAtomValue } from "jotai";
+import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 
 const BrandBadge = () => {
   return (
@@ -40,18 +45,28 @@ const AuthenticBadge = () => {
   );
 };
 
-const SalesCount = ({ quantity }: { quantity: number | undefined }) => {
-  const navigation = useNavigation();
-
+const SalesCount = ({
+  quantity,
+  isLiked,
+  onPress,
+}: {
+  quantity: number | undefined;
+  isLiked: boolean;
+  onPress: () => void;
+}) => {
   return (
-    <TouchableOpacity onPress={() => navigation.navigate("LikedProduct")}>
-      <View style={styles.salesCountContainer}>
-        <Text style={styles.salesCountText}>
-          Đã bán {(quantity || 0)?.toLocaleString()}
-        </Text>
-        <AntDesign name="heart" size={15} color="#E01739" />
-      </View>
-    </TouchableOpacity>
+    <View style={styles.salesCountContainer}>
+      <Text style={styles.salesCountText}>
+        Đã bán {(quantity || 0)?.toLocaleString()}
+      </Text>
+      <TouchableOpacity onPress={onPress}>
+        <AntDesign
+          name={isLiked ? "heart" : "hearto"}
+          size={15}
+          color={isLiked ? "#E01739" : "#AEAEAE"}
+        />
+      </TouchableOpacity>
+    </View>
   );
 };
 
@@ -103,43 +118,74 @@ const Atribute = ({
 };
 
 const Info = ({ id }: { id: string | number }) => {
-  const [selectedType, setSelectedType] = useState("NPK rau 500gr");
-
-  const { data: productDetail } = useQuery({
+  const queryClient = useQueryClient();
+  const auth = useAtomValue(authAtom);
+  const navigation = useSmartNavigation();
+  const { data: productDetail, refetch } = useQuery({
     queryKey: ["product-detail", id],
     queryFn: () => productService.getProductDetail(id),
     staleTime: 1000 * 60 * 5,
     enabled: !!id,
   });
 
-  const productTypes = useMemo(() => {
-    return (
-      productDetail?.attributes?.flatMap((attribute) =>
-        attribute?.options?.map((option) => option?.name)
-      ) ?? []
-    );
-  }, [productDetail]);
+  const mutationLikeProduct = useMutation({
+    mutationFn: () => wishlistService.addWishlist(id.toString()),
+    onSuccess: () => {
+      refetch();
+      queryClient.invalidateQueries({ queryKey: ["wishlist"] });
+      toast.success("Đã thêm vào danh sách yêu thích");
+    },
+    onError: () => {
+      toast.error("Lỗi khi thêm vào danh sách yêu thích");
+    },
+  });
+
+  const mutationUnlikeProduct = useMutation({
+    mutationFn: () => wishlistService.removeWishlist(id.toString()),
+    onSuccess: () => {
+      refetch();
+      queryClient.invalidateQueries({ queryKey: ["wishlist"] });
+      toast.success("Đã xóa khỏi danh sách yêu thích");
+    },
+    onError: () => {
+      toast.error("Lỗi khi xóa khỏi danh sách yêu thích");
+    },
+  });
+
+  const handleLikeProduct = () => {
+    if (!auth?.isLoggedIn) {
+      navigation.smartNavigate("Login");
+      return;
+    }
+
+    if (false) {
+      mutationUnlikeProduct.mutate();
+    } else {
+      mutationLikeProduct.mutate();
+    }
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.brandInfoText}>
-        Thương hiệu:{" "}
-        <Text
-          style={{
-            ...styles.brandInfoText,
-            color: "#22B14C",
-          }}
-        >
-          Siêu thị Làm Vườn Greenhome
+      {productDetail?.brands?.[0]?.name && (
+        <Text style={styles.brandInfoText}>
+          Thương hiệu:{" "}
+          <Text style={{ ...styles.brandInfoText, color: "#22B14C" }}>
+            {productDetail?.brands?.[0]?.name}
+          </Text>
         </Text>
-      </Text>
+      )}
 
       <View style={styles.brandInfoContent}>
         <View style={styles.badgesContainer}>
           <BrandBadge />
-          <AuthenticBadge />
+          {productDetail?.shop?.isOfficial && <AuthenticBadge />}
         </View>
-        <SalesCount quantity={productDetail?.totalSales} />
+        <SalesCount
+          quantity={productDetail?.totalSales}
+          isLiked={false} //TODO: change to productDetail?.isLiked
+          onPress={handleLikeProduct}
+        />
       </View>
 
       <Text style={styles.productTitle}>{productDetail?.name}</Text>

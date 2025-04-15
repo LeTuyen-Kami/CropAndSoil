@@ -64,9 +64,7 @@ const LoginForm = () => {
             token: data.token,
             isLoggedIn: true,
           }));
-          navigation.navigate("MainTabs", {
-            screen: "Profile",
-          });
+          navigation.goBack();
         },
         onError: (error) => {
           toast.error(getErrorMessage(error, "Lỗi khi đăng nhập"));

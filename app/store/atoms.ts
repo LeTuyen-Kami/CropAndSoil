@@ -3,6 +3,7 @@ import { Token } from "../types";
 import { atomWithMMKV } from "./atomWithMMKV";
 import { jotaiStore } from "./store";
 import { IAddress, User } from "~/services/api/user.service";
+import { IVoucher } from "~/services/api/voucher.service";
 
 interface AuthState {
   isLoggedIn: boolean;
@@ -97,3 +98,13 @@ export const initialAddress: IAtomAddress = {
 };
 
 export const editAddressAtom = atom<IAtomAddress>(initialAddress);
+
+export interface IVoucherState {
+  voucher: IVoucher | null;
+  canSelect: boolean;
+}
+
+export const selectedVoucherAtom = atom<IVoucherState>({
+  voucher: null,
+  canSelect: false,
+});

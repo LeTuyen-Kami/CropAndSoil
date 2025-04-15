@@ -1,13 +1,15 @@
 import { deepEqual } from "fast-equals";
 import { memo, useCallback } from "react";
-import { View, ImageSourcePropType } from "react-native";
+import { View, ImageSourcePropType, TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { Text } from "react-native";
 import { imagePaths } from "~/assets/imagePath";
 import Checkbox from "expo-checkbox";
 import ShoppingCartItem from "~/components/common/ShoppingCartItem";
-import { Store } from "./types";
+import { Store } from "../types";
+import { useNavigation } from "@react-navigation/native";
+import { RootStackScreenProps } from "~/navigation/types";
 
 const ShoppingCartStore = ({
   store,
@@ -26,6 +28,8 @@ const ShoppingCartStore = ({
   onItemDelete: (storeId: string, itemId: string) => void;
   onSelectAllItems: (storeId: string, selected: boolean) => void;
 }) => {
+  const navigation = useNavigation<RootStackScreenProps<"ShoppingCart">>();
+
   const handleStoreSelect = useCallback(
     (selected: boolean) => {
       onSelectAllItems(store.id, selected);
@@ -79,9 +83,25 @@ const ShoppingCartStore = ({
             source={imagePaths.icShop}
             style={{ width: 18, height: 18, tintColor: "#676767" }}
           />
-          <Text className="text-sm font-medium">{store.name}</Text>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate("Shop", {
+                id: store.id,
+              });
+            }}
+          >
+            <Text className="text-sm font-medium">{store.name}</Text>
+          </TouchableOpacity>
         </View>
-        <Feather name="chevron-right" size={20} color="#676767" />
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate("Shop", {
+              id: store.id,
+            });
+          }}
+        >
+          <Feather name="chevron-right" size={20} color="#676767" />
+        </TouchableOpacity>
       </View>
 
       {/* Store Items */}
@@ -89,8 +109,10 @@ const ShoppingCartStore = ({
         <ShoppingCartItem
           key={item.id}
           id={item.id}
+          productId={item.productId}
+          variationId={item.variation.id.toString()}
           name={item.name}
-          image={item.image as ImageSourcePropType}
+          image={item.image}
           price={item.price}
           originalPrice={item.originalPrice}
           type={item.type}

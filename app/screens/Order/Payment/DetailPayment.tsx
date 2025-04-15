@@ -1,5 +1,7 @@
+import { useMemo } from "react";
 import { View, Text } from "react-native";
-
+import { ICalculateResponse } from "~/services/api/order.service";
+import { formatPrice } from "~/utils";
 export interface PaymentItem {
   label: string;
   value: string;
@@ -7,24 +9,37 @@ export interface PaymentItem {
   isTotal?: boolean;
 }
 
-interface PaymentDetailsProps {
-  title?: string;
-  items: PaymentItem[];
-  className?: string;
-}
+const DetailPayment = ({
+  calculatedData,
+}: {
+  calculatedData?: ICalculateResponse;
+}) => {
+  if (!calculatedData) return null;
 
-const DetailPayment = () => {
-  const paymentItems: PaymentItem[] = [
-    { label: "Tổng tiền hàng", value: "2.165.000đ" },
-    { label: "Tổng tiền phí vận chuyển", value: "67.600đ" },
-    { label: "Giảm giá phí vận chuyển", value: "-30.600đ", isNegative: true },
-    {
-      label: "Tổng cộng voucher giảm giá",
-      value: "-300.700đ",
-      isNegative: true,
-    },
-    { label: "Tổng thanh toán", value: "1.901.300đ", isTotal: true },
-  ];
+  const paymentItems: PaymentItem[] = useMemo(() => {
+    return [
+      { label: "Tổng tiền hàng", value: formatPrice(calculatedData.subtotal) },
+      {
+        label: "Tổng tiền phí vận chuyển",
+        value: formatPrice(calculatedData.shippingFeeTotal),
+      },
+      {
+        label: "Giảm giá phí vận chuyển",
+        value: formatPrice(calculatedData.shippingVoucherDiscountTotal),
+        isNegative: true,
+      },
+      {
+        label: "Tổng cộng voucher giảm giá",
+        value: formatPrice(calculatedData.productVoucherDiscountTotal),
+        isNegative: true,
+      },
+      {
+        label: "Tổng thanh toán",
+        value: formatPrice(calculatedData.total),
+        isTotal: true,
+      },
+    ]?.filter((item) => item.value !== "");
+  }, [calculatedData]);
 
   return (
     <View className="overflow-hidden mt-4 bg-white rounded-2xl">

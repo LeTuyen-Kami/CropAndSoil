@@ -10,8 +10,8 @@ import { getItemWidth, screen } from "~/utils";
 interface VoucherItemProps {
   description: string;
   amount: string;
-  minimumAmount: number;
-  maximumReduction: number;
+  minimumAmount: string | number;
+  maximumReduction: string | number;
   expiryDate: string;
   onPressSave?: () => void;
 }

@@ -1,9 +1,12 @@
 import { useNavigation } from "@react-navigation/native";
 import { Image } from "expo-image";
+import { deepEqual } from "fast-equals";
+import React from "react";
 import { DimensionValue, TouchableOpacity, View } from "react-native";
 import { imagePaths } from "~/assets/imagePath";
 import { Text } from "~/components/ui/text";
 import { cn } from "~/lib/utils";
+import { RootStackScreenProps } from "~/navigation/types";
 
 export interface ProductItemProps {
   image?: string;
@@ -25,7 +28,7 @@ export interface ProductItemProps {
 }
 
 const ProductItem = ({
-  image = "https://picsum.photos/200/300",
+  image,
   name,
   price,
   originalPrice,
@@ -42,7 +45,7 @@ const ProductItem = ({
   onSale,
   id,
 }: ProductItemProps) => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<RootStackScreenProps<"DetailProduct">>();
 
   const hasDiscount = !!discount && discount > 0;
   const hasSoldCount =
@@ -62,7 +65,7 @@ const ProductItem = ({
     if (onPress) {
       onPress();
     } else {
-      navigation.navigate("DetailProduct", { id: id });
+      navigation.push("DetailProduct", { id: id });
     }
   };
 
@@ -102,50 +105,53 @@ const ProductItem = ({
               </Text>
             )}
           </View>
-          <View className="flex-row justify-between items-center mt-1">
-            {hasSoldCount && (
-              <View className="flex-1">
-                <View className="bg-secondary-100 rounded-full h-[14] w-full overflow-hidden">
-                  <View
-                    className="h-full rounded-full bg-secondary-500"
-                    style={{
-                      width: `${calculateSoldPercentage()}%`,
-                    }}
-                  />
-                  <Text
-                    className="text-[10px] text-center w-full tracking-tight text-neutral-700 font-medium leading-[14px]"
-                    style={{
-                      position: "absolute",
-                    }}
-                  >
-                    {`Đã bán ${soldCount}/${totalCount}`}
-                  </Text>
-                </View>
-              </View>
-            )}
-
-            {!hasSoldCount && hasRating && (
-              <View className="flex-row gap-2 items-center">
-                {hasRating && (
-                  <View className="flex-row items-center bg-[#FDF8EA] rounded-[12px] py-[2] px-[4]">
-                    <Text className="text-[10px] text-[#545454] mr-[2]">
-                      {rating.toFixed(1)}
-                    </Text>
-                    <Image
-                      source={imagePaths.icStar}
-                      style={{ width: 10, height: 10 }}
-                    />
+          {hasSoldCount ||
+            (hasRating && (
+              <View className="flex-row justify-between items-center">
+                {hasSoldCount && (
+                  <View className="flex-1 mt-1">
+                    <View className="bg-secondary-100 rounded-full h-[14] w-full overflow-hidden">
+                      <View
+                        className="h-full rounded-full bg-secondary-500"
+                        style={{
+                          width: `${calculateSoldPercentage()}%`,
+                        }}
+                      />
+                      <Text
+                        className="text-[10px] text-center w-full tracking-tight text-neutral-700 font-medium leading-[14px]"
+                        style={{
+                          position: "absolute",
+                        }}
+                      >
+                        {`Đã bán ${soldCount}/${totalCount}`}
+                      </Text>
+                    </View>
                   </View>
                 )}
 
-                {soldCount && (
-                  <Text className="text-[10px] tracking-tight text-neutral-700">
-                    Đã bán {soldCount}
-                  </Text>
+                {!hasSoldCount && hasRating && (
+                  <View className="flex-row gap-2 items-center mt-1">
+                    {hasRating && (
+                      <View className="flex-row items-center bg-[#FDF8EA] rounded-[12px] py-[2] px-[4]">
+                        <Text className="text-[10px] text-[#545454] mr-[2]">
+                          {rating.toFixed(1)}
+                        </Text>
+                        <Image
+                          source={imagePaths.icStar}
+                          style={{ width: 10, height: 10 }}
+                        />
+                      </View>
+                    )}
+
+                    {soldCount && (
+                      <Text className="text-[10px] tracking-tight text-neutral-700">
+                        Đã bán {soldCount}
+                      </Text>
+                    )}
+                  </View>
                 )}
               </View>
-            )}
-          </View>
+            ))}
           {location && (
             <View className="flex-row gap-[2] items-center mt-1">
               <Image
@@ -172,4 +178,6 @@ const ProductItem = ({
   );
 };
 
-export default ProductItem;
+export default React.memo(ProductItem, (prevProps, nextProps) => {
+  return deepEqual(prevProps, nextProps);
+});

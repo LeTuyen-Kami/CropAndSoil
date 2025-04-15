@@ -188,16 +188,18 @@ export const calculateDiscount = (item: IProduct) => {
   return undefined;
 };
 
-export const formatDate = (date?: string) => {
+export const formatDate = (date?: string, format: string = "DD/MM/YYYY") => {
   if (!date) return "";
 
   if (!dayjs(date)?.isValid()) return "";
 
-  return dayjs(date).format("DD/MM/YYYY");
+  return dayjs(date).format(format);
 };
 
-export const convertToK = (value: number) => {
-  return Math.round(value / 1000);
+export const convertToK = (value?: number) => {
+  if (!value) return 0;
+
+  return Math.round(value / 1000).toLocaleString("vi-VN");
 };
 
 export const checkCanRender = (data: any) => {
@@ -208,4 +210,10 @@ export const checkCanRender = (data: any) => {
   if (data?.some((item: any) => !item)) return false;
 
   return true;
+};
+
+export const formatPhoneNumber = (phoneNumber?: string) => {
+  if (!phoneNumber) return "";
+
+  return phoneNumber.replace(/(\d{3})(\d{3})(\d{4})/, "$1 $2 $3");
 };

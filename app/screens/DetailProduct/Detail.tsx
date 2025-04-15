@@ -1,3 +1,4 @@
+import { useNavigation } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { deepEqual } from "fast-equals";
@@ -5,28 +6,37 @@ import React, { useState } from "react";
 import { Platform, TouchableOpacity, View } from "react-native";
 import WebView, { WebViewMessageEvent } from "react-native-webview";
 import { imagePaths } from "~/assets/imagePath";
+import WebViewContent from "~/components/common/WebViewContent";
 import { Text } from "~/components/ui/text";
+import { RootStackScreenProps } from "~/navigation/types";
 import { productService } from "~/services/api/product.service";
 
 const Detail = ({ id }: { id: string | number }) => {
   const [expanded, setExpanded] = useState(false);
-  const [webViewHeight, setWebViewHeight] = useState(0);
+  const navigation = useNavigation<RootStackScreenProps<"DetailProduct">>();
 
-  const { data: productDetail } = useQuery({
+  const { data: productDescription } = useQuery({
     queryKey: ["productDetail", id],
     queryFn: () => productService.getProductDetail(id),
     enabled: !!id,
     staleTime: 1000 * 60 * 5,
+    select: (data) => {
+      return {
+        description: data?.description,
+        properties: data?.properties,
+        shop: data?.shop,
+      };
+    },
   });
 
-  const productDescription = productDetail?.properties;
+  const handlePressAllProduct = () => {
+    if (!productDescription?.shop?.id) return;
 
-  const onWebViewMessage = (event: WebViewMessageEvent) => {
-    console.log(event.nativeEvent.data);
-    setWebViewHeight(Number(event.nativeEvent.data));
+    navigation.navigate("Shop", {
+      id: String(productDescription?.shop?.id),
+      tabIndex: 2,
+    });
   };
-
-  console.log(webViewHeight);
 
   return (
     <View className="flex-1 mt-2 bg-white rounded-b-3xl">
@@ -38,7 +48,10 @@ const Detail = ({ id }: { id: string | number }) => {
               Chi tiết sản phẩm
             </Text>
           </View>
-          <TouchableOpacity className="flex-row items-center">
+          <TouchableOpacity
+            className="flex-row items-center"
+            onPress={handlePressAllProduct}
+          >
             <Text className="text-[#159747] text-base mr-1">Xem tất cả</Text>
             <Image source={imagePaths.icArrowRight} className="w-5 h-5" />
           </TouchableOpacity>
@@ -55,7 +68,7 @@ const Detail = ({ id }: { id: string | number }) => {
 
         <View className="flex flex-col gap-5 px-5 py-2 mt-2">
           {/* Product description items */}
-          {productDescription?.map((item) => (
+          {productDescription?.properties?.map((item) => (
             <View className="flex-row justify-between" key={item?.key}>
               <Text className="text-[#979797] text-sm w-36">{item?.name}</Text>
               <Text className="text-[#545454] text-sm flex-1">
@@ -67,11 +80,7 @@ const Detail = ({ id }: { id: string | number }) => {
 
         {expanded && (
           <View className="px-5">
-            <WebView
-              source={{ html: productDetail?.description || "" }}
-              style={{ width: "100%", height: 500 }}
-              onMessage={onWebViewMessage}
-            />
+            <WebViewContent html={productDescription?.description || ""} />
           </View>
         )}
       </View>

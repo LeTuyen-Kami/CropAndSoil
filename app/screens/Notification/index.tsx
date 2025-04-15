@@ -1,5 +1,11 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ActivityIndicator,
+  RefreshControl,
+} from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import Header from "~/components/common/Header";
 import ScreenWrapper from "~/components/common/ScreenWrapper";
@@ -8,9 +14,26 @@ import NotificationItem from "~/components/notification/NotificationItem";
 import { useNotifications } from "~/hooks/useNotifications";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Empty from "~/components/common/Empty";
+import { usePagination } from "~/hooks/usePagination";
+import { notificationService } from "~/services/api/notification.service";
+import { COLORS } from "~/constants/theme";
 
 const Notification = () => {
-  const { notifications, activeTab, handleTabChange } = useNotifications();
+  const {
+    data: notifications,
+    isLoading,
+    refresh,
+    isRefresh,
+    hasNextPage,
+    isFetching,
+    fetchNextPage,
+  } = usePagination(notificationService.getNotifications, {
+    initialParams: {
+      skip: 0,
+      take: 10,
+    },
+    queryKey: ["notifications"],
+  });
 
   return (
     <ScreenWrapper hasGradient={true}>
@@ -28,8 +51,22 @@ const Notification = () => {
           estimatedItemSize={150}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listContent}
-          ListEmptyComponent={<Empty title="Không có thông báo nào" />}
-          ListFooterComponent={<View className="h-[100px] bg-transparent" />}
+          onEndReached={fetchNextPage}
+          refreshControl={
+            <RefreshControl refreshing={isRefresh} onRefresh={refresh} />
+          }
+          ListEmptyComponent={
+            <Empty title="Không có thông báo nào" isLoading={isLoading} />
+          }
+          ListFooterComponent={
+            hasNextPage && isFetching ? (
+              <View className="justify-center items-center h-10">
+                <ActivityIndicator size="large" color={COLORS.primary} />
+              </View>
+            ) : (
+              <View className="h-[100px] bg-transparent" />
+            )
+          }
         />
       </View>
     </ScreenWrapper>

@@ -153,6 +153,8 @@ const Toast = ({ toast, onHide }: { toast: ToastData; onHide: () => void }) => {
       exiting={exiting}
       layout={LinearTransition}
       style={[styles.toast, { backgroundColor }]}
+      pointerEvents={"auto"}
+      onTouchStart={onHide}
     >
       <View style={styles.iconContainer}>{getToastIcon(toast.type)}</View>
       <Text style={styles.message}>{toast.message}</Text>
@@ -187,7 +189,10 @@ export const ToastHolder = () => {
   return (
     <>
       {topToasts.length > 0 && (
-        <View style={[styles.container, { top: insets.top + 10 }]}>
+        <View
+          style={[styles.container, { top: insets.top + 10 }]}
+          pointerEvents="box-none"
+        >
           {topToasts.map((toast) => (
             <Animated.View
               key={toast.id}
@@ -201,7 +206,10 @@ export const ToastHolder = () => {
       )}
 
       {bottomToasts.length > 0 && (
-        <View style={[styles.container, { bottom: insets.bottom + 10 }]}>
+        <View
+          style={[styles.container, { bottom: insets.bottom + 10 }]}
+          pointerEvents="box-none"
+        >
           {bottomToasts.map((toast) => (
             <Animated.View
               key={toast.id}

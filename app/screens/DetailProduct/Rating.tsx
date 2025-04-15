@@ -77,11 +77,7 @@ const MOCK_REVIEWS: ReviewItemProps[] = [
   },
 ];
 
-const Rating: React.FC<RatingProps> = ({
-  totalReviews = 20,
-  onViewAllPress,
-  id,
-}) => {
+const Rating: React.FC<RatingProps> = ({ onViewAllPress, id }) => {
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
 
   const { data: productDetail } = useQuery({

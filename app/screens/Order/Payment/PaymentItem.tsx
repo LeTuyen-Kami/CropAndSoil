@@ -1,16 +1,17 @@
 import React from "react";
-import { View, ImageSourcePropType } from "react-native";
+import { View, ImageSourcePropType, TouchableOpacity } from "react-native";
 import { Text } from "~/components/ui/text";
 import { Image } from "expo-image";
 
 interface PaymentItemProps {
   id: string;
   name: string;
-  image: ImageSourcePropType;
+  image: any;
   type: string;
   price: number;
   originalPrice: number;
   quantity: number;
+  onPress: () => void;
 }
 
 const PaymentItem = ({
@@ -21,13 +22,14 @@ const PaymentItem = ({
   price,
   originalPrice,
   quantity,
+  onPress,
 }: PaymentItemProps) => {
   const formatPrice = (value: number) => {
     return value.toLocaleString() + "đ";
   };
 
   return (
-    <View className="flex-row gap-1.5 px-3">
+    <TouchableOpacity className="flex-row gap-1.5 px-3" onPress={onPress}>
       {/* Product Image */}
       <View className="w-[80px] h-[80px] border border-[#F0F0F0] rounded-2xl justify-center items-center p-2.5">
         <Image
@@ -68,7 +70,7 @@ const PaymentItem = ({
           <Text className="text-[10px] text-[#676767]">x{quantity}</Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

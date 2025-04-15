@@ -1,11 +1,12 @@
 import { atom, useAtom } from "jotai";
 import { View, StyleSheet, ActivityIndicator } from "react-native";
+import { COLORS } from "~/constants/theme";
 import { jotaiStore } from "~/store/store";
 
 const loadingAtom = atom(false);
 
 export const toggleLoading = (value?: boolean) => {
-  if (value) {
+  if (value !== undefined && value !== null) {
     jotaiStore.set(loadingAtom, value);
   } else {
     const previousValue = jotaiStore.get(loadingAtom);
@@ -29,7 +30,7 @@ const ScreenLoading = () => {
         },
       ]}
     >
-      <ActivityIndicator size="large" color="#fff" />
+      <ActivityIndicator size="large" color={COLORS.primary} />
     </View>
   );
 };

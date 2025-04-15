@@ -3,17 +3,23 @@ import { TouchableOpacity, View } from "react-native";
 import { Image } from "expo-image";
 import { Text } from "~/components/ui/text";
 import { imagePaths } from "~/assets/imagePath";
+import { cn } from "~/lib/utils";
 
 interface SearchSuggestionTermProps {
   text: string;
   onPress: () => void;
+  className?: string;
 }
 
-const SearchSuggestionTerm = ({ text, onPress }: SearchSuggestionTermProps) => {
+const SearchSuggestionTerm = ({
+  text,
+  onPress,
+  className,
+}: SearchSuggestionTermProps) => {
   return (
     <TouchableOpacity
       onPress={onPress}
-      className="flex-row items-center px-4 py-4 w-full"
+      className={cn("flex-row items-center p-4 w-full", className)}
     >
       <Image
         source={imagePaths.magnifierBlueIcon}

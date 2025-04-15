@@ -21,11 +21,13 @@ import { authAtom } from "~/store/atoms";
 import { useQueryClient } from "@tanstack/react-query";
 import { RootStackScreenProps } from "~/navigation/types";
 import SupportSection from "./SupportSecction";
+import ScreenWrapper from "~/components/common/ScreenWrapper";
+import RecentProduct from "./RecentProduct";
+import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 // Main profile component
 const ProfileScreen = () => {
   const { top } = useSafeAreaInsets();
-
-  const navigation = useNavigation<RootStackScreenProps<"MainTabs">>();
+  const navigation = useSmartNavigation();
   const [refreshing, setRefreshing] = useState(false);
   const setLoginState = useSetAtom(loginAtom);
 
@@ -41,135 +43,105 @@ const ProfileScreen = () => {
   };
 
   const onPressMyOrder = (index: number) => {
-    navigation.navigate("MyOrder", { tabIndex: index });
+    navigation.smartNavigate("MyOrder", { tabIndex: index });
   };
 
   return (
-    <ScreenContainer
-      scrollable={true}
-      paddingHorizontal={0}
-      paddingVertical={0}
-      safeArea={false}
-      backgroundColor="#159747"
-      wrapperClassName="bg-[#eeeeee]"
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
-      <GradientBackground
-        gradientStyle={{ paddingTop: top, paddingBottom: 20 }}
+    <ScreenWrapper hasGradient={false} hasSafeTop={false}>
+      <ScrollView
+        contentContainerClassName="bg-[#EEEEEE]"
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
-        <ProfileHeader />
-        {/* User section */}
+        <GradientBackground
+          gradientStyle={{ paddingTop: top, paddingBottom: 20 }}
+        >
+          <ProfileHeader />
+          {/* User section */}
 
-        <HeaderLogging />
-      </GradientBackground>
-      {/* My orders section */}
-      <View>
-        <View className="bg-white rounded-xl mb-2.5 -mt-4">
-          <SectionTitle
-            title="Đơn hàng của tôi"
-            actionText={
-              auth?.isLoggedIn ? "Xem lịch sử mua hàng" : "Đăng nhập để xem"
-            }
-            showArrow={true}
-          />
-          <View className="flex-row flex-wrap px-2 py-3">
-            <OrderStatusItem
-              icon={imagePaths.icWallet}
-              title="Chờ xác nhận"
+          <HeaderLogging />
+        </GradientBackground>
+        {/* My orders section */}
+        <View>
+          <View className="bg-white rounded-xl mb-2.5 -mt-4">
+            <SectionTitle
               onPress={() => onPressMyOrder(0)}
+              title="Đơn hàng của tôi"
+              actionText={
+                auth?.isLoggedIn ? "Xem lịch sử mua hàng" : "Đăng nhập để xem"
+              }
+              showArrow={true}
             />
-            <OrderStatusItem
-              icon={imagePaths.icBox}
-              title="Chờ vận chuyển"
-              onPress={() => onPressMyOrder(1)}
-            />
-            <OrderStatusItem
-              icon={imagePaths.icDelivery}
-              title="Đang vận chuyển"
-              onPress={() => onPressMyOrder(2)}
-            />
-            <OrderStatusItem
-              icon={imagePaths.icStarProfile}
-              title="Đã giao"
-              onPress={() => onPressMyOrder(3)}
-            />
-            <OrderStatusItem
-              icon={imagePaths.icReturn}
-              title="Đổi trả"
-              onPress={() => onPressMyOrder(4)}
-            />
-          </View>
-        </View>
-
-        {/* Special offers section */}
-        <View className="bg-white rounded-xl mb-2.5">
-          <SectionTitle title="Ưu đãi dành riêng cho bạn" />
-          <Carousel
-            autoPlayInterval={2000}
-            data={[...Array(10)].map((_, index) => ({
-              id: index.toString(),
-            }))}
-            height={(screen.width - 40) / 2}
-            loop={true}
-            pagingEnabled={true}
-            snapEnabled={true}
-            width={screen.width}
-            style={{
-              width: screen.width,
-            }}
-            mode="parallax"
-            modeConfig={{
-              parallaxScrollingScale: 1,
-              parallaxScrollingOffset: 40,
-            }}
-            renderItem={({ index }) => (
-              <View
-                style={{
-                  flex: 1,
-                  marginHorizontal: 26,
-                  paddingVertical: 8,
-                }}
-              >
-                <Image
-                  source={{
-                    uri: "https://picsum.photos/200/300",
-                  }}
-                  style={{ width: "100%", height: "100%", borderRadius: 12 }}
-                />
-              </View>
-            )}
-          />
-          <ScrollView horizontal>
-            <View className="flex-row gap-2 p-2">
-              {[...Array(10)].map((_, index) => (
-                <ProductItem
-                  key={index}
-                  name={"Thuốc trừ bệnh Sumi Eight 12.5WP 100gr "}
-                  price={160000}
-                  originalPrice={180000}
-                  rating={4.5}
-                  soldCount={100}
-                  location="Hà Nội"
-                  id={"123"}
-                />
-              ))}
+            <View className="flex-row flex-wrap px-2 py-3">
+              <OrderStatusItem
+                icon={imagePaths.icWallet}
+                title="Chờ xác nhận"
+                onPress={() => onPressMyOrder(1)}
+              />
+              <OrderStatusItem
+                icon={imagePaths.icBox}
+                title="Chờ vận chuyển"
+                onPress={() => onPressMyOrder(2)}
+              />
+              <OrderStatusItem
+                icon={imagePaths.icDelivery}
+                title="Đang vận chuyển"
+                onPress={() => onPressMyOrder(3)}
+              />
+              <OrderStatusItem
+                icon={imagePaths.icStarProfile}
+                title="Đã giao"
+                onPress={() => onPressMyOrder(4)}
+              />
+              <OrderStatusItem
+                icon={imagePaths.icReturn}
+                title="Đổi trả"
+                onPress={() => onPressMyOrder(5)}
+              />
             </View>
-          </ScrollView>
-        </View>
+          </View>
 
-        {/* Recently viewed section */}
-        <View className="bg-white  rounded-xl mb-2.5">
-          <SectionTitle
-            title="Đã xem gần đây"
-            actionText={auth?.isLoggedIn ? "" : "Đăng nhập để xem"}
-            showArrow={true}
-          />
-
-          {auth?.isLoggedIn && (
+          {/* Special offers section */}
+          <View className="bg-white rounded-xl mb-2.5">
+            <SectionTitle title="Ưu đãi dành riêng cho bạn" />
+            <Carousel
+              autoPlayInterval={2000}
+              data={[...Array(10)].map((_, index) => ({
+                id: index.toString(),
+              }))}
+              height={(screen.width - 40) / 2}
+              loop={true}
+              pagingEnabled={true}
+              snapEnabled={true}
+              width={screen.width}
+              style={{
+                width: screen.width,
+              }}
+              mode="parallax"
+              modeConfig={{
+                parallaxScrollingScale: 1,
+                parallaxScrollingOffset: 40,
+              }}
+              renderItem={({ index }) => (
+                <View
+                  style={{
+                    flex: 1,
+                    marginHorizontal: 26,
+                    paddingVertical: 8,
+                  }}
+                >
+                  <Image
+                    source={{
+                      uri: "https://picsum.photos/200/300",
+                    }}
+                    style={{ width: "100%", height: "100%", borderRadius: 12 }}
+                  />
+                </View>
+              )}
+            />
             <ScrollView horizontal>
-              <View className="flex-row gap-2 px-2 pb-2">
+              <View className="flex-row gap-2 p-2">
                 {[...Array(10)].map((_, index) => (
                   <ProductItem
                     key={index}
@@ -184,36 +156,39 @@ const ProfileScreen = () => {
                 ))}
               </View>
             </ScrollView>
-          )}
-        </View>
-
-        {/* My utilities section */}
-        <View className="bg-white rounded-xl mb-2.5">
-          <SectionTitle title="Tiện ích của tôi" />
-          <View className="flex-row justify-around px-2 py-3">
-            <UtilityItem
-              icon={imagePaths.icVoucher}
-              title="Kho Voucher"
-              onPress={() => navigation.navigate("VoucherSelect")}
-            />
-            <UtilityItem
-              icon={imagePaths.icHeart}
-              title="Sản phẩm yêu thích"
-              onPress={() => navigation.navigate("LikedProduct")}
-            />
-            <UtilityItem
-              icon={imagePaths.icClipboard}
-              title="Danh sách đánh giá"
-              onPress={() => navigation.navigate("MyRating")}
-            />
           </View>
-        </View>
 
-        {/* Support section */}
-        <SupportSection />
-      </View>
-      <View className="h-20 bg-[#EEEEEE]" />
-    </ScreenContainer>
+          {/* Recently viewed section */}
+          <RecentProduct />
+
+          {/* My utilities section */}
+          <View className="bg-white rounded-xl mb-2.5">
+            <SectionTitle title="Tiện ích của tôi" />
+            <View className="flex-row justify-around px-2 py-3">
+              <UtilityItem
+                icon={imagePaths.icVoucher}
+                title="Kho Voucher"
+                onPress={() => navigation.smartNavigate("VoucherSelect")}
+              />
+              <UtilityItem
+                icon={imagePaths.icHeart}
+                title="Sản phẩm yêu thích"
+                onPress={() => navigation.smartNavigate("LikedProduct")}
+              />
+              <UtilityItem
+                icon={imagePaths.icClipboard}
+                title="Danh sách đánh giá"
+                onPress={() => navigation.smartNavigate("MyRating")}
+              />
+            </View>
+          </View>
+
+          {/* Support section */}
+          <SupportSection />
+        </View>
+        <View className="h-20 bg-[#EEEEEE]" />
+      </ScrollView>
+    </ScreenWrapper>
   );
 };
 

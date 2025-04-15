@@ -10,6 +10,8 @@ import ShopCategory from "./ShopCategory";
 import ShopProduct from "./ShopProduct";
 import ShopScreen from "./ShopScreen";
 import ShopVoucher from "./ShopVoucher";
+import { RootStackRouteProp } from "~/navigation/types";
+import { useRoute } from "@react-navigation/native";
 
 const tabs = [
   {
@@ -28,22 +30,36 @@ const tabs = [
 
 const Tabs = () => {
   const [activeIndex, setActiveIndex] = useAtom(activeIndexAtom);
-  const pagerRef = useRef<PagerView>(null);
+  console.log("activeIndex", activeIndex);
 
+  const pagerRef = useRef<PagerView>(null);
+  const route = useRoute<RootStackRouteProp<"Shop">>();
   const onPressTab = (index: number) => {
     setActiveIndex(index);
     pagerRef.current?.setPage(index);
   };
 
   const handlePageChange = (index: number) => {
+    console.log("handlePageChange", index);
+
     setActiveIndex(index);
   };
 
   useEffect(() => {
     return () => {
+      console.log("unmount");
+
       setActiveIndex(0);
     };
   }, []);
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (route.params?.tabIndex) {
+        onPressTab(route.params.tabIndex);
+      }
+    }, 1000);
+  }, [route.params?.tabIndex]);
 
   return (
     <View className="flex-col flex-1 -mt-16">

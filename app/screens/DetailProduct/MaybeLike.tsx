@@ -1,13 +1,20 @@
 import { FlashList } from "@shopify/flash-list";
+import { useQuery } from "@tanstack/react-query";
 import { deepEqual } from "fast-equals";
 import React from "react";
 import { View } from "react-native";
 import ProductItem from "~/components/common/ProductItem";
 import { Text } from "~/components/ui/text";
 import { cn } from "~/lib/utils";
-import { screen } from "~/utils";
+import { calculateDiscount, screen } from "~/utils";
+import { productService } from "~/services/api/product.service";
 
 const MaybeLike = ({ id }: { id: string | number }) => {
+  const { data: recommendedProduct } = useQuery({
+    queryKey: ["recommended-product"],
+    queryFn: () => productService.getRecommendedProducts(),
+  });
+
   return (
     <View className="mt-4">
       <View className="flex-row justify-between items-center px-4">
@@ -18,23 +25,21 @@ const MaybeLike = ({ id }: { id: string | number }) => {
         <View className="flex-1 h-[1px] bg-[#CCC]" />
       </View>
       <View className="flex-row flex-wrap gap-2 px-2 py-3">
-        {[...Array(10)].map((_, index) => (
-          <View key={index}>
-            <ProductItem
-              width={(screen.width - 24) / 2}
-              name={
-                "Voluptate irure in laboris sit sunt pariatur. Sit  Voluptate irure in 123 "
-              }
-              price={100000}
-              originalPrice={150000}
-              discount={20}
-              soldCount={100}
-              totalCount={1000}
-              rating={4.5}
-              location={"Hà Nội"}
-              id={"123"}
-            />
-          </View>
+        {recommendedProduct?.map((item, index) => (
+          <ProductItem
+            width={(screen.width - 24) / 2}
+            key={item.id}
+            name={item.name}
+            price={item.salePrice}
+            originalPrice={item.regularPrice}
+            discount={calculateDiscount(item)}
+            rating={item.averageRating}
+            soldCount={item.totalSales}
+            location={item.shop?.shopWarehouseLocation?.province?.name}
+            id={item.id}
+            image={item.thumbnail}
+            className="flex-grow"
+          />
         ))}
       </View>
     </View>

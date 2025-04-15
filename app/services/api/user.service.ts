@@ -1,20 +1,23 @@
 import { PaginatedResponse, PaginationRequests } from "~/types";
 import { typedAxios } from "../base";
-
 export interface User {
-  accountType: string;
-  avatarUrl?: any;
-  birthday?: any;
-  createdAt: string;
-  email: string;
-  gender?: any;
   id: string;
-  name: string;
-  phone: string;
-  taxCertificateUrl?: any;
-  taxNumber?: any;
-  updatedAt: string;
   wooId: number;
+  phone: string;
+  name: string;
+  email: string;
+  gender: string;
+  avatarUrl: string;
+  birthday: string;
+  taxNumber: string;
+  taxCertificateUrl: string;
+  accountType: string;
+  totalFollowing: number;
+  totalFollowers: number;
+  isApproved: boolean;
+  status: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface UpdateUserPayload {

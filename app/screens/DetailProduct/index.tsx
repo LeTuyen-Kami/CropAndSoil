@@ -28,6 +28,7 @@ import { productService } from "~/services/api/product.service";
 import { RootStackRouteProp } from "~/navigation/types";
 import ListImage from "./ListImage";
 import { FlashList } from "@shopify/flash-list";
+import BottomButton from "./BottomButton";
 const Header = () => {
   const { top } = useSafeAreaInsets();
   const navigation = useNavigation();
@@ -134,7 +135,9 @@ const DetailProduct = () => {
         estimatedItemSize={200}
         getItemType={(item) => item.type}
         keyExtractor={(item) => item.type}
+        ListFooterComponent={<View className="h-10" />}
       />
+      <BottomButton productId={id} />
     </ScreenWrapper>
   );
 };

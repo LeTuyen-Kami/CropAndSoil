@@ -6,13 +6,18 @@ import { Modal, View } from "react-native";
 import { imagePaths } from "~/assets/imagePath";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
-
+import { ICalculateResponse } from "~/services/api/order.service";
+import { formatPrice } from "~/utils";
 const ModalSuccess = ({
   isOpen,
-  onClose,
+  onContinueOrder,
+  onViewOrder,
+  calculatedData,
 }: {
   isOpen: boolean;
-  onClose: () => void;
+  onContinueOrder: () => void;
+  onViewOrder: () => void;
+  calculatedData?: ICalculateResponse;
 }) => {
   const lottieRef = useRef<LottieView>(null);
 
@@ -38,7 +43,7 @@ const ModalSuccess = ({
             className="size-[175px] mb-10"
           />
           <Text className="text-xl font-bold leading-loose text-center text-white">
-            Bạn đã thanh toán 1.091.300đ
+            Bạn đã thanh toán {formatPrice(calculatedData?.total)}
           </Text>
           <Text className="text-sm font-normal leading-tight text-center text-white">
             Đơn hàng của bạn đã được ghi nhận. Theo dõi trạng thái đơn hàng tại
@@ -46,10 +51,10 @@ const ModalSuccess = ({
           </Text>
         </View>
         <View className="gap-4 px-9">
-          <Button className="bg-secondary" onPress={onClose}>
+          <Button className="bg-secondary" onPress={onContinueOrder}>
             <Text className="font-medium">Tiếp tục mua</Text>
           </Button>
-          <Button className="bg-white">
+          <Button className="bg-white" onPress={onViewOrder}>
             <Text className="font-medium text-black">Chi tiết đơn</Text>
           </Button>
         </View>

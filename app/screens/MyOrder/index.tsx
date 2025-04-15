@@ -2,7 +2,7 @@ import { Feather } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
 import { Image } from "expo-image";
 import { useSetAtom } from "jotai";
-import { TouchableOpacity, View } from "react-native";
+import { RefreshControl, TouchableOpacity, View } from "react-native";
 import { imagePaths } from "~/assets/imagePath";
 import GradientBackground from "~/components/common/GradientBackground";
 import Header from "~/components/common/Header";
@@ -10,27 +10,20 @@ import Tabs from "~/components/common/Tabs";
 import { Text } from "~/components/ui/text";
 import { confirmAtom } from "~/store/atoms";
 import ProductCart from "./ProductCart";
+import { useQuery } from "@tanstack/react-query";
+import { orderService } from "~/services/api/order.service";
+import { usePagination } from "~/hooks/usePagination";
+import ListOrder from "./ListOrder";
+import { ORDER_STATUS } from "~/utils/contants";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { RootStackRouteProp, RootStackScreenProps } from "~/navigation/types";
+import { useEffect, useRef } from "react";
+import { TabsRef } from "~/components/common/Tabs";
 const MyOrderScreen = () => {
+  const route = useRoute<RootStackRouteProp<"MyOrder">>();
+  const tabIndex = route.params?.tabIndex || 0;
   const setConfirmState = useSetAtom(confirmAtom);
-
-  const mockProducts = [
-    {
-      name: "Phân Bón NPK Greenhome, Chuyên Rau Ăn Lá, Củ, Cây Ăn Trái, Hoa, Chắc Rễ, Khoẻ Cây, Bông To, Sai Quả",
-      type: "NPK Rau Phú Mỹ",
-      quantity: 1,
-      originalPrice: "220.000đ",
-      discountedPrice: "160.000đ",
-      imageUri: "https://picsum.photos/200/300",
-    },
-    {
-      name: "Phân Bón NPK Greenhome, Chuyên Rau Ăn Lá, Củ, Cây Ăn Trái, Hoa, Chắc Rễ, Khoẻ Cây, Bông To, Sai Quả",
-      type: "NPK Rau Phú Mỹ",
-      quantity: 2,
-      originalPrice: "220.000đ",
-      discountedPrice: "170.000đ",
-      imageUri: "https://picsum.photos/200/300",
-    },
-  ];
+  const navigation = useNavigation<RootStackScreenProps<"MyOrder">>();
 
   const handleCancelOrder = () => {
     setConfirmState({
@@ -50,55 +43,38 @@ const MyOrderScreen = () => {
     console.log("View details");
   };
 
-  const renderPageItem = ({ listItem }: { listItem: any[] }) => {
-    return (
-      <View className="flex-1 mt-3">
-        <FlashList
-          data={listItem}
-          ItemSeparatorComponent={() => <View className="h-2.5" />}
-          renderItem={({ item }) => (
-            <ProductCart
-              shopName="Greenhomevn"
-              products={mockProducts}
-              totalPrice="Tổng số tiền (2 sản phẩm): 500.000đ"
-              onCancelOrder={handleCancelOrder}
-              onViewDetails={handleViewDetails}
-            />
-          )}
-          estimatedItemSize={200}
-        />
-      </View>
-    );
+  const handleSearchOrder = () => {
+    navigation.navigate("SearchOrder");
   };
 
   const items = [
     {
       title: "Tất cả",
-      content: renderPageItem({ listItem: [...Array(10)] }),
+      content: <ListOrder />,
     },
     {
       title: "Chờ xác nhận",
-      content: renderPageItem({ listItem: [...Array(10)] }),
+      content: <ListOrder status={ORDER_STATUS.PENDING} />,
     },
     {
       title: "Chờ vận chuyển",
-      content: renderPageItem({ listItem: [...Array(10)] }),
+      content: <ListOrder status={ORDER_STATUS.PROCESSING} />,
     },
     {
       title: "Đang vận chuyển",
-      content: renderPageItem({ listItem: [...Array(10)] }),
+      content: <ListOrder status={ORDER_STATUS.SHIPPED} />,
     },
     {
       title: "Đã giao",
-      content: renderPageItem({ listItem: [...Array(10)] }),
+      content: <ListOrder status={ORDER_STATUS.DELIVERED} />,
     },
     {
       title: "Đổi trả",
-      content: renderPageItem({ listItem: [...Array(10)] }),
+      content: <ListOrder status={ORDER_STATUS.RETURNED} />,
     },
     {
       title: "Đã hủy",
-      content: renderPageItem({ listItem: [...Array(10)] }),
+      content: <ListOrder status={ORDER_STATUS.CANCELLED} />,
     },
   ];
 
@@ -119,9 +95,12 @@ const MyOrderScreen = () => {
           </TouchableOpacity>
         }
       />
-      <View className="flex-1 bg-[#EEE] rounded-t-[40px]">
+      <View className="flex-1 bg-[#EEE] rounded-t-2xl">
         <View className="px-3 mt-4 mb-3">
-          <TouchableOpacity className="flex-row gap-3 items-center bg-white rounded-full py-[15px] px-4">
+          <TouchableOpacity
+            className="flex-row gap-3 items-center bg-white rounded-full py-[15px] px-4"
+            onPress={handleSearchOrder}
+          >
             <Feather name="search" size={18} color="#AEAEAE" />
             <Text className="text-sm leading-tight text-[#AEAEAE]">
               Tìm Mã đơn hàng, Nhà bán, Tên sản phẩm
@@ -129,7 +108,7 @@ const MyOrderScreen = () => {
           </TouchableOpacity>
         </View>
         <View className="flex-1">
-          <Tabs items={items} />
+          <Tabs items={items} initialPage={tabIndex} />
         </View>
 
         {/* <ProductCart

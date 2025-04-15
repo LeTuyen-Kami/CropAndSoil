@@ -10,51 +10,16 @@ import { useMemo, useState } from "react";
 import { FlashList } from "@shopify/flash-list";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import ScreenWrapper from "~/components/common/ScreenWrapper";
-const mockData = [
-  {
-    type: "shippingHeader",
-    title: "Ưu đãi phí vận chuyển",
-  },
-  ...Array(2)
-    .fill(0)
-    .map((_, index) => {
-      return {
-        type: "shipping",
-      };
-    }),
-  {
-    type: "shippingFooter",
-  },
-  {
-    type: "voucherHeader",
-    title: "Voucher Cropee",
-  },
-  ...Array(10)
-    .fill(0)
-    .map((_, index) => {
-      return {
-        type: "voucher",
-      };
-    }),
-  {
-    type: "voucherFooter",
-  },
-  {
-    type: "otherHeader",
-    title: "Voucher không khả dụng",
-  },
-  ...Array(20)
-    .fill(0)
-    .map((_, index) => {
-      return {
-        type: "other",
-      };
-    }),
-  {
-    type: "otherFooter",
-    title: "Không áp dụng với một số sản phẩm",
-  },
-];
+import { voucherService } from "~/services/api/voucher.service";
+import { useQuery } from "@tanstack/react-query";
+import { RefreshControl } from "react-native-gesture-handler";
+import { IVoucher } from "~/services/api/shop.service";
+import { convertToK, formatDate } from "~/utils";
+import { RootStackRouteProp, RootStackScreenProps } from "~/navigation/types";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { useAtom } from "jotai";
+import { selectedVoucherAtom } from "~/store/atoms";
+import { imagePaths } from "~/assets/imagePath";
 
 const WrapperHeader = ({ title }: { title: string }) => {
   return (
@@ -76,30 +41,111 @@ const WrapperVoucher = ({ children }: { children: React.ReactNode }) => {
   return <View className="px-3 -mt-4 bg-white">{children}</View>;
 };
 
+const ShippingVoucher = ({
+  voucher,
+  onPressVoucher,
+}: {
+  voucher: IVoucher;
+  onPressVoucher: (voucher: IVoucher) => void;
+}) => {
+  return (
+    <WrapperVoucher>
+      <TicketVoucher
+        title={"Mã vận chuyển"}
+        description={voucher.description}
+        minOrder={`Đơn tối thiểu ${convertToK(voucher.minimumAmount)}đ`}
+        expiryDate={formatDate(voucher.expiryDate)}
+        usagePercent={Math.round(
+          (voucher.usedCount / (voucher.usageLimit || 1)) * 100
+        )}
+        onPress={() => {
+          onPressVoucher(voucher);
+        }}
+      />
+    </WrapperVoucher>
+  );
+};
+
+const ProductVoucher = ({
+  voucher,
+  onPressVoucher,
+}: {
+  voucher: IVoucher;
+  onPressVoucher: (voucher: IVoucher) => void;
+}) => {
+  return (
+    <WrapperVoucher>
+      {
+        <TicketVoucher
+          linearGradientColors={["#FFFCF5", "#FFF6DD"]}
+          borderColor="#FEEBC1"
+          shadowColor="#FEEBC1"
+          shadowBorderColor="#FEEBC1"
+          image={imagePaths.bag}
+          title="Voucher toàn sàn"
+          minOrder={`Đơn tối thiểu ${convertToK(voucher.minimumAmount)}đ`}
+          expiryDate={formatDate(voucher.expiryDate)}
+          description={voucher.description}
+          usagePercent={Math.round(
+            (voucher.usedCount / (voucher.usageLimit || 1)) * 100
+          )}
+          onPress={() => {
+            onPressVoucher(voucher);
+          }}
+        />
+      }
+    </WrapperVoucher>
+  );
+};
+
 const VoucherSelectScreen = () => {
   const { top } = useSafeAreaInsets();
   const [search, setSearch] = useState("");
-  const [data, setData] = useState(mockData);
   const [isShowMoreVoucher, setIsShowMoreVoucher] = useState(false);
-  const onPressMoreVoucher = () => {
-    const shippingFooterIndex = mockData.findIndex(
-      (item) => item.type === "shippingFooter"
-    );
-    const beforeIndex = mockData.slice(0, shippingFooterIndex);
-    const afterIndex = mockData.slice(shippingFooterIndex);
+  const [voucherState, setVoucherState] = useAtom(selectedVoucherAtom);
+  const navigation = useNavigation<RootStackScreenProps<"VoucherSelect">>();
+  const {
+    data: shippingVouchers,
+    refetch,
+    isRefetching,
+  } = useQuery({
+    queryKey: ["vouchers", "shipping"],
+    queryFn: () =>
+      voucherService.getVouchers({
+        voucherType: "shipping",
+        skip: 0,
+        take: 100,
+      }),
+    staleTime: 0,
+    refetchOnMount: "always",
+  });
 
-    setData([
-      ...beforeIndex,
-      ...(!isShowMoreVoucher
-        ? Array(10)
-            .fill(0)
-            .map((_, index) => {
-              return { type: "voucher" };
-            })
-        : []),
-      ...afterIndex,
-    ]);
+  const {
+    data: productVouchers,
+    refetch: refetchProductVouchers,
+    isRefetching: isRefetchingProductVouchers,
+  } = useQuery({
+    queryKey: ["vouchers", "product"],
+    queryFn: () =>
+      voucherService.getVouchers({
+        voucherType: "product",
+        skip: 0,
+        take: 100,
+      }),
+  });
+
+  const onPressMoreVoucher = () => {
     setIsShowMoreVoucher((prev) => !prev);
+  };
+
+  const onPressVoucher = (voucher: IVoucher) => {
+    if (voucherState.canSelect) {
+      navigation?.goBack();
+      setVoucherState({
+        voucher,
+        canSelect: false,
+      });
+    }
   };
 
   const renderItem = ({ item }: { item: any }) => {
@@ -107,11 +153,16 @@ const VoucherSelectScreen = () => {
       case "shippingHeader":
         return <WrapperHeader title={item.title} />;
       case "shipping":
-        return <WrapperVoucher>{<TicketVoucher />}</WrapperVoucher>;
+        return (
+          <ShippingVoucher
+            voucher={item.item}
+            onPressVoucher={onPressVoucher}
+          />
+        );
       case "shippingFooter":
         return (
           <View className="flex-row justify-center items-center px-2 py-2.5 mb-2.5 bg-white rounded-b-3xl">
-            <TouchableOpacity onPress={onPressMoreVoucher}>
+            {/* <TouchableOpacity onPress={onPressMoreVoucher}>
               <Text className="text-xs tracking-tight leading-none">
                 {isShowMoreVoucher ? "Ẩn bớt voucher" : "Xem thêm voucher"}
               </Text>
@@ -120,16 +171,14 @@ const VoucherSelectScreen = () => {
               name="chevron-down"
               size={18}
               color="black"
-            />
+            /> */}
           </View>
         );
       case "voucherHeader":
         return <WrapperHeader title={item.title} />;
       case "voucher":
         return (
-          <WrapperVoucher>
-            {<TicketVoucher linearGradientColors={["#FF0000", "#00FF00"]} />}
-          </WrapperVoucher>
+          <ProductVoucher voucher={item.item} onPressVoucher={onPressVoucher} />
         );
       case "voucherFooter":
         return <WrapperFooter title={item.title} />;
@@ -144,20 +193,42 @@ const VoucherSelectScreen = () => {
     }
   };
 
-  const stickyHeaderIndices = useMemo(() => {
-    return mockData
-      ?.map((item, index) => {
-        if (
-          item.type === "shippingHeader" ||
-          item.type === "voucherHeader" ||
-          item.type === "otherHeader"
-        ) {
-          return index;
-        }
-        return null;
-      })
-      .filter((item) => item !== null);
-  }, []);
+  const flashListData = useMemo(() => {
+    if (!shippingVouchers && !productVouchers) return [];
+
+    return [
+      {
+        type: "shippingHeader",
+        title: "Ưu đãi phí vận chuyển",
+      },
+      ...(shippingVouchers?.data || [])?.map((voucher) => ({
+        type: "shipping",
+        item: voucher,
+      })),
+      {
+        type: "shippingFooter",
+      },
+      {
+        type: "voucherHeader",
+        title: "Voucher Cropee",
+      },
+      ...(productVouchers?.data || [])?.map((voucher) => ({
+        type: "voucher",
+        item: voucher,
+      })),
+      {
+        type: "voucherFooter",
+      },
+      // {
+      //   type: "otherHeader",
+      //   title: "Voucher không khả dụng",
+      // },
+      // {
+      //   type: "otherFooter",
+      //   title: "Không áp dụng với một số sản phẩm",
+      // },
+    ];
+  }, [shippingVouchers, productVouchers]);
 
   return (
     <ScreenWrapper hasGradient={true} hasSafeBottom={false}>
@@ -179,7 +250,10 @@ const VoucherSelectScreen = () => {
         />
         <View className="flex-1">
           <FlashList
-            data={data}
+            refreshControl={
+              <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+            }
+            data={flashListData}
             renderItem={renderItem}
             getItemType={(item) => item.type}
             estimatedItemSize={100}

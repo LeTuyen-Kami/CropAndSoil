@@ -2,11 +2,13 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import React, { useEffect, useRef, useState } from "react";
-import { View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import Header from "~/components/common/Header";
 import ScreenWrapper from "~/components/common/ScreenWrapper";
 import SearchBar from "~/components/common/SearchBar";
 import SearchResults from "~/components/search/SearchResults";
+import { Text } from "~/components/ui/text";
+import { useDebounce } from "~/hooks/useDebounce";
 import { RootStackParamList } from "~/navigation/types";
 import { searchService } from "~/services/api/search.services";
 
@@ -37,16 +39,13 @@ const SearchScreen = () => {
     queryFn: () => searchService.getTrending(),
   });
 
-  const mutation = useMutation({
-    mutationFn: (search: string) => searchService.searchSuggestions(search),
-  });
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   const { data: suggestions } = useQuery({
-    queryKey: ["suggestions", searchQuery],
-    queryFn: () => searchService.searchSuggestions(searchQuery),
+    queryKey: ["suggestions", debouncedSearchQuery],
+    queryFn: () => searchService.searchSuggestions(debouncedSearchQuery),
+    enabled: !!debouncedSearchQuery,
   });
-
-  console.log(trending);
 
   // Update visibility of suggestion grid based on query
   useEffect(() => {
@@ -57,10 +56,18 @@ const SearchScreen = () => {
     setShowSuggestions(searchQuery.length === 0);
   }, [searchQuery]);
 
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
-      navigation.navigate("SearchAdvance", { searchText: searchQuery });
+  const handleSearch = (query?: string) => {
+    const value = query || searchQuery;
+    console.log("value", value);
+
+    if (value?.trim()) {
+      navigation.navigate("SearchAdvance", { searchText: value });
     }
+  };
+
+  const handlePressTrending = (item: string) => {
+    setSearchQuery(item);
+    handleSearch(item);
   };
 
   const handleSuggestionPress = (suggestion: any) => {
@@ -78,22 +85,12 @@ const SearchScreen = () => {
 
   const handleSuggestionTermPress = (text: string) => {
     setSearchQuery(text);
-    handleSearch();
+    handleSearch(text);
   };
 
   const handleViewMorePress = () => {
     console.log("View more pressed");
   };
-
-  useEffect(() => {
-    if (trending && trending.length > 0) {
-      mutation.mutate(trending[0], {
-        onSuccess: (data) => {
-          console.log("data", data);
-        },
-      });
-    }
-  }, [trending]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -109,19 +106,38 @@ const SearchScreen = () => {
         showBack
         className="border-0"
         hasSafeTop={false}
+        onBackPress={() => navigation.popToTop()}
       />
       <View className="flex-1">
         <SearchBar
           value={searchQuery}
           onChangeText={setSearchQuery}
-          onSearch={handleSearch}
+          onSearch={() => handleSearch()}
         />
+
+        {!searchQuery && (
+          <View className="flex-row flex-wrap gap-2 p-2">
+            {trending?.map((item, index) => (
+              <TouchableOpacity
+                key={index}
+                className="p-2 bg-[#F5F5F5] rounded-lg"
+                onPress={() => handlePressTrending(item)}
+              >
+                <Text className="text-xs">{item}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
 
         {/* Search Results */}
         <SearchResults
           query={searchQuery}
           searchHistory={searchHistory}
-          suggestedTerms={MOCK_SEARCH_SUGGESTIONS}
+          suggestedTerms={
+            suggestions
+              ?.sort((a, b) => b.count - a.count)
+              .map((item) => item.name) || []
+          }
           onHistoryItemPress={handleHistoryItemPress}
           onHistoryItemDelete={handleHistoryItemDelete}
           onSuggestionPress={handleSuggestionTermPress}

@@ -5,7 +5,9 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { imagePaths } from "~/assets/imagePath";
 import { useNavigation } from "@react-navigation/native";
 import { RootStackScreenProps } from "~/navigation/types";
-
+import { INotification } from "~/services/api/notification.service";
+import dayjs from "dayjs";
+import { formatDate } from "~/utils";
 export interface PromotionNotification {
   id: string;
   type: "promotion";
@@ -17,7 +19,7 @@ export interface PromotionNotification {
 }
 
 interface PromotionNotificationItemProps {
-  notification: PromotionNotification;
+  notification: INotification;
 }
 
 const PromotionNotificationItem: React.FC<PromotionNotificationItemProps> = ({
@@ -44,18 +46,18 @@ const PromotionNotificationItem: React.FC<PromotionNotificationItemProps> = ({
                 contentFit="contain"
                 className="size-[38px]"
               />
-              {!notification.isRead && (
+              {/* {!notification.isRead && (
                 <View className="absolute top-0 right-0 rounded-full border border-white">
                   <View className="bg-red-500 rounded-full size-2" />
                 </View>
-              )}
+              )} */}
             </View>
             <View>
               <Text className="text-base font-medium text-[#383B45]">
                 {notification.title}
               </Text>
               <Text className="text-xs text-[#676767]">
-                {notification.date}
+                {formatDate(notification?.createdAt, "DD/MM/YYYY HH:mm")}
               </Text>
             </View>
           </View>
@@ -66,7 +68,7 @@ const PromotionNotificationItem: React.FC<PromotionNotificationItemProps> = ({
           <View className="flex-row bg-[#F5F5F5] rounded-lg gap-[10px]">
             <View className="w-[74px] h-[72px] rounded-lg border border-[#F0F0F0] overflow-hidden">
               <Image
-                source={{ uri: notification.imageUrl }}
+                source={{ uri: notification.thumbnail }}
                 className="w-full h-full rounded-lg"
                 contentFit="cover"
               />
@@ -76,7 +78,7 @@ const PromotionNotificationItem: React.FC<PromotionNotificationItemProps> = ({
                 className="text-xs text-[#676767] leading-[18px]"
                 numberOfLines={3}
               >
-                {notification.message}
+                {notification.content}
               </Text>
             </View>
           </View>

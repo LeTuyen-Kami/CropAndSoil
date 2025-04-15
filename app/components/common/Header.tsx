@@ -15,6 +15,7 @@ interface HeaderProps {
   textColor?: string;
   titleClassName?: string;
   hasSafeTop?: boolean;
+  onBackPress?: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -26,9 +27,18 @@ const Header: React.FC<HeaderProps> = ({
   textColor,
   titleClassName,
   hasSafeTop = true,
+  onBackPress,
 }) => {
   const navigation = useNavigation();
   const { top } = useSafeAreaInsets();
+
+  const handleBackPress = () => {
+    if (onBackPress) {
+      onBackPress();
+    } else {
+      navigation.goBack();
+    }
+  };
 
   return (
     <View
@@ -47,7 +57,7 @@ const Header: React.FC<HeaderProps> = ({
               left: 20,
               right: 40,
             }}
-            onPress={() => navigation.goBack()}
+            onPress={handleBackPress}
             className={cn("w-8", leftClassName)}
           >
             <Image

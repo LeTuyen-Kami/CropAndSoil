@@ -7,13 +7,19 @@ export interface ISearchTrending {
   image: string;
 }
 
+export interface ISearchSuggestion {
+  id: string;
+  name: string;
+  count: number;
+}
+
 class SearchService {
   async getTrending() {
     return typedAxios.get<string[]>("/search/trending");
   }
 
   async searchSuggestions(search: string) {
-    return typedAxios.get<string[]>("/search/suggestions", {
+    return typedAxios.get<ISearchSuggestion[]>("/search/suggestions", {
       params: { search },
     });
   }

@@ -63,7 +63,7 @@ const RenderTwoProduct = ({ items }: { items: IProduct[] }) => {
           id={item.id}
           image={item.images[0]}
           onSale={item.regularPrice > item.salePrice}
-          location={"Ha Noi"}
+          location={item.shop?.shopWarehouseLocation?.province?.name}
           height={"100%"}
         />
       ))}

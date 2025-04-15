@@ -13,10 +13,13 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/ic_launcher.png"
       },
-      "package": "com.letuyen1277.CropAndSoil"
+      "package": "com.letuyen1277.CropAndSoil",
+      "splash": {
+        "image": "./assets/ic_launcher_round.png",
+        "backgroundColor": "#ffffff"
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"

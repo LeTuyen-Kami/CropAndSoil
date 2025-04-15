@@ -7,20 +7,11 @@ import { imagePaths } from "~/assets/imagePath";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { RootStackScreenProps } from "~/navigation/types";
-export interface DeliveryNotification {
-  id: string;
-  type: "delivery";
-  message: string;
-  date: Date;
-  imageUrl: string;
-  isRead: boolean;
-  title: string;
-  orderCode: string;
-  packageCode: string;
-}
+import { INotification } from "~/services/api/notification.service";
+import { formatDate } from "~/utils";
 
 interface DeliveryNotificationItemProps {
-  notification: DeliveryNotification;
+  notification: INotification;
 }
 
 const DeliveryNotificationItem: React.FC<DeliveryNotificationItemProps> = ({
@@ -47,18 +38,18 @@ const DeliveryNotificationItem: React.FC<DeliveryNotificationItemProps> = ({
                 contentFit="contain"
                 className="size-[38px]"
               />
-              {!notification.isRead && (
+              {/* {!notification?.isRead && (
                 <View className="absolute top-0 right-0 rounded-full border border-white">
                   <View className="bg-red-500 rounded-full size-2" />
                 </View>
-              )}
+              )} */}
             </View>
             <View>
               <Text className="text-base font-medium text-[#383B45]">
                 {notification.title}
               </Text>
               <Text className="text-xs text-[#676767]">
-                {dayjs(notification.date).format("DD/MM/YYYY HH:mm")}
+                {formatDate(notification?.createdAt, "DD/MM/YYYY HH:mm")}
               </Text>
             </View>
           </View>
@@ -69,24 +60,24 @@ const DeliveryNotificationItem: React.FC<DeliveryNotificationItemProps> = ({
           <View className="flex-row items-center gap-1.5">
             <View className="w-[74px] h-[74px] rounded-lg border border-[#F0F0F0] p-2.5 justify-center items-center">
               <Image
-                source={{ uri: notification.imageUrl }}
+                source={{ uri: notification.thumbnail }}
                 className="w-full h-full rounded-lg"
                 contentFit="cover"
               />
             </View>
-            <View className="flex-1">
+            {/* <View className="flex-1">
               <Text className="text-xs text-[#676767] leading-[18px]">
                 Kiện hàng{" "}
                 <Text className="text-xs leading-[18px] text-[#159747]">
-                  {notification.packageCode}
+                  {notification}
                 </Text>{" "}
                 của đơn hàng{" "}
                 <Text className="text-xs leading-[18px] text-[#159747]">
-                  {notification.orderCode}
+                  {notification.payload.orderCode}
                 </Text>{" "}
                 đã giao thành công đến bạn.
               </Text>
-            </View>
+            </View> */}
             <MaterialIcons
               name="keyboard-arrow-down"
               size={18}

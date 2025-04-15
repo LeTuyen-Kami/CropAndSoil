@@ -122,9 +122,7 @@ const RegisterForm = () => {
               token: data.token,
               isLoggedIn: true,
             }));
-            navigation.replace("MainTabs", {
-              screen: "Profile",
-            });
+            navigation.goBack();
           },
           onError: (error) => {
             toast.error(

@@ -6,12 +6,15 @@ import { imagePaths } from "~/assets/imagePath";
 import { BOTTOM_TAB_HEIGHT } from "~/utils";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
+import { useAtomValue } from "jotai";
+import { authAtom } from "~/store/atoms";
 
 const CustomTabBar = ({
   state,
   descriptors,
   navigation,
 }: BottomTabBarProps) => {
+  const auth = useAtomValue(authAtom);
   const iconMap: { [key: string]: { icon: any; activeIcon: any } } = {
     Home: {
       icon: imagePaths.icHome,
@@ -52,6 +55,12 @@ const CustomTabBar = ({
         const onPress = () => {
           if (route.name === "TempSearch") {
             navigation.navigate("Search");
+          } else if (route.name === "Notifications") {
+            if (auth?.isLoggedIn) {
+              navigation.navigate("Notifications");
+            } else {
+              navigation.navigate("Login");
+            }
           } else {
             const event = navigation.emit({
               type: "tabPress",
@@ -103,7 +112,13 @@ const CustomTabBar = ({
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => navigation.navigate("ShoppingCart")}
+                onPress={() => {
+                  if (auth?.isLoggedIn) {
+                    navigation.navigate("ShoppingCart");
+                  } else {
+                    navigation.navigate("Login");
+                  }
+                }}
                 style={styles.scanButtonContainer}
                 activeOpacity={0.9}
               >

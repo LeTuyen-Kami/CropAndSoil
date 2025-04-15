@@ -61,8 +61,12 @@ const HeaderLogging = () => {
                 profile?.phone}
             </Text>
             <View className="flex-row gap-6 mt-1">
-              <Text className="text-xs text-white">{102} Người theo dõi</Text>
-              <Text className="text-xs text-white">{125} Đang theo dõi</Text>
+              <Text className="text-xs text-white">
+                {profile?.totalFollowers || 0} Người theo dõi
+              </Text>
+              <Text className="text-xs text-white">
+                {profile?.totalFollowing || 0} Đang theo dõi
+              </Text>
             </View>
           </View>
           <Image

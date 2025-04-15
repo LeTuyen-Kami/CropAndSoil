@@ -20,7 +20,7 @@ const IDENTITY_BASE_URL = "https://cropee-api.faster.asia/api/v1";
 
 export const identityAxiosInstance = axios.create({
   baseURL: IDENTITY_BASE_URL,
-  timeout: 10000,
+  timeout: 60000,
   headers: {
     "Content-Type": "application/json",
     "device-id": getDeviceId(),
@@ -31,7 +31,7 @@ export const identityAxiosInstance = axios.create({
 // Create axios instance
 export const axiosInstance = axios.create({
   baseURL: BASE_URL,
-  timeout: 10000,
+  timeout: 60000,
   headers: {
     "Content-Type": "application/json",
     "device-id": getDeviceId(),

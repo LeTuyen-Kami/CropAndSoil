@@ -8,6 +8,64 @@ export interface Value {
   slug: string;
 }
 
+export interface Option {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+export interface Province {
+  id: string;
+  name: string;
+  type: string;
+  slug: string;
+}
+
+export interface District {
+  id: string;
+  name: string;
+  type: string;
+  provinceId: string;
+}
+
+export interface Ward {
+  id: string;
+  name: string;
+  type: string;
+  districtId: string;
+}
+
+export interface ShopWarehouseLocation {
+  province: Province;
+  district: District;
+  ward: Ward;
+  addressLine: string;
+}
+
+export interface Shop {
+  id: number;
+  shopName: string;
+  shopLogoUrl: string;
+  shopCoverUrl: string;
+  shopRating: number;
+  isOfficial: boolean;
+  totalProducts: number;
+  totalReviews: number;
+  totalFollowers: number;
+  totalFollowing: number;
+  lastOnlineAt: string;
+  createdAt: string;
+  replyRate: string;
+  replyIn: string;
+  shopWarehouseLocation: ShopWarehouseLocation;
+}
+
+export interface Value {
+  id: number;
+  name: string;
+  slug: string;
+}
+
 export interface Property {
   name: string;
   key: string;
@@ -46,6 +104,7 @@ export interface Attribute {
 
 export interface Variation {
   id: number;
+  name: string;
   regularPrice: number;
   salePrice?: any;
   description: string;
@@ -60,14 +119,15 @@ export interface Variation {
   averageRating: number;
   reviewCount: number;
   attributes: Attribute[];
-  name: string;
 }
 
 export interface IProduct {
   id: number;
   name: string;
+  createdAt: string;
   slug: string;
-  sellerId: number;
+  shopId: number;
+  shop: Shop;
   description: string;
   shortDescription: string;
   totalSales: number;
@@ -76,12 +136,11 @@ export interface IProduct {
   salePrice: number;
   featured: boolean;
   onSale: boolean;
-  stock?: any;
+  stock: number;
   stockStatus: string;
   averageRating: number;
   reviewCount: number;
   purchaseNote: string;
-  shopId: number;
   weight?: any;
   length?: any;
   width?: any;
@@ -108,7 +167,7 @@ export interface IProductResquest {
   maxPrice: number;
   location: string;
   averageRatingFrom: number;
-  ids: number[];
+  ids: string; // comma separated
 }
 
 class ProductService {

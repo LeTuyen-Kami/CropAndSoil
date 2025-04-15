@@ -47,10 +47,12 @@ export type RootStackParamList = {
   FAQsDetail: undefined;
   Shop: {
     id: string | number;
+    tabIndex?: number;
   };
   DetailNotification: {
     id: string | number;
   };
+  SearchOrder: undefined;
 };
 
 // Create a type for the navigation prop for stack screens

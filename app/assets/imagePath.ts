@@ -123,6 +123,11 @@ import lightningBadge from "~/assets/images/lightning_badge.png";
 import statusDelivery from "~/assets/images/status_delivery.png";
 import statusPromotion from "~/assets/images/status_promotion.png";
 
+import freeShipping from "~/assets/images/freeship.png";
+import bag from "~/assets/images/bag.png";
+
+import icDollar from "~/assets/icons/dollar_icon.png";
+
 export const imagePaths = {
   //images
   logo: logo,
@@ -247,4 +252,8 @@ export const imagePaths = {
   lightningBadge: lightningBadge,
   statusDelivery: statusDelivery,
   statusPromotion: statusPromotion,
+
+  freeShipping: freeShipping,
+  bag: bag,
+  icDollar: icDollar,
 };
