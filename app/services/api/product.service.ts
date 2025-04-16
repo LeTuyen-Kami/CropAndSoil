@@ -161,11 +161,11 @@ export interface IProduct {
 
 export interface IProductResquest extends PaginationRequests {
   search: string;
-  categoryId: number;
   minPrice: number;
   maxPrice: number;
   locations: string; // comma separated
   averageRatingFrom: number;
+  categoryIds: string; // comma separated
   ids: string; // comma separated
   sortBy: "salePrice" | "createdAt";
   sortDirection: "asc" | "desc";

@@ -21,10 +21,12 @@ const PaymentStore = ({
   store,
   onMessagePress,
   message,
+  onShopVoucherPress,
 }: {
   store: Store;
   onMessagePress: () => void;
   message: string;
+  onShopVoucherPress: () => void;
 }) => {
   const navigation = useNavigation<RootStackScreenProps<"Payment">>();
 
@@ -89,10 +91,24 @@ const PaymentStore = ({
       </View>
 
       {/* Voucher */}
-      <TouchableOpacity className="flex-row justify-between items-center p-3 border-t border-[#F0F0F0]">
+      <TouchableOpacity
+        className="flex-row justify-between items-center p-3 border-t border-[#F0F0F0]"
+        onPress={onShopVoucherPress}
+      >
         <Text className="text-sm text-[#676767]">Voucher của Shop</Text>
-        <View className="flex-row items-center">
-          <Text className="text-sm text-[#AEAEAE] mr-2">Chọn hoặc nhập mã</Text>
+        <View className="flex-row flex-1 justify-end items-center ml-1">
+          {store.shopVoucher ? (
+            <Text
+              className="flex-1 text-sm text-right text-primary"
+              numberOfLines={1}
+            >
+              {store.shopVoucher.description}
+            </Text>
+          ) : (
+            <Text className="text-sm text-[#AEAEAE] mr-2">
+              Chọn hoặc nhập mã
+            </Text>
+          )}
           <Feather name="chevron-right" size={16} color="#AEAEAE" />
         </View>
       </TouchableOpacity>

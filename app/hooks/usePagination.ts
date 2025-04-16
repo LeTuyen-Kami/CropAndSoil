@@ -131,6 +131,10 @@ export function usePagination<T, P = Record<string, any>>(
     setCurrentParams((prev) => ({ ...prev, ...newParams }));
   }, []);
 
+  const resetParams = useCallback(() => {
+    setCurrentParams(initialParams);
+  }, [initialParams]);
+
   const returnValue = useMemo(
     () => ({
       data: combinedData,
@@ -143,6 +147,7 @@ export function usePagination<T, P = Record<string, any>>(
       fetchNextPage,
       refresh,
       updateParams,
+      resetParams,
     }),
     [
       combinedData,
@@ -155,6 +160,7 @@ export function usePagination<T, P = Record<string, any>>(
       refresh,
       updateParams,
       total,
+      resetParams,
     ]
   );
 

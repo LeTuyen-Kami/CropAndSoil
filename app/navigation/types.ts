@@ -39,7 +39,9 @@ export type RootStackParamList = {
   Settings: undefined;
   BusinessVoucher: undefined;
   MyRating: undefined;
-  EditReview: undefined;
+  EditReview: {
+    id: string | number;
+  };
   HelpCenter: undefined;
   HelpCenterDetail: undefined;
   TalkWithCropee: undefined;
@@ -55,6 +57,8 @@ export type RootStackParamList = {
   SearchOrder: undefined;
   Followers: undefined;
   Followings: undefined;
+  ChangePassword: undefined;
+  FlashSale: undefined;
 };
 
 // Create a type for the navigation prop for stack screens

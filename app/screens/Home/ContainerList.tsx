@@ -1,7 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { cssInterop } from "nativewind";
 import React from "react";
-import { View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import { Text } from "~/components/ui/text";
 import { cn } from "~/lib/utils";
 
@@ -13,6 +13,7 @@ interface ContainerListProps {
   bgColor?: string;
   linearColor?: [string, string];
   rightComponent?: React.ReactNode;
+  onPress?: () => void;
 }
 
 cssInterop(LinearGradient, {
@@ -29,8 +30,11 @@ const ContainerList: React.FC<ContainerListProps> = ({
   bgColor,
   linearColor,
   rightComponent,
+  onPress,
 }) => {
   const Container = linearColor ? LinearGradient : View;
+
+  const Wrapper = onPress ? TouchableOpacity : View;
 
   return (
     <Container
@@ -45,11 +49,14 @@ const ContainerList: React.FC<ContainerListProps> = ({
       }}
       className={cn(bgColor, className)}
     >
-      <View className="flex-row gap-2 items-center px-2 mb-4 w-full">
+      <Wrapper
+        className="flex-row gap-2 items-center px-2 mb-4 w-full"
+        onPress={onPress}
+      >
         {!!icon && icon}
         <Text className="text-xl font-bold text-black uppercase">{title}</Text>
         {!!rightComponent && rightComponent}
-      </View>
+      </Wrapper>
       {children}
     </Container>
   );

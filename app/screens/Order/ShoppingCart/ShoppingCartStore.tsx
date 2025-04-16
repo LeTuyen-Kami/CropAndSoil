@@ -136,9 +136,15 @@ const ShoppingCartStore = ({
             source={imagePaths.icTicketSale}
             style={{ width: 20, height: 20, tintColor: "#159747" }}
           />
-          <Text className="text-xs text-[#676767]">
-            Thêm mã khuyến mãi của Shop
-          </Text>
+          {store?.shopVoucher ? (
+            <Text className="flex-1 text-xs text-primary" numberOfLines={1}>
+              {store.shopVoucher.description}
+            </Text>
+          ) : (
+            <Text className="text-xs text-[#676767]">
+              Thêm mã khuyến mãi của Shop
+            </Text>
+          )}
         </View>
         <Feather name="chevron-right" size={20} color="#AEAEAE" />
       </TouchableOpacity>

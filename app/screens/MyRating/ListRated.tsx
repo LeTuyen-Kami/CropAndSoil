@@ -1,126 +1,118 @@
 import { FlashList } from "@shopify/flash-list";
-import { View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 import { Text } from "~/components/ui/text";
 import RatingFilter from "./RatedFilter";
 import ReviewItem, { ReviewItemProps } from "~/components/common/ReviewItem";
 import Empty from "~/components/common/Empty";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
+import { usePagination } from "~/hooks/usePagination";
+import { reviewService } from "~/services/api/review.service";
+import { RefreshControl } from "react-native-gesture-handler";
+import { COLORS } from "~/constants/theme";
+import { useState } from "react";
 
 const ITEMS = [
-  { id: "1", name: "Tất cả" },
-  { id: "2", name: "5 sao" },
-  { id: "3", name: "4 sao" },
-  { id: "4", name: "3 sao" },
-  { id: "5", name: "2 sao" },
-  { id: "6", name: "1 sao" },
-];
-
-const MOCK_REVIEWS: ReviewItemProps[] = [
-  {
-    reviewer: {
-      name: "Thanh Trần",
-      avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-    },
-    rating: 5,
-    quality: "Tốt",
-    date: "10/01/2025 12:14",
-    productVariant: "NPK Rau Phú Mỹ",
-    comment: "Sản phẩm tốt, giá cả phù hợp",
-    likes: 0,
-    media: [
-      {
-        type: "video",
-        uri: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-        duration: "0:18",
-        // thumbnail: "https://images.unsplash.com/photo-1560493676-04071c5f467b",
-      },
-      {
-        type: "video",
-        uri: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-      },
-      {
-        type: "video",
-        uri: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-      },
-      {
-        type: "image",
-        uri: "https://images.unsplash.com/photo-1536147210925-5cb7a7a4f9fe",
-      },
-    ],
-    sellerResponse:
-      "Greenhome thật vui mừng khi nhận được đánh giá của bạn, và rất mong tiếp tục nhận được sự ủng hộ của bạn trong thời gian sắp tới ạ! Mến chúc bạn mỗi ngày đều rạng rỡ, tươi tắn và gặp nhiều may mắn!",
-  },
-  {
-    reviewer: {
-      name: "Lưu Nhã Ngân",
-      avatar: "https://randomuser.me/api/portraits/women/32.jpg",
-    },
-    rating: 3,
-    quality: "Tốt",
-    date: "10/01/2025 12:14",
-    productVariant: "NPK Rau Phú Mỹ",
-    likes: 0,
-    sellerResponse:
-      "Greenhome thật vui mừng khi nhận được đánh giá của bạn, và rất mong tiếp tục nhận được sự ủng hộ của bạn trong thời gian sắp tới ạ! Mến chúc bạn mỗi ngày đều rạng rỡ, tươi tắn và gặp nhiều may mắn!",
-  },
-  {
-    reviewer: {
-      name: "Nguyễn Trần Hưng",
-      avatar: "https://randomuser.me/api/portraits/men/42.jpg",
-    },
-    rating: 5,
-    quality: "Tốt",
-    date: "10/01/2025 12:14",
-    productVariant: "NPK Rau Phú Mỹ",
-    likes: 0,
-  },
+  { id: "1", name: "Tất cả", value: "" },
+  { id: "2", name: "5 sao", value: "5" },
+  { id: "3", name: "4 sao", value: "4" },
+  { id: "4", name: "3 sao", value: "3" },
+  { id: "5", name: "2 sao", value: "2" },
+  { id: "6", name: "1 sao", value: "1" },
 ];
 
 const ListRated = ({ data }: { data: any[] }) => {
   const { bottom } = useSafeAreaInsets();
   const navigation = useNavigation();
+  const [selectedFilter, setSelectedFilter] = useState<{
+    id: string;
+    name: string;
+  }>(ITEMS[0]);
 
-  const onPressEdit = () => {
-    navigation.navigate("EditReview");
+  const {
+    data: reviews,
+    isLoading,
+    isFetching,
+    hasNextPage,
+    isRefresh,
+    refresh,
+    fetchNextPage,
+    updateParams,
+  } = usePagination(reviewService.getMyReviews, {
+    initialPagination: {
+      skip: 0,
+      take: 10,
+    },
+    queryKey: ["reviews"],
+  });
+
+  const onPressEdit = (id: string | number) => {
+    navigation.navigate("EditReview", { id });
   };
 
-  const onPressLike = () => {
+  const onPressLike = (id: string | number) => {
     console.log("onPressLike");
+  };
+
+  const onPressFilter = (item: any) => {
+    setSelectedFilter(item);
+    updateParams({ rating: item.value });
   };
 
   return (
     <View className="flex-1">
       <RatingFilter
         items={ITEMS}
-        selectedItem={ITEMS[0]}
-        onPressItem={() => {}}
+        selectedItem={selectedFilter}
+        onPressItem={onPressFilter}
       />
       <FlashList
-        data={MOCK_REVIEWS}
+        data={reviews}
         renderItem={({ item }) => (
           <ReviewItem
-            {...item}
             isLikeButtonInBottom
-            onPressEdit={onPressEdit}
-            onPressLike={onPressLike}
+            onPressEdit={() => onPressEdit(item.id)}
+            onPressLike={() => onPressLike(item.id)}
+            reviewer={{
+              name: item.authorName,
+              avatar: item.authorAvatar,
+            }}
+            rating={item.rating}
+            quality={item.quality}
+            date={item.createdAt}
+            productVariant={item.variation.name}
+            likes={item.totalLikes}
           />
         )}
+        onEndReached={fetchNextPage}
+        refreshControl={
+          <RefreshControl refreshing={isRefresh} onRefresh={refresh} />
+        }
         estimatedItemSize={100}
         ItemSeparatorComponent={() => <View className="h-2" />}
-        ListEmptyComponent={() => <Empty title="Không có đánh giá nào" />}
-        ListFooterComponent={() => (
-          <View
-            className="py-3"
-            style={{
-              paddingBottom: bottom,
-            }}
-          >
-            <Text className="text-sm text-center text-primary">
-              Bạn đã xem hết danh sách
-            </Text>
-          </View>
+        ListEmptyComponent={() => (
+          <Empty title="Không có đánh giá nào" isLoading={isLoading} />
         )}
+        ListFooterComponent={
+          isFetching && hasNextPage ? (
+            <View className="justify-center items-center py-3">
+              <ActivityIndicator size="small" color={COLORS.primary} />
+            </View>
+          ) : (
+            <View
+              className="py-3"
+              style={{
+                paddingBottom: bottom,
+              }}
+            >
+              {reviews?.length > 0 && (
+                <Text className="text-sm text-center text-primary">
+                  Bạn đã xem hết danh sách
+                </Text>
+              )}
+            </View>
+          )
+        }
       />
     </View>
   );

@@ -6,7 +6,11 @@ import { BREAKPOINTS } from "./contants";
 import dayjs from "dayjs";
 import { IProduct } from "~/services/api/product.service";
 
-export const ENV = process.env;
+export const ENV = {
+  EXPO_PUBLIC_BASE_URL: "https://cropee-api.faster.asia/api/v1",
+  EXPO_PUBLIC_IDENTITY_BASE_URL: "https://cropee-api.faster.asia/api/v1",
+  EXPO_PUBLIC_ENV: "dev",
+};
 
 export const screen = Dimensions.get("screen");
 
@@ -216,4 +220,12 @@ export const formatPhoneNumber = (phoneNumber?: string) => {
   if (!phoneNumber) return "";
 
   return phoneNumber.replace(/(\d{3})(\d{3})(\d{4})/, "$1 $2 $3");
+};
+
+export const priceToNumber = (formattedPrice: string): number => {
+  if (!formattedPrice) return 0;
+
+  const normalized = formattedPrice.replace(/[^\d]/g, "");
+
+  return Number(normalized);
 };

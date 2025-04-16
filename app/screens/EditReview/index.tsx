@@ -11,6 +11,14 @@ import { toast } from "~/components/common/Toast";
 import ModalBottom from "~/components/common/ModalBottom";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import Checkbox from "expo-checkbox";
+import {
+  ICreateReviewRequest,
+  IUpdateReviewRequest,
+  reviewService,
+} from "~/services/api/review.service";
+import { useMutation } from "@tanstack/react-query";
+import { useRoute } from "@react-navigation/native";
+import { RootStackRouteProp } from "~/navigation/types";
 
 // Define types for the images/videos
 type MediaAsset = {
@@ -31,6 +39,20 @@ const EditReview = () => {
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [showQualityModal, setShowQualityModal] = useState(false);
   const [showPackagingModal, setShowPackagingModal] = useState(false);
+
+  const route = useRoute<RootStackRouteProp<"EditReview">>();
+
+  const id = route.params.id || "";
+
+  const mutationSendReview = useMutation({
+    mutationFn: (data: ICreateReviewRequest) =>
+      reviewService.createReview(data),
+  });
+
+  const mutationUpdateReview = useMutation({
+    mutationFn: (data: IUpdateReviewRequest) =>
+      reviewService.updateReview(id!, data),
+  });
 
   // Function to render stars based on rating
   const renderStars = () => {
@@ -65,7 +87,7 @@ const EditReview = () => {
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        mediaTypes: ["images", "videos"],
         allowsEditing: true,
         quality: 0.8,
       });

@@ -16,8 +16,10 @@ import Header from "./Header";
 import HeaderSearch from "./HeaderSearch";
 import { productService } from "~/services/api/product.service";
 import { useQuery } from "@tanstack/react-query";
+import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 
 const FlashSale = () => {
+  const navigation = useSmartNavigation();
   const { data } = useQuery({
     queryKey: ["flashSale", "home"],
     queryFn: () => productService.getRecommendedProducts(),
@@ -31,6 +33,7 @@ const FlashSale = () => {
       <View className="relative mt-10">
         <View className="mx-2 top-[-15] absolute left-0 right-0 h-[76] rounded-[40] bg-secondary-50 opacity-20" />
         <ContainerList
+          onPress={() => navigation.navigate("FlashSale")}
           bgColor="bg-primary-100"
           title="Flash Sale"
           icon={

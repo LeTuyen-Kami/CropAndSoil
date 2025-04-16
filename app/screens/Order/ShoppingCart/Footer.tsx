@@ -118,14 +118,19 @@ const Footer = ({
           <Text className="text-sm text-[#0A0A0A]">Cropee Voucher</Text>
         </View>
         <TouchableOpacity
-          className="flex-row items-center"
+          className="flex-row flex-1 items-center ml-1"
           onPress={onVoucherPress}
           activeOpacity={0.8}
         >
           {!!voucher ? (
-            <Text className="text-sm text-[#AEAEAE] mr-2">{}</Text>
+            <Text
+              className="flex-1 text-sm text-right text-primary"
+              numberOfLines={1}
+            >
+              {voucher.description}
+            </Text>
           ) : (
-            <Text className="text-sm text-[#AEAEAE] mr-2">
+            <Text className="text-sm text-[#AEAEAE] mr-2 flex-1 text-right">
               Chọn hoặc nhập mã
             </Text>
           )}

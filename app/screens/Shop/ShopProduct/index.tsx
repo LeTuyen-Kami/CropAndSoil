@@ -20,8 +20,22 @@ import { IProduct, productService } from "~/services/api/product.service";
 import Empty from "~/components/common/Empty";
 import { COLORS } from "~/constants/theme";
 import useGetShopId from "../useGetShopId";
+import { Image } from "expo-image";
+import { imagePaths } from "~/assets/imagePath";
+import { cn } from "~/lib/utils";
 
-const Header = ({ total }: { total: number }) => {
+const Header = ({
+  total,
+  sort,
+  onToggleSort,
+}: {
+  total: number;
+  sort: {
+    sortBy: "salePrice" | "createdAt";
+    sortDirection: "asc" | "desc";
+  } | null;
+  onToggleSort: () => void;
+}) => {
   return (
     <View className="flex-row gap-2 items-center px-2 mb-4 w-full">
       <Text className="text-sm font-medium text-black">
@@ -30,11 +44,38 @@ const Header = ({ total }: { total: number }) => {
           ({(total || 0)?.toLocaleString()} kết quả)
         </Text>
       </Text>
-      <TouchableOpacity className="flex-row gap-2 items-center px-4 py-2 ml-auto bg-white rounded-full">
-        <Text className="text-sm font-medium leading-tight text-[#676767]">
+      <TouchableOpacity
+        className={cn(
+          "flex-row gap-2 items-center px-4 py-2 ml-auto bg-white rounded-full",
+          sort && "border border-primary"
+        )}
+        onPress={onToggleSort}
+      >
+        <Text
+          className={cn(
+            "text-sm font-medium leading-tight text-[#676767]",
+            sort && "text-primary"
+          )}
+        >
           Sắp xếp
         </Text>
-        <FontAwesome5 name="sort-amount-down-alt" size={16} color="#676767" />
+        {!sort ? (
+          <Image
+            source={imagePaths.icSort}
+            className="size-5"
+            contentFit="contain"
+          />
+        ) : (
+          <FontAwesome5
+            name={
+              sort?.sortDirection === "desc"
+                ? "sort-amount-down-alt"
+                : "sort-amount-up-alt"
+            }
+            size={16}
+            color={COLORS.primary}
+          />
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -73,6 +114,12 @@ const RenderTwoProduct = ({ items }: { items: IProduct[] }) => {
 
 const ShopProduct = () => {
   const id = useGetShopId();
+
+  const [sort, setSort] = useState<{
+    sortBy: "salePrice" | "createdAt";
+    sortDirection: "asc" | "desc";
+  } | null>(null);
+
   const {
     data,
     isLoading,
@@ -82,17 +129,41 @@ const ShopProduct = () => {
     fetchNextPage,
     isFetching,
     total,
+    updateParams,
+    resetParams,
   } = usePagination(productService.searchProducts, {
     queryKey: ["products", (id || "")?.toString()],
     enabled: !!id,
     initialParams: {
       shopId: id,
+      sortBy: undefined as "salePrice" | "createdAt" | undefined,
+      sortDirection: undefined as "asc" | "desc" | undefined,
+    },
+    initialPagination: {
+      skip: 0,
+      take: 10,
     },
   });
 
+  const onToggleSort = () => {
+    if (!sort) {
+      setSort({
+        sortBy: "salePrice",
+        sortDirection: "desc",
+      });
+    } else if (sort?.sortBy === "salePrice" && sort?.sortDirection === "desc") {
+      setSort({
+        sortBy: "salePrice",
+        sortDirection: "asc",
+      });
+    } else {
+      setSort(null);
+    }
+  };
+
   const renderItem = ({ item }: { item: any }) => {
     if (item.type === "header") {
-      return <Header total={total} />;
+      return <Header total={total} sort={sort} onToggleSort={onToggleSort} />;
     }
 
     if (item.type === "product") {
@@ -112,6 +183,15 @@ const ShopProduct = () => {
     return null;
   };
 
+  useEffect(() => {
+    if (!sort) return resetParams();
+
+    updateParams({
+      sortBy: sort?.sortBy,
+      sortDirection: sort?.sortDirection,
+    });
+  }, [sort]);
+
   const flashListData = useMemo(() => {
     const handledData = preHandleFlashListData(data);
 
@@ -120,7 +200,7 @@ const ShopProduct = () => {
     }
 
     return [{ type: "header" }, ...handledData];
-  }, [data]);
+  }, [data, sort]);
 
   return (
     <View className="flex-1 px-2 py-3">

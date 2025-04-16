@@ -8,74 +8,14 @@ import { Text } from "~/components/ui/text";
 import { deepEqual } from "fast-equals";
 import { useQuery } from "@tanstack/react-query";
 import { productService } from "~/services/api/product.service";
-
+import { reviewService } from "~/services/api/review.service";
+import { AntDesign } from "@expo/vector-icons";
 type RatingProps = {
   rating?: number;
   totalReviews?: number;
   onViewAllPress?: () => void;
   id: string | number;
 };
-
-// Mock data for reviews
-const MOCK_REVIEWS: ReviewItemProps[] = [
-  {
-    reviewer: {
-      name: "Thanh Trần",
-      avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-    },
-    rating: 5,
-    quality: "Chất lượng sản phẩm: Tốt",
-    date: "10/01/2025 12:14",
-    productVariant: "NPK Rau Phú Mỹ",
-    likes: 0,
-    media: [
-      {
-        type: "video",
-        uri: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-        duration: "0:18",
-        thumbnail: "https://images.unsplash.com/photo-1560493676-04071c5f467b",
-      },
-      {
-        type: "image",
-        uri: "https://images.unsplash.com/photo-1560493676-04071c5f467b",
-      },
-      {
-        type: "image",
-        uri: "https://images.unsplash.com/photo-1471193945509-9ad0617afabf",
-      },
-      {
-        type: "image",
-        uri: "https://images.unsplash.com/photo-1536147210925-5cb7a7a4f9fe",
-      },
-    ],
-    sellerResponse:
-      "Greenhome thật vui mừng khi nhận được đánh giá của bạn, và rất mong tiếp tục nhận được sự ủng hộ của bạn trong thời gian sắp tới ạ! Mến chúc bạn mỗi ngày đều rạng rỡ, tươi tắn và gặp nhiều may mắn!",
-  },
-  {
-    reviewer: {
-      name: "Lưu Nhã Ngân",
-      avatar: "https://randomuser.me/api/portraits/women/32.jpg",
-    },
-    rating: 5,
-    quality: "Chất lượng sản phẩm: Tốt",
-    date: "10/01/2025 12:14",
-    productVariant: "NPK Rau Phú Mỹ",
-    likes: 0,
-    sellerResponse:
-      "Greenhome thật vui mừng khi nhận được đánh giá của bạn, và rất mong tiếp tục nhận được sự ủng hộ của bạn trong thời gian sắp tới ạ! Mến chúc bạn mỗi ngày đều rạng rỡ, tươi tắn và gặp nhiều may mắn!",
-  },
-  {
-    reviewer: {
-      name: "Nguyễn Trần Hưng",
-      avatar: "https://randomuser.me/api/portraits/men/42.jpg",
-    },
-    rating: 5,
-    quality: "Chất lượng sản phẩm: Tốt",
-    date: "10/01/2025 12:14",
-    productVariant: "NPK Rau Phú Mỹ",
-    likes: 0,
-  },
-];
 
 const Rating: React.FC<RatingProps> = ({ onViewAllPress, id }) => {
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
@@ -85,29 +25,48 @@ const Rating: React.FC<RatingProps> = ({ onViewAllPress, id }) => {
     queryFn: () => productService.getProductDetail(id),
     enabled: !!id,
     staleTime: 1000 * 60 * 5,
+    select: (data) => {
+      return {
+        averageRating: data.averageRating,
+        reviewCount: data.reviewCount,
+        productId: data.id,
+      };
+    },
   });
+
+  const { data: reviews } = useQuery({
+    queryKey: ["reviews", productDetail?.productId],
+    queryFn: () =>
+      reviewService.getProductReviews(productDetail?.productId!, {
+        take: 10,
+        skip: 0,
+        rating: 4,
+      }),
+    enabled: !!productDetail?.productId,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  console.log(reviews);
 
   // Render stars based on rating
   const renderStars = () => {
     const stars = [];
+
+    const rating = Math.round(productDetail?.averageRating || 0);
+
     for (let i = 0; i < 5; i++) {
       stars.push(
-        <ExpoImage
+        <AntDesign
           key={i}
-          source={imagePaths.starFilled}
-          style={{ width: 16, height: 16, marginRight: 2 }}
-          contentFit="contain"
+          name={i < rating ? "star" : "staro"}
+          size={16}
+          color={rating >= i + 1 ? "#FCBA27" : "#E0E0E0"}
+          style={{ marginRight: 2 }}
         />
       );
     }
     return stars;
   };
-
-  // Filter reviews based on selected filter
-  const filteredReviews =
-    selectedFilter === "images"
-      ? MOCK_REVIEWS.filter((review) => review.media && review.media.length > 0)
-      : MOCK_REVIEWS;
 
   return (
     <View className="mt-2 w-full bg-white rounded-3xl">
@@ -162,7 +121,7 @@ const Rating: React.FC<RatingProps> = ({ onViewAllPress, id }) => {
                 selectedFilter === "all" ? "text-[#159747]" : "text-[#676767]"
               }`}
             >
-              Tất cả đánh giá (16)
+              Tất cả đánh giá ({reviews?.total || 0})
             </Text>
           </TouchableOpacity>
 
@@ -189,8 +148,19 @@ const Rating: React.FC<RatingProps> = ({ onViewAllPress, id }) => {
 
       {/* Review List */}
       <View>
-        {filteredReviews.map((review, index) => (
-          <ReviewItem key={index} {...review} />
+        {reviews?.data?.map((review, index) => (
+          <ReviewItem
+            key={index}
+            reviewer={{
+              name: review.authorName,
+              avatar: review.authorAvatar,
+            }}
+            rating={review.rating}
+            quality={review.quality}
+            date={review.createdAt}
+            productVariant={review.variation.name}
+            likes={review.totalLikes}
+          />
         ))}
       </View>
     </View>

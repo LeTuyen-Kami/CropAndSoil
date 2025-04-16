@@ -270,6 +270,7 @@ const SearchAdvance = () => {
     isLoading,
     isFetching,
     updateParams,
+    resetParams,
   } = usePagination(productService.searchProducts, {
     initialPagination: {
       skip: 0,
@@ -311,7 +312,7 @@ const SearchAdvance = () => {
   };
 
   useEffect(() => {
-    if (!sort) return;
+    if (!sort) return resetParams();
 
     updateParams({
       sortBy: sort?.sortBy,
@@ -332,8 +333,8 @@ const SearchAdvance = () => {
     locations: string[];
     ratings: string[];
   }) => {
-    const numberMinPrice = Number(minPrice);
-    const numberMaxPrice = Number(maxPrice);
+    const numberMinPrice = minPrice;
+    const numberMaxPrice = maxPrice;
 
     updateParams({
       ...(numberMinPrice > 0 &&
@@ -342,12 +343,14 @@ const SearchAdvance = () => {
       ...(numberMaxPrice > 0 &&
         !!numberMaxPrice &&
         numberMaxPrice > numberMinPrice && { maxPrice: numberMaxPrice }),
-      ...(locations.length > 0 && {
-        locations: locations?.map((i) => "p:" + i).join(","),
-      }),
-      ...(categories.length > 0 && { categories: categories.join(",") }),
-      ...(ratings.length > 0 && { averageRatingFrom: Number(ratings) }),
+      locations: locations?.map((i) => "p:" + i).join(","),
+      categoryIds: categories.join(","),
+      averageRatingFrom: Number(ratings),
     });
+  };
+
+  const onResetFilter = () => {
+    resetParams();
   };
 
   const flashListData = useMemo(() => {
@@ -402,7 +405,12 @@ const SearchAdvance = () => {
           }
         />
       </View>
-      <Filter isOpen={isOpen} onClose={onClose} onApply={onFilter} />
+      <Filter
+        isOpen={isOpen}
+        onClose={onClose}
+        onApply={onFilter}
+        onResetFilter={onResetFilter}
+      />
     </ScreenWrapper>
   );
 };

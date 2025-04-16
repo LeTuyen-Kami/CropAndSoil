@@ -21,7 +21,7 @@ import { Text } from "~/components/ui/text";
 import useDisclosure from "~/hooks/useDisclosure";
 import { categoryService } from "~/services/api/category.service";
 import { placeService } from "~/services/api/place.service";
-import { screen } from "~/utils";
+import { priceToNumber, screen } from "~/utils";
 interface FilterChipProps {
   label: string;
   isSelected: boolean;
@@ -176,6 +176,7 @@ const Filter = ({
   isOpen,
   onClose,
   onApply,
+  onResetFilter,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -186,6 +187,7 @@ const Filter = ({
     locations: string[];
     ratings: string[];
   }) => void;
+  onResetFilter: () => void;
 }) => {
   const { top, bottom } = useSafeAreaInsets();
   const store = useStore();
@@ -266,7 +268,7 @@ const Filter = ({
     {
       title: "Nơi bán",
       data: groupIntoRows(locations).map((row) => row),
-      showDetails: true,
+      showDetails: categories?.length > 0,
       isOpen: isOpenCategory,
       onOpen: onToggleCategory,
     },
@@ -274,7 +276,7 @@ const Filter = ({
       title: "Theo giá",
       data: [null],
       type: "price",
-      showDetails: true,
+      showDetails: locations?.length > 0,
       isOpen: isOpenLocation,
       onOpen: onToggleLocation,
     },
@@ -294,14 +296,17 @@ const Filter = ({
     const selectedRatings = ratings.filter((rating) => rating.isSelected);
     onClose();
 
-    if (Number(store.get(minPriceAtom)) > Number(store.get(maxPriceAtom))) {
+    if (
+      priceToNumber(store.get(minPriceAtom)) >
+      priceToNumber(store.get(maxPriceAtom))
+    ) {
       toast.warning("Giá tối thiểu không được lớn hơn giá tối đa");
       return;
     }
 
     onApply({
-      minPrice: Number(store.get(minPriceAtom)),
-      maxPrice: Number(store.get(maxPriceAtom)),
+      minPrice: priceToNumber(store.get(minPriceAtom)),
+      maxPrice: priceToNumber(store.get(maxPriceAtom)),
       categories: selectedCategories.map((category) => category.id),
       locations: selectedLocations.map((location) => location.id),
       ratings: selectedRatings.map((rating) => rating.id),
@@ -316,10 +321,14 @@ const Filter = ({
       categories.map((category) => ({ ...category, isSelected: false }))
     );
     setRatings(ratings.map((rating) => ({ ...rating, isSelected: false })));
+    store.set(minPriceAtom, "");
+    store.set(maxPriceAtom, "");
   };
 
   const onPressReset = () => {
     onReset();
+    onClose();
+    onResetFilter();
   };
 
   useEffect(() => {

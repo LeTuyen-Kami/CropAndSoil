@@ -101,11 +101,6 @@ const ResetPassword = () => {
     }
   };
 
-  const handlePhoneChanged = () => {
-    // Handle phone number changed action
-    console.log("Phone number changed");
-  };
-
   const togglePasswordVisibility = () => {
     setTogglePassword(!togglePassword);
   };

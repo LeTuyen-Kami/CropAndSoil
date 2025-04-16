@@ -47,15 +47,18 @@ const PaymentMenu = ({
           </TouchableOpacity>
 
           <TouchableOpacity
-            className="flex-row gap-2 items-center"
+            className="flex-row flex-1 gap-2 items-center ml-1"
             onPress={onVoucherPress}
           >
             {!!voucher ? (
-              <Text className="text-sm font-normal text-[#AEAEAE]">
-                {voucher?.code}
+              <Text
+                className="flex-1 text-sm font-normal text-right text-primary"
+                numberOfLines={1}
+              >
+                {voucher?.description}
               </Text>
             ) : (
-              <Text className="text-sm font-normal text-[#AEAEAE]">
+              <Text className="text-sm font-normal text-[#AEAEAE] flex-1 text-right">
                 Chọn hoặc nhập mã
               </Text>
             )}

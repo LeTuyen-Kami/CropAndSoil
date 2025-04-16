@@ -12,7 +12,7 @@ import ModalFailed from "./ModalFailed";
 import ScreenWrapper from "~/components/common/ScreenWrapper";
 import { useAtom, useSetAtom } from "jotai";
 import { storeAtom } from "../atom";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { formatPrice, getErrorMessage } from "~/utils";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -33,8 +33,11 @@ import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import { RootStackRouteProp, RootStackScreenProps } from "~/navigation/types";
 import { selectedVoucherAtom } from "~/store/atoms";
+import ModalSelectShopVoucher from "~/screens/VoucherSelect/ModalSelectShopVoucher";
+import { IVoucher } from "~/services/api/shop.service";
 const Payment = () => {
   const navigation = useNavigation<RootStackScreenProps<"Payment">>();
+  const [voucherShopId, setVoucherShopId] = useState<string>();
 
   const [voucherState, setVoucherState] = useAtom(selectedVoucherAtom);
 
@@ -100,7 +103,7 @@ const Payment = () => {
               id: Number(store.id),
               shippingMethodKey: "ghtk",
               note: storeMessage[store.id] || "",
-              voucherCode: "",
+              voucherCode: store.shopVoucher?.code || "",
               items: store.items
                 ?.filter((item) => item.isSelected)
                 .map((item) => ({
@@ -129,7 +132,7 @@ const Payment = () => {
         }
       );
     }
-  }, [selectedPaymentMethod, voucherState.voucher, address]);
+  }, [selectedPaymentMethod, voucherState.voucher, address, stores]);
 
   const onPressOrder = () => {
     if (!calculatedData) {
@@ -153,7 +156,7 @@ const Payment = () => {
           id: Number(store.id),
           shippingMethodKey: "ghtk",
           note: storeMessage[store.id] || "",
-          voucherCode: "",
+          voucherCode: store.shopVoucher?.code || "",
           items: store.items
             ?.filter((item) => item.isSelected)
             .map((item) => ({
@@ -243,6 +246,17 @@ const Payment = () => {
     });
   };
 
+  const handleShopVoucherPress = useCallback(
+    (shopId: string, voucher: IVoucher) => {
+      setStores((prev) =>
+        prev.map((store) =>
+          store.id === shopId ? { ...store, shopVoucher: voucher } : store
+        )
+      );
+    },
+    []
+  );
+
   const handlePressViewOrder = () => {
     onCloseSuccess();
     navigation.replace("MyOrder", {
@@ -272,6 +286,7 @@ const Payment = () => {
             store={store}
             onMessagePress={() => handleOpenMessageModal(store.id)}
             message={storeMessage[store.id]}
+            onShopVoucherPress={() => setVoucherShopId(store.id)}
           />
         ))}
         <PaymentMethod
@@ -334,6 +349,15 @@ const Payment = () => {
           </Button>
         </View>
       </ModalBottom>
+      <ModalSelectShopVoucher
+        isOpen={!!voucherShopId}
+        onClose={() => setVoucherShopId("")}
+        shopId={voucherShopId}
+        onSelectVoucher={(voucher) => {
+          handleShopVoucherPress(voucherShopId!, voucher);
+          setVoucherShopId("");
+        }}
+      />
     </ScreenWrapper>
   );
 };

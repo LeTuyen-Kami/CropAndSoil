@@ -1,15 +1,14 @@
 import { TouchableOpacity } from "react-native";
 
-import { View } from "react-native";
 import { Image } from "expo-image";
-import { Text } from "~/components/ui/text";
+import { View } from "react-native";
 import { imagePaths } from "~/assets/imagePath";
-import { useNavigation } from "@react-navigation/native";
-import { RootStackScreenProps } from "~/navigation/types";
+import { Text } from "~/components/ui/text";
+import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 
 // Profile header component
 const ProfileHeader = () => {
-  const navigation = useNavigation<RootStackScreenProps<"MainTabs">>();
+  const navigation = useSmartNavigation();
 
   return (
     <View className="flex-row justify-between items-center pr-4">
@@ -32,7 +31,7 @@ const ProfileHeader = () => {
       <View className="flex-row">
         <TouchableOpacity
           className="mr-6"
-          onPress={() => navigation.navigate("Settings")}
+          onPress={() => navigation.smartNavigate("Settings")}
         >
           <Image
             source={imagePaths.icSettings}

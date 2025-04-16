@@ -117,13 +117,15 @@ const SearchScreen = () => {
 
         {!searchQuery && (
           <View className="flex-row flex-wrap gap-2 p-2">
-            {trending?.map((item, index) => (
+            {trending?.slice(0, 10)?.map((item, index) => (
               <TouchableOpacity
                 key={index}
                 className="p-2 bg-[#F5F5F5] rounded-lg"
                 onPress={() => handlePressTrending(item)}
               >
-                <Text className="text-xs">{item}</Text>
+                <Text className="text-xs" numberOfLines={2}>
+                  {item}
+                </Text>
               </TouchableOpacity>
             ))}
           </View>

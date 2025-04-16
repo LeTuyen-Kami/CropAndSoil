@@ -7,7 +7,7 @@ import { usePagination } from "~/hooks/usePagination";
 interface ModalSelectShopVoucherProps {
   isOpen: boolean;
   onClose: () => void;
-  shopId: string;
+  shopId?: string;
   onSelectVoucher: (voucher: IVoucher) => void;
 }
 

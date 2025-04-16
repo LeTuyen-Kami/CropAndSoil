@@ -13,10 +13,8 @@ interface CustomAxiosConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
 }
 
-// const BASE_URL = ENV.EXPO_PUBLIC_BASE_URL;
-const BASE_URL = "https://cropee-api.faster.asia/api/v1";
-const IDENTITY_BASE_URL = "https://cropee-api.faster.asia/api/v1";
-// const IDENTITY_BASE_URL = ENV.EXPO_PUBLIC_IDENTITY_BASE_URL;
+const BASE_URL = ENV.EXPO_PUBLIC_BASE_URL;
+const IDENTITY_BASE_URL = ENV.EXPO_PUBLIC_IDENTITY_BASE_URL;
 
 export const identityAxiosInstance = axios.create({
   baseURL: IDENTITY_BASE_URL,
