@@ -14,6 +14,7 @@ import { toast } from "~/components/common/Toast";
 import { authAtom } from "~/store/atoms";
 import { useAtomValue } from "jotai";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
+import { shopService } from "~/services/api/shop.service";
 
 const BrandBadge = () => {
   return (
@@ -70,13 +71,13 @@ const SalesCount = ({
   );
 };
 
-const PromotionBadge = () => {
+const PromotionBadge = ({ title }: { title: string }) => {
   return (
     <View style={styles.promotionContainer}>
       <View style={styles.promotionContent}>
         <Image source={imagePaths.icPromotion} style={styles.promotionIcon} />
-        <Text style={styles.promotionText}>
-          Giảm 24k từ mã khuyến mãi của nhà bán
+        <Text style={styles.promotionText} numberOfLines={1}>
+          {title}
         </Text>
       </View>
       <View style={styles.promotionArrowContainer}>
@@ -128,6 +129,17 @@ const Info = ({ id }: { id: string | number }) => {
     enabled: !!id,
   });
 
+  const { data: voucher } = useQuery({
+    queryKey: ["vouchers", (productDetail?.shop?.id || "")?.toString()],
+    enabled: !!productDetail?.shop?.id,
+    queryFn: () =>
+      shopService.getListVoucher({
+        shopId: productDetail?.shop?.id,
+        take: 1,
+        skip: 0,
+      }),
+  });
+
   const mutationLikeProduct = useMutation({
     mutationFn: () => wishlistService.addWishlist(id.toString()),
     onSuccess: () => {
@@ -158,7 +170,11 @@ const Info = ({ id }: { id: string | number }) => {
       return;
     }
 
-    if (false) {
+    if (mutationLikeProduct.isPending || mutationUnlikeProduct.isPending) {
+      return;
+    }
+
+    if (productDetail?.isLiked) {
       mutationUnlikeProduct.mutate();
     } else {
       mutationLikeProduct.mutate();
@@ -183,7 +199,7 @@ const Info = ({ id }: { id: string | number }) => {
         </View>
         <SalesCount
           quantity={productDetail?.totalSales}
-          isLiked={false} //TODO: change to productDetail?.isLiked
+          isLiked={productDetail?.isLiked || false}
           onPress={handleLikeProduct}
         />
       </View>
@@ -218,7 +234,9 @@ const Info = ({ id }: { id: string | number }) => {
           )}
       </View>
 
-      <PromotionBadge />
+      {voucher?.data?.[0]?.description && (
+        <PromotionBadge title={voucher?.data?.[0]?.description} />
+      )}
 
       <Atribute attributes={productDetail?.attributes} />
     </View>
@@ -388,7 +406,6 @@ const styles = StyleSheet.create({
     paddingRight: 10,
     backgroundColor: "#FDF1F3",
     borderRadius: 24,
-    width: 299,
   },
   promotionIcon: {
     width: 16,

@@ -1,3 +1,5 @@
+import { IVoucher } from "~/services/api/shop.service";
+
 export interface StoreItem {
   id: string;
   name: string;
@@ -19,4 +21,5 @@ export interface Store {
   name: string;
   items: StoreItem[];
   isSelected: boolean;
+  shopVoucher?: IVoucher;
 }

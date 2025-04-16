@@ -16,7 +16,11 @@ const useDisclosure = ({
     setOpenValue({});
   };
 
-  return { isOpen, openValue, setOpenValue, onOpen, onClose };
+  const onToggle = () => {
+    setIsOpen((prev) => !prev);
+  };
+
+  return { isOpen, openValue, setOpenValue, onOpen, onClose, onToggle };
 };
 
 export default useDisclosure;

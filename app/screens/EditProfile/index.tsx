@@ -408,19 +408,21 @@ const EditProfileScreen = () => {
                   value={profileForm.taxId}
                   placeholder="Nhập thông tin & tải lên tệp bắt buộc để hoàn tất"
                   onPress={() => {
-                    navigation.navigate("BusinessVoucher");
                     if (!profileForm.taxId) {
+                      navigation.navigate("BusinessVoucher");
                     } else {
-                      // toast.info("Bạn đã tải lên chứng từ kinh doanh");
+                      toast.info("Bạn đã tải lên chứng từ kinh doanh");
                     }
                   }}
                 />
-                <View className="px-2 py-4">
-                  <Alert
-                    title="Tài khoản đang chờ duyệt."
-                    description="Giấy phép kinh doanh đã được tải lên và đang trong quá trình xem xét, chờ phê duyệt từ Cropee."
-                  />
-                </View>
+                {!profile?.isApproved && (
+                  <View className="px-2 py-4">
+                    <Alert
+                      title="Tài khoản đang chờ duyệt."
+                      description="Giấy phép kinh doanh đã được tải lên và đang trong quá trình xem xét, chờ phê duyệt từ Cropee."
+                    />
+                  </View>
+                )}
               </View>
             </ScrollView>
             <View className="px-2" style={{ paddingBottom: bottom }}>

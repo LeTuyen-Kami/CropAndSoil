@@ -35,6 +35,8 @@ import FAQsDetail from "~/screens/FAQsDetail";
 import DetailNotification from "~/screens/DetailNotification";
 import Payment from "~/screens/Order/Payment";
 import SearchOrder from "~/screens/MyOrder/SearchOrder";
+import Followers from "~/screens/Follow/Followers";
+import Followings from "~/screens/Follow/Followings";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -121,6 +123,8 @@ export const AppNavigator = () => {
           component={DetailNotification}
         />
         <Stack.Screen name="SearchOrder" component={SearchOrder} />
+        <Stack.Screen name="Followers" component={Followers} />
+        <Stack.Screen name="Followings" component={Followings} />
       </Stack.Navigator>
     </NavigationContainer>
   );

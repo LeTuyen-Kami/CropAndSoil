@@ -67,7 +67,7 @@ const Tabs = () => {
         {tabs.map((tab, index) => (
           <TouchableOpacity
             key={index}
-            hitSlop={20}
+            hitSlop={10}
             className="flex-row justify-center items-center min-w-[40px] py-2.5"
             onPress={() => onPressTab(index)}
           >

@@ -2,7 +2,7 @@ import { useNavigation } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAtom } from "jotai";
-import React from "react";
+import React, { useEffect } from "react";
 import { TouchableOpacity, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import Animated, { SlideInRight, SlideOutLeft } from "react-native-reanimated";
@@ -17,6 +17,15 @@ const LoginScreen = () => {
   const { top } = useSafeAreaInsets();
   const navigation = useNavigation();
   const [loginState, setLoginState] = useAtom(loginAtom);
+
+  useEffect(() => {
+    return () => {
+      setLoginState({
+        step: "signIn",
+        previousStep: null,
+      });
+    };
+  }, []);
 
   return (
     <View className="flex-1">

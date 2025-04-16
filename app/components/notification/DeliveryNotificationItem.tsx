@@ -9,6 +9,7 @@ import { useNavigation } from "@react-navigation/native";
 import { RootStackScreenProps } from "~/navigation/types";
 import { INotification } from "~/services/api/notification.service";
 import { formatDate } from "~/utils";
+import WebViewContent from "../common/WebViewContent";
 
 interface DeliveryNotificationItemProps {
   notification: INotification;
@@ -38,11 +39,11 @@ const DeliveryNotificationItem: React.FC<DeliveryNotificationItemProps> = ({
                 contentFit="contain"
                 className="size-[38px]"
               />
-              {/* {!notification?.isRead && (
+              {!notification?.isRead && (
                 <View className="absolute top-0 right-0 rounded-full border border-white">
                   <View className="bg-red-500 rounded-full size-2" />
                 </View>
-              )} */}
+              )}
             </View>
             <View>
               <Text className="text-base font-medium text-[#383B45]">
@@ -65,19 +66,12 @@ const DeliveryNotificationItem: React.FC<DeliveryNotificationItemProps> = ({
                 contentFit="cover"
               />
             </View>
-            {/* <View className="flex-1">
-              <Text className="text-xs text-[#676767] leading-[18px]">
-                Kiện hàng{" "}
-                <Text className="text-xs leading-[18px] text-[#159747]">
-                  {notification}
-                </Text>{" "}
-                của đơn hàng{" "}
-                <Text className="text-xs leading-[18px] text-[#159747]">
-                  {notification.payload.orderCode}
-                </Text>{" "}
-                đã giao thành công đến bạn.
-              </Text>
-            </View> */}
+            <View className="h-[64px] flex-1 justify-center">
+              <WebViewContent
+                html={`<div>${notification.content}</div>`}
+                canScroll={false}
+              />
+            </View>
             <MaterialIcons
               name="keyboard-arrow-down"
               size={18}

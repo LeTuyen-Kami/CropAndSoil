@@ -15,7 +15,11 @@ import { imagePaths } from "~/assets/imagePath";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
-import { getErrorMessage, validatePhoneNumber } from "~/utils";
+import {
+  formatPhoneNumber,
+  getErrorMessage,
+  validatePhoneNumber,
+} from "~/utils";
 import { loginAtom } from "./atom";
 import { authService, SendSmsOtpResponse } from "~/services/api/auth.service";
 import { useMutation } from "@tanstack/react-query";
@@ -288,7 +292,9 @@ const RegisterForm = () => {
         <Animated.View entering={SlideInRight} exiting={SlideOutLeft}>
           <Text className="mt-4 text-xs tracking-tight text-center text-zinc-600">
             Mã xác thực (OTP) đã được gửi qua tin nhắn của số{"\n"}
-            <Text className="text-black">{phoneNumber || "0123456789"}</Text>
+            <Text className="text-xs tracking-tight text-black">
+              {formatPhoneNumber(phoneNumber || "0123456789")}
+            </Text>
           </Text>
 
           <View className="my-8">
@@ -303,13 +309,14 @@ const RegisterForm = () => {
           </View>
 
           {countdown > 0 ? (
-            <Text className="mt-4 text-xs tracking-tight text-center text-zinc-600">
+            <Text className="text-xs tracking-tight text-center text-zinc-600">
               Vui lòng chờ{" "}
               <Text className="text-xs font-bold text-[#159747]">
                 {countdown}
               </Text>{" "}
               giây để nhận lại mã xác thực.{"\n"}Lưu ý: Kiểm tra thông báo của
-              Zalo để nhận mã kịp thời.
+              Zalo để nhận Mã kịp thời Nếu bạn chưa có tài khoản Zalo, hãy nhấn
+              mũi tên trở lại để chọn phương thức khác
             </Text>
           ) : (
             <TouchableOpacity

@@ -63,6 +63,8 @@ const RecentProduct = () => {
               image={product?.images[0]}
               onSale={product?.regularPrice > product?.salePrice}
               id={product?.id}
+              location={product?.shop?.shopWarehouseLocation?.province?.name}
+              className="flex-grow"
             />
           )}
           keyExtractor={(item) => item.id.toString()}

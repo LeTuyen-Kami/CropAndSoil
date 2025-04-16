@@ -127,6 +127,7 @@ import freeShipping from "~/assets/images/freeship.png";
 import bag from "~/assets/images/bag.png";
 
 import icDollar from "~/assets/icons/dollar_icon.png";
+import icSort from "~/assets/icons/sort_vertical_icon.png";
 
 export const imagePaths = {
   //images
@@ -256,4 +257,5 @@ export const imagePaths = {
   freeShipping: freeShipping,
   bag: bag,
   icDollar: icDollar,
+  icSort: icSort,
 };

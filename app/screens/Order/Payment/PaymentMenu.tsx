@@ -19,7 +19,6 @@ const PaymentMenu = ({
   voucher,
   calculatedData,
 }: PaymentMenuProps) => {
-
   const savedAmount = useMemo(() => {
     return (
       (calculatedData?.productVoucherDiscountTotal || 0) +
@@ -27,7 +26,6 @@ const PaymentMenu = ({
       (calculatedData?.marketplaceDiscountTotal || 0)
     );
   }, [calculatedData]);
-
 
   return (
     <View className="bg-white rounded-t-xl border-t border-[#F0F0F0] border-l border-r">
@@ -94,6 +92,7 @@ const PaymentMenu = ({
         <TouchableOpacity
           className="bg-[#FCBA27] py-3 px-6 rounded-full"
           onPress={onOrderPress}
+          disabled={!calculatedData?.total}
         >
           <Text className="text-sm font-medium text-white">Đặt hàng</Text>
         </TouchableOpacity>

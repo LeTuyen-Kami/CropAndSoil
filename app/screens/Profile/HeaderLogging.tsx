@@ -61,12 +61,27 @@ const HeaderLogging = () => {
                 profile?.phone}
             </Text>
             <View className="flex-row gap-6 mt-1">
-              <Text className="text-xs text-white">
-                {profile?.totalFollowers || 0} Người theo dõi
-              </Text>
-              <Text className="text-xs text-white">
-                {profile?.totalFollowing || 0} Đang theo dõi
-              </Text>
+              <TouchableOpacity
+                hitSlop={10}
+                onPress={() => {
+                  navigation.navigate("Followers");
+                }}
+              >
+                <Text className="text-xs text-white">
+                  {profile?.totalFollowers || 0} Người theo dõi
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                hitSlop={10}
+                onPress={() => {
+                  navigation.navigate("Followings");
+                }}
+              >
+                <Text className="text-xs text-white">
+                  {profile?.totalFollowing || 0} Đang theo dõi
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
           <Image

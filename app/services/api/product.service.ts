@@ -1,6 +1,6 @@
 import { AxiosResponse } from "axios";
 import { typedAxios } from "../base";
-import { PaginatedResponse } from "~/types";
+import { PaginatedResponse, PaginationRequests } from "~/types";
 
 export interface Value {
   id: number;
@@ -129,6 +129,7 @@ export interface IProduct {
   shopId: number;
   shop: Shop;
   description: string;
+  isLiked: boolean;
   shortDescription: string;
   totalSales: number;
   sku: string;
@@ -158,16 +159,16 @@ export interface IProduct {
   variations: Variation[];
 }
 
-export interface IProductResquest {
-  skip: number;
-  take: number;
+export interface IProductResquest extends PaginationRequests {
   search: string;
   categoryId: number;
   minPrice: number;
   maxPrice: number;
-  location: string;
+  locations: string; // comma separated
   averageRatingFrom: number;
   ids: string; // comma separated
+  sortBy: "salePrice" | "createdAt";
+  sortDirection: "asc" | "desc";
 }
 
 class ProductService {

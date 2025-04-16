@@ -74,7 +74,9 @@ export interface IVoucher {
   isAvailable: boolean;
 }
 
-export interface IListVoucherRequest extends PaginationRequests {}
+export interface IListVoucherRequest extends PaginationRequests {
+  shopId?: string | number;
+}
 
 class ShopService {
   async getShopDetail(id: string | number) {

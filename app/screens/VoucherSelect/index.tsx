@@ -1,25 +1,23 @@
-import ScreenContainer from "~/components/common/ScreenContainer";
-import Header from "~/components/common/Header";
-import { SectionList, TouchableOpacity, View } from "react-native";
-import { Text } from "~/components/ui/text";
-import GradientBackground from "~/components/common/GradientBackground";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import TicketVoucher from "./TicketVoucher";
-import { Input } from "~/components/ui/input";
-import { useMemo, useState } from "react";
+import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import ScreenWrapper from "~/components/common/ScreenWrapper";
-import { voucherService } from "~/services/api/voucher.service";
 import { useQuery } from "@tanstack/react-query";
-import { RefreshControl } from "react-native-gesture-handler";
-import { IVoucher } from "~/services/api/shop.service";
-import { convertToK, formatDate } from "~/utils";
-import { RootStackRouteProp, RootStackScreenProps } from "~/navigation/types";
-import { useNavigation, useRoute } from "@react-navigation/native";
 import { useAtom } from "jotai";
-import { selectedVoucherAtom } from "~/store/atoms";
+import { useMemo, useState } from "react";
+import { View } from "react-native";
+import { RefreshControl } from "react-native-gesture-handler";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { imagePaths } from "~/assets/imagePath";
+import Header from "~/components/common/Header";
+import ScreenWrapper from "~/components/common/ScreenWrapper";
+import { Input } from "~/components/ui/input";
+import { Text } from "~/components/ui/text";
+import { RootStackScreenProps } from "~/navigation/types";
+import { IVoucher } from "~/services/api/shop.service";
+import { voucherService } from "~/services/api/voucher.service";
+import { selectedVoucherAtom } from "~/store/atoms";
+import { convertToK, formatDate } from "~/utils";
+import TicketVoucher from "./TicketVoucher";
+import Empty from "~/components/common/Empty";
 
 const WrapperHeader = ({ title }: { title: string }) => {
   return (
@@ -66,7 +64,7 @@ const ShippingVoucher = ({
   );
 };
 
-const ProductVoucher = ({
+export const ProductVoucher = ({
   voucher,
   onPressVoucher,
 }: {
@@ -108,6 +106,7 @@ const VoucherSelectScreen = () => {
     data: shippingVouchers,
     refetch,
     isRefetching,
+    isPending: isPendingShippingVouchers,
   } = useQuery({
     queryKey: ["vouchers", "shipping"],
     queryFn: () =>
@@ -124,6 +123,7 @@ const VoucherSelectScreen = () => {
     data: productVouchers,
     refetch: refetchProductVouchers,
     isRefetching: isRefetchingProductVouchers,
+    isPending: isPendingProductVouchers,
   } = useQuery({
     queryKey: ["vouchers", "product"],
     queryFn: () =>
@@ -257,6 +257,15 @@ const VoucherSelectScreen = () => {
             renderItem={renderItem}
             getItemType={(item) => item.type}
             estimatedItemSize={100}
+            ListEmptyComponent={() => (
+              <Empty
+                title="Không tìm thấy voucher"
+                backgroundColor="white"
+                isLoading={
+                  isPendingShippingVouchers || isPendingProductVouchers
+                }
+              />
+            )}
           />
         </View>
       </View>

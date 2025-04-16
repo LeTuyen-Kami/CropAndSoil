@@ -53,6 +53,8 @@ export type RootStackParamList = {
     id: string | number;
   };
   SearchOrder: undefined;
+  Followers: undefined;
+  Followings: undefined;
 };
 
 // Create a type for the navigation prop for stack screens

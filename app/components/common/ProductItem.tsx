@@ -88,7 +88,7 @@ const ProductItem = ({
             contentFit="cover"
           />
         </View>
-        <View className="p-[10] flex-col gap-[2]">
+        <View className="p-[10] flex-col gap-[2] flex-1">
           <Text
             className="text-xs tracking-tight text-neutral-700"
             numberOfLines={2}
@@ -153,7 +153,7 @@ const ProductItem = ({
               </View>
             ))}
           {location && (
-            <View className="flex-row gap-[2] items-center mt-1">
+            <View className="flex-row gap-[2] items-center pt-1 mt-auto">
               <Image
                 source={imagePaths.icLocation}
                 style={{ width: 10, height: 10 }}

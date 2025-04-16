@@ -21,6 +21,7 @@ const ListProduct = ({ data }: { data: IProduct[] }) => {
           rating={item.averageRating}
           id={item.id}
           image={item.thumbnail}
+          location={item?.shop?.shopWarehouseLocation?.province?.name}
           className="flex-1"
         />
       )}

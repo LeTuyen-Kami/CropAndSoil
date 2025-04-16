@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -15,10 +15,16 @@ import { useNotifications } from "~/hooks/useNotifications";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Empty from "~/components/common/Empty";
 import { usePagination } from "~/hooks/usePagination";
-import { notificationService } from "~/services/api/notification.service";
+import {
+  INotification,
+  notificationService,
+} from "~/services/api/notification.service";
 import { COLORS } from "~/constants/theme";
-
+import { useIsFocused } from "@react-navigation/native";
 const Notification = () => {
+  const isFocused = useIsFocused();
+  const flashListRef = useRef<FlashList<INotification>>(null);
+
   const {
     data: notifications,
     isLoading,
@@ -33,7 +39,15 @@ const Notification = () => {
       take: 10,
     },
     queryKey: ["notifications"],
+    enabled: false,
   });
+
+  useEffect(() => {
+    if (isFocused) {
+      flashListRef.current?.scrollToOffset({ offset: 0 });
+      refresh();
+    }
+  }, [isFocused]);
 
   return (
     <ScreenWrapper hasGradient={true}>
@@ -45,6 +59,7 @@ const Notification = () => {
       />
       <View className="flex-1 bg-[#EEE] rounded-t-3xl overflow-hidden">
         <FlashList
+          ref={flashListRef}
           ItemSeparatorComponent={() => <View className="h-[10px]" />}
           data={notifications}
           renderItem={({ item }) => <NotificationItem notification={item} />}

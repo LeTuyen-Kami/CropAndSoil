@@ -17,6 +17,7 @@ const ShoppingCartStore = ({
   onItemQuantityChange,
   onItemDelete,
   onSelectAllItems,
+  onShopVoucherPress,
 }: {
   store: Store;
   onItemSelect: (storeId: string, itemId: string, selected: boolean) => void;
@@ -27,6 +28,7 @@ const ShoppingCartStore = ({
   ) => void;
   onItemDelete: (storeId: string, itemId: string) => void;
   onSelectAllItems: (storeId: string, selected: boolean) => void;
+  onShopVoucherPress: (shopId: string) => void;
 }) => {
   const navigation = useNavigation<RootStackScreenProps<"ShoppingCart">>();
 
@@ -125,7 +127,10 @@ const ShoppingCartStore = ({
       ))}
 
       {/* Voucher Section */}
-      <View className="flex-row justify-between items-center p-4">
+      <TouchableOpacity
+        className="flex-row justify-between items-center p-4"
+        onPress={() => onShopVoucherPress(store.id)}
+      >
         <View className="flex-row gap-2 items-center">
           <Image
             source={imagePaths.icTicketSale}
@@ -136,7 +141,7 @@ const ShoppingCartStore = ({
           </Text>
         </View>
         <Feather name="chevron-right" size={20} color="#AEAEAE" />
-      </View>
+      </TouchableOpacity>
     </View>
   );
 };

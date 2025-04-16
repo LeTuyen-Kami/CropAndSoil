@@ -55,7 +55,7 @@ const Footer = ({
               id: Number(store.id),
               shippingMethodKey: "ghtk",
               note: "",
-              voucherCode: "",
+              voucherCode: store.shopVoucher?.code || "",
               items: store.items
                 ?.filter((item) => item.isSelected)
                 .map((item) => ({
@@ -123,7 +123,7 @@ const Footer = ({
           activeOpacity={0.8}
         >
           {!!voucher ? (
-            <Text className="text-sm text-[#AEAEAE] mr-2">{voucher?.code}</Text>
+            <Text className="text-sm text-[#AEAEAE] mr-2">{}</Text>
           ) : (
             <Text className="text-sm text-[#AEAEAE] mr-2">
               Chọn hoặc nhập mã

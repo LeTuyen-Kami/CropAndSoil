@@ -31,9 +31,13 @@ import { useNavigation } from "@react-navigation/native";
 import { userService } from "~/services/api/user.service";
 import { IOrderCalculateRequest } from "~/services/api/order.service";
 import { orderService } from "~/services/api/order.service";
+import ModalVoucherSelect from "~/screens/VoucherSelect/ModalVoucherSelect";
+import ModalSelectShopVoucher from "~/screens/VoucherSelect/ModalSelectShopVoucher";
+import { IVoucher } from "~/services/api/shop.service";
 const ShoppingCart = () => {
   const navigation = useNavigation<RootStackScreenProps<"ShoppingCart">>();
   const [stores, setStores] = useAtom(storeAtom);
+  const [voucherShopId, setVoucherShopId] = useState<string>("");
 
   const [selectedVoucher, setSelectedVoucher] = useAtom(selectedVoucherAtom);
   const { bottom } = useSafeAreaInsets();
@@ -50,7 +54,10 @@ const ShoppingCart = () => {
   });
 
   const mutationRemoveCartItem = useMutation({
-    mutationFn: (cartItemId: string) => cartService.removeCartItem(cartItemId),
+    mutationFn: (cartItemIds: number[]) =>
+      cartService.removeCartItem({
+        cartItems: cartItemIds,
+      }),
   });
 
   useEffect(() => {
@@ -138,6 +145,17 @@ const ShoppingCart = () => {
     []
   );
 
+  const handleShopVoucherPress = useCallback(
+    (shopId: string, voucher: IVoucher) => {
+      setStores((prev) =>
+        prev.map((store) =>
+          store.id === shopId ? { ...store, shopVoucher: voucher } : store
+        )
+      );
+    },
+    []
+  );
+
   const handleItemQuantityChange = useCallback(
     (storeId: string, itemId: string, quantity: number) => {
       setStores((prev) =>
@@ -162,7 +180,7 @@ const ShoppingCart = () => {
       message: "Bạn có muốn xóa sản phẩm này khỏi giỏ hàng không?",
       onConfirm: () => {
         toggleLoading(true);
-        mutationRemoveCartItem.mutate(itemId, {
+        mutationRemoveCartItem.mutate([Number(itemId)], {
           onSuccess: () => {
             refetch();
             toast.success("Đã xóa sản phẩm khỏi giỏ hàng");
@@ -172,6 +190,28 @@ const ShoppingCart = () => {
           },
           onSettled: () => {
             toggleLoading(false);
+          },
+        });
+      },
+    });
+  }, []);
+
+  const handleRemoveAll = useCallback(() => {
+    showModalConfirm({
+      title: "Xóa tất cả sản phẩm",
+      message: "Bạn có muốn xóa tất cả sản phẩm khỏi giỏ hàng không?",
+      onConfirm: () => {
+        toggleLoading(true);
+        const allCartItems = stores.flatMap((store) =>
+          store.items.map((item) => Number(item.id))
+        );
+        mutationRemoveCartItem.mutate(allCartItems, {
+          onSuccess: () => {
+            refetch();
+            toast.success("Đã xóa tất cả sản phẩm khỏi giỏ hàng");
+          },
+          onError: (error) => {
+            toast.error(getErrorMessage(error, "Lỗi khi xóa tất cả sản phẩm"));
           },
         });
       },
@@ -198,6 +238,11 @@ const ShoppingCart = () => {
   };
 
   useEffect(() => {
+    setSelectedVoucher({
+      voucher: null,
+      canSelect: false,
+    });
+
     return () => {
       //clear stores when unmount
       setStores([]);
@@ -253,7 +298,7 @@ const ShoppingCart = () => {
             Tất cả
           </Text>
         </Pressable>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => handleRemoveAll()}>
           <Image
             source={imagePaths.icTrash}
             style={{ width: 24, height: 24, tintColor: "#AEAEAE" }}
@@ -274,6 +319,7 @@ const ShoppingCart = () => {
             onItemQuantityChange={handleItemQuantityChange}
             onItemDelete={handleItemDelete}
             onSelectAllItems={handleSelectAllItems}
+            onShopVoucherPress={setVoucherShopId}
           />
         )}
         estimatedItemSize={200}
@@ -296,6 +342,15 @@ const ShoppingCart = () => {
           />
         </View>
       )}
+      <ModalSelectShopVoucher
+        isOpen={!!voucherShopId}
+        onClose={() => setVoucherShopId("")}
+        shopId={voucherShopId}
+        onSelectVoucher={(voucher) => {
+          handleShopVoucherPress(voucherShopId, voucher);
+          setVoucherShopId("");
+        }}
+      />
     </ScreenWrapper>
   );
 };

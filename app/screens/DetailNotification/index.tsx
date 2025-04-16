@@ -1,6 +1,6 @@
 import { useRoute } from "@react-navigation/native";
-import { useQuery } from "@tanstack/react-query";
-import React from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import React, { useEffect } from "react";
 import { Image, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Header from "~/components/common/Header";
@@ -13,6 +13,7 @@ import { formatDate } from "~/utils";
 const DetailNotification = () => {
   const { bottom } = useSafeAreaInsets();
   const { params } = useRoute<RootStackRouteProp<"DetailNotification">>();
+  const queryClient = useQueryClient();
 
   const { data: notification } = useQuery({
     queryKey: ["notification", params.id],
@@ -20,6 +21,14 @@ const DetailNotification = () => {
       notificationService.getNotificationsDetail(params.id!.toString()),
     enabled: !!params.id,
   });
+
+  useEffect(() => {
+    if (notification) {
+      queryClient.invalidateQueries({
+        queryKey: ["notifications"],
+      });
+    }
+  }, [notification]);
 
   return (
     <ScreenWrapper hasGradient={true} hasSafeBottom={false}>

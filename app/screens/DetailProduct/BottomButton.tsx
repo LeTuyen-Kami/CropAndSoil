@@ -1,5 +1,11 @@
 import { Image } from "expo-image";
-import { FlatList, Modal, TouchableOpacity, View } from "react-native";
+import {
+  FlatList,
+  Modal,
+  TouchableOpacity,
+  View,
+  TouchableWithoutFeedback,
+} from "react-native";
 import { imagePaths } from "~/assets/imagePath";
 import { Text } from "~/components/ui/text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -12,10 +18,10 @@ import ModalBottom from "~/components/common/ModalBottom";
 import { toggleLoading } from "~/components/common/ScreenLoading";
 import { toast } from "~/components/common/Toast";
 import { getErrorMessage } from "~/utils";
-import { useAtomValue } from "jotai";
-import { authAtom } from "~/store/atoms";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { authAtom, selectedVoucherAtom } from "~/store/atoms";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
-
+import { storeAtom } from "../Order/atom";
 type Variation = IProduct["variations"][0];
 
 const SelectVariation = ({
@@ -60,120 +66,125 @@ const SelectVariation = ({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <View className="flex-1 justify-end bg-black/50">
-        <View
-          className="bg-white rounded-t-[24px] p-4"
-          style={{ paddingBottom: bottom || 16 }}
-        >
-          <View className="flex-row items-start mb-4">
-            {selectedVariation?.thumbnail && (
-              <Image
-                source={{ uri: selectedVariation.thumbnail }}
-                className="mr-3 w-20 h-20 rounded-lg"
-              />
-            )}
-            <View className="flex-1">
-              <Text className="mb-1 text-base font-medium">
-                {selectedVariation?.salePrice !== null ? (
-                  <Text className="text-[#FF424E] font-semibold">
-                    {formatPrice(selectedVariation?.salePrice)}
-                  </Text>
-                ) : (
-                  <Text className="text-[#FF424E] font-semibold">
-                    {formatPrice(selectedVariation?.regularPrice)}
-                  </Text>
+      <TouchableWithoutFeedback onPress={onClose}>
+        <View className="flex-1 justify-end bg-black/50">
+          <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
+            <View
+              className="bg-white rounded-t-[24px] p-4"
+              style={{ paddingBottom: bottom || 16 }}
+            >
+              <View className="flex-row items-start mb-4">
+                {selectedVariation?.thumbnail && (
+                  <Image
+                    source={{ uri: selectedVariation.thumbnail }}
+                    className="mr-3 w-20 h-20 rounded-lg"
+                  />
                 )}
-              </Text>
-              <Text className="text-sm text-gray-500">
-                Kho: {selectedVariation?.stock || 0}
-              </Text>
-              <Text className="mt-1 text-sm text-gray-500">
-                Đã chọn: {selectedVariation?.name || "Chưa chọn"}
-              </Text>
-            </View>
-            <TouchableOpacity onPress={onClose} className="p-1">
-              <AntDesign name="close" size={24} color="black" />
-            </TouchableOpacity>
-          </View>
+                <View className="flex-1">
+                  <Text className="mb-1 text-base font-medium">
+                    {selectedVariation?.salePrice !== null ? (
+                      <Text className="text-[#FF424E] font-semibold">
+                        {formatPrice(selectedVariation?.salePrice)}
+                      </Text>
+                    ) : (
+                      <Text className="text-[#FF424E] font-semibold">
+                        {formatPrice(selectedVariation?.regularPrice)}
+                      </Text>
+                    )}
+                  </Text>
+                  <Text className="text-sm text-gray-500">
+                    Kho: {selectedVariation?.stock || 0}
+                  </Text>
+                  <Text className="mt-1 text-sm text-gray-500">
+                    Đã chọn: {selectedVariation?.name || "Chưa chọn"}
+                  </Text>
+                </View>
+                <TouchableOpacity onPress={onClose} className="p-1">
+                  <AntDesign name="close" size={24} color="black" />
+                </TouchableOpacity>
+              </View>
 
-          <Text className="mb-3 text-base font-medium">Phân loại</Text>
+              <Text className="mb-3 text-base font-medium">Phân loại</Text>
 
-          <View className="flex-row flex-wrap mb-4">
-            {variations.map((item) => (
+              <View className="flex-row flex-wrap mb-4">
+                {variations.map((item) => (
+                  <TouchableOpacity
+                    key={item.id.toString()}
+                    className={`mr-2 mb-2 px-2 py-2 rounded-full border ${
+                      selectedVariation?.id === item.id
+                        ? "border-[#FF424E] bg-[#FFF1F0]"
+                        : "border-gray-300"
+                    }`}
+                    onPress={() => onSelectVariation(item)}
+                  >
+                    <Text
+                      className={`text-xs ${
+                        selectedVariation?.id === item.id
+                          ? "text-[#FF424E]"
+                          : "text-gray-700"
+                      }`}
+                    >
+                      {item.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <View className="flex-row justify-between items-center mb-4">
+                <Text className="mb-3 text-base font-medium">Số lượng</Text>
+                <View className="flex-row items-center">
+                  <TouchableOpacity
+                    onPress={decrementQuantity}
+                    className="justify-center items-center w-8 h-8 rounded-md border border-gray-300"
+                    disabled={quantity <= 1}
+                  >
+                    <AntDesign
+                      name="minus"
+                      size={16}
+                      color={quantity <= 1 ? "#D3D3D3" : "black"}
+                    />
+                  </TouchableOpacity>
+
+                  <Text className="mx-4 text-base">{quantity}</Text>
+
+                  <TouchableOpacity
+                    onPress={incrementQuantity}
+                    className="justify-center items-center w-8 h-8 rounded-md border border-gray-300"
+                    disabled={
+                      !selectedVariation || quantity >= selectedVariation.stock
+                    }
+                  >
+                    <AntDesign
+                      name="plus"
+                      size={16}
+                      color={
+                        !selectedVariation ||
+                        quantity >= selectedVariation.stock
+                          ? "#D3D3D3"
+                          : "black"
+                      }
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
+
               <TouchableOpacity
-                key={item.id.toString()}
-                className={`mr-2 mb-2 px-2 py-2 rounded-full border ${
-                  selectedVariation?.id === item.id
-                    ? "border-[#FF424E] bg-[#FFF1F0]"
-                    : "border-gray-300"
-                }`}
-                onPress={() => onSelectVariation(item)}
+                className="w-full py-3 rounded-full bg-[#FF424E]"
+                onPress={() => {
+                  if (selectedVariation) {
+                    onClose();
+                    onConfirm();
+                  }
+                }}
               >
-                <Text
-                  className={`text-xs ${
-                    selectedVariation?.id === item.id
-                      ? "text-[#FF424E]"
-                      : "text-gray-700"
-                  }`}
-                >
-                  {item.name}
+                <Text className="font-semibold text-center text-white">
+                  Xác nhận
                 </Text>
               </TouchableOpacity>
-            ))}
-          </View>
-
-          <View className="flex-row justify-between items-center mb-4">
-            <Text className="mb-3 text-base font-medium">Số lượng</Text>
-            <View className="flex-row items-center">
-              <TouchableOpacity
-                onPress={decrementQuantity}
-                className="justify-center items-center w-8 h-8 rounded-md border border-gray-300"
-                disabled={quantity <= 1}
-              >
-                <AntDesign
-                  name="minus"
-                  size={16}
-                  color={quantity <= 1 ? "#D3D3D3" : "black"}
-                />
-              </TouchableOpacity>
-
-              <Text className="mx-4 text-base">{quantity}</Text>
-
-              <TouchableOpacity
-                onPress={incrementQuantity}
-                className="justify-center items-center w-8 h-8 rounded-md border border-gray-300"
-                disabled={
-                  !selectedVariation || quantity >= selectedVariation.stock
-                }
-              >
-                <AntDesign
-                  name="plus"
-                  size={16}
-                  color={
-                    !selectedVariation || quantity >= selectedVariation.stock
-                      ? "#D3D3D3"
-                      : "black"
-                  }
-                />
-              </TouchableOpacity>
             </View>
-          </View>
-
-          <TouchableOpacity
-            className="w-full py-3 rounded-full bg-[#FF424E]"
-            onPress={() => {
-              if (selectedVariation) {
-                onClose();
-                onConfirm();
-              }
-            }}
-          >
-            <Text className="font-semibold text-center text-white">
-              Xác nhận
-            </Text>
-          </TouchableOpacity>
+          </TouchableWithoutFeedback>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 };
@@ -194,6 +205,8 @@ const BottomButton = ({ productId }: { productId: number | string }) => {
   const [quantity, setQuantity] = useState(1);
   const queryClient = useQueryClient();
   const [actionType, setActionType] = useState<"add" | "buy">("add");
+  const setStores = useSetAtom(storeAtom);
+  const setVoucherState = useSetAtom(selectedVoucherAtom);
 
   const { data: productDetail } = useQuery({
     queryKey: ["product-detail", productId],
@@ -228,6 +241,34 @@ const BottomButton = ({ productId }: { productId: number | string }) => {
     },
   });
 
+  // useEffect(() => {
+  //   if (detailCart) {
+  //     // Transform detailCart data to match the Store format
+  //     const transformedStores = detailCart.cartShops.map((shop) => ({
+  //       id: shop.id.toString(),
+  //       name: shop.shopName,
+  //       isSelected: shop.items.every((item) => item.isChecked),
+  //       items: shop.items.map((item) => ({
+  //         id: item.id.toString(),
+  //         productId: item.product.id.toString(),
+  //         name: item.product.name,
+  //         image: item.variation?.thumbnail || item.product.thumbnail,
+  //         price: item.unitPrice,
+  //         originalPrice: item.product.regularPrice,
+  //         type: item.variation?.name || "",
+  //         variation: {
+  //           name: item.variation?.name || "",
+  //           id: item.variation?.id,
+  //         },
+  //         quantity: item.quantity,
+  //         isSelected: item.isChecked,
+  //       })),
+  //     }));
+
+  //     setStores(transformedStores);
+  //   }
+  // }, [detailCart]);
+
   const handleAction = (type: "add" | "buy") => {
     if (!auth?.isLoggedIn) {
       navigation.smartNavigate("Login");
@@ -244,8 +285,42 @@ const BottomButton = ({ productId }: { productId: number | string }) => {
       mutationAddToCart.mutate();
     } else {
       // Handle buy now action
-      console.log("Buy now with variation:", selectedVariation);
+      const data = [
+        {
+          id: productDetail?.shop?.id?.toString() || "",
+          name: productDetail?.shop?.shopName || "",
+          isSelected: true,
+          items: [
+            {
+              id: productDetail?.id?.toString() || "",
+              productId: productDetail?.id?.toString() || "",
+              name: productDetail?.name || "",
+              image: selectedVariation?.thumbnail! || productDetail?.thumbnail!,
+              price: (productDetail?.salePrice ||
+                productDetail?.regularPrice ||
+                0)!,
+              originalPrice: (productDetail?.regularPrice || 0)!,
+              type: selectedVariation?.name || "",
+              variation: {
+                name: selectedVariation?.name!,
+                id: selectedVariation?.id!,
+              },
+              quantity: quantity,
+              isSelected: true,
+            },
+          ],
+        },
+      ];
+
+      setStores(data);
+      setVoucherState({
+        voucher: null,
+        canSelect: false,
+      });
+
       setShowVariations(false);
+
+      navigation.smartNavigate("Payment");
     }
   };
 

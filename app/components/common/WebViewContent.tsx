@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 
-const WebViewContent = ({ html }: { html: string }) => {
+const WebViewContent = ({
+  html,
+  canScroll = true,
+}: {
+  html: string;
+  canScroll?: boolean;
+}) => {
   const [webViewHeight, setWebViewHeight] = useState(0);
 
   const onWebViewMessage = (event: WebViewMessageEvent) => {
@@ -24,6 +30,7 @@ const WebViewContent = ({ html }: { html: string }) => {
               line-height: 1.5;
               margin: 0;
               padding: 0;
+              ${!canScroll ? "overflow: hidden;" : ""}
             }
             img {
               max-width: 100%;

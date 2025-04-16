@@ -157,7 +157,9 @@ const Toast = ({ toast, onHide }: { toast: ToastData; onHide: () => void }) => {
       onTouchStart={onHide}
     >
       <View style={styles.iconContainer}>{getToastIcon(toast.type)}</View>
-      <Text style={styles.message}>{toast.message}</Text>
+      <Text style={styles.message} numberOfLines={3}>
+        {toast.message}
+      </Text>
       {onHide && (
         <TouchableOpacity style={styles.closeButton} onPress={onHide}>
           <AntDesign name="close" size={16} color="#fff" />

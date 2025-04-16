@@ -43,7 +43,8 @@ const BusinessVoucherScreen = () => {
     },
   });
   const handleUploadDocument = () => {
-    setShowTypeSelector(true);
+    // setShowTypeSelector(true);
+    handleSelectDocument();
   };
 
   const handleSelectImage = async () => {
@@ -225,7 +226,7 @@ const BusinessVoucherScreen = () => {
         </View>
       </View>
 
-      <ModalBottom
+      {/* <ModalBottom
         isOpen={showTypeSelector}
         onClose={() => setShowTypeSelector(false)}
       >
@@ -234,7 +235,7 @@ const BusinessVoucherScreen = () => {
           onSelectImage={handleSelectImage}
           onSelectDocument={handleSelectDocument}
         />
-      </ModalBottom>
+      </ModalBottom> */}
     </ScreenWrapper>
   );
 };

@@ -13,6 +13,7 @@ export interface INotification {
   thumbnail: string;
   title: string;
   type: string;
+  isRead: boolean;
 }
 
 class NotificationService {

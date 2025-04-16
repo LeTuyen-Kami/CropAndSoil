@@ -262,6 +262,10 @@ export interface IAddToCartRequest {
 
 export interface IUpdateCartItemRequest extends IAddToCartRequest {}
 
+export interface IRemoveCartItemRequest {
+  cartItems: number[];
+}
+
 class CartService {
   async getDetailCart() {
     return typedAxios.get<ICart>("/cart");
@@ -278,12 +282,13 @@ class CartService {
     cartItemId: number;
     data: IUpdateCartItemRequest;
   }) {
-    console.log(cartItemId, data);
     return typedAxios.put<ICartItem>(`/cart/${cartItemId}`, data);
   }
 
-  async removeCartItem(cartItemId: string) {
-    return typedAxios.delete<void>(`/cart/${cartItemId}`);
+  async removeCartItem(data: IRemoveCartItemRequest) {
+    return typedAxios.delete<void>(`/cart/remove-cart-item`, {
+      data,
+    });
   }
 }
 

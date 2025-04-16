@@ -11,14 +11,17 @@ import Gallery, { GalleryItem } from "~/components/common/Galery";
 import { Text } from "~/components/ui/text";
 import { productService } from "~/services/api/product.service";
 import { shopService } from "~/services/api/shop.service";
-import { screen } from "~/utils";
+import { getErrorMessage, screen } from "~/utils";
+import { AxiosError } from "axios";
+import { useNavigation } from "@react-navigation/native";
+import { toast } from "~/components/common/Toast";
 const ListImage = ({ id }: { id: string | number }) => {
   const [isGalleryVisible, setIsGalleryVisible] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [images, setImages] = useState<GalleryItem[]>([]);
   const flatListRef = useRef<FlatList>(null);
-
-  const { data: productDetail } = useQuery({
+  const navigation = useNavigation();
+  const { data: productDetail, error } = useQuery({
     queryKey: ["product-detail", id],
     queryFn: () => productService.getProductDetail(id),
     staleTime: 1000 * 60 * 5,
@@ -64,6 +67,14 @@ const ListImage = ({ id }: { id: string | number }) => {
       });
     }
   }, [isGalleryVisible]);
+
+  useEffect(() => {
+    if (error) {
+      const errorMessage = getErrorMessage(error, "Sản phẩm không tồn tại");
+      toast.error(errorMessage);
+      navigation.goBack();
+    }
+  }, [error]);
 
   return (
     <View
