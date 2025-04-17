@@ -16,17 +16,20 @@ import { Store } from "../types";
 import { useNavigation } from "@react-navigation/native";
 import { RootStackRouteProp, RootStackScreenProps } from "~/navigation/types";
 import { cn } from "~/lib/utils";
-
+import { ICalculateResponse } from "~/services/api/order.service";
+import { convertToK } from "~/utils";
 const PaymentStore = ({
   store,
   onMessagePress,
   message,
   onShopVoucherPress,
+  calculatedData,
 }: {
   store: Store;
   onMessagePress: () => void;
   message: string;
   onShopVoucherPress: () => void;
+  calculatedData?: ICalculateResponse;
 }) => {
   const navigation = useNavigation<RootStackScreenProps<"Payment">>();
 
@@ -55,6 +58,12 @@ const PaymentStore = ({
   const navigationToProduct = (productId: string) => {
     navigation.navigate("DetailProduct", { id: productId });
   };
+
+  const orderShop = useMemo(() => {
+    return calculatedData?.orderShops?.find(
+      (orderShop) => orderShop.shop.id + "" === store.id + ""
+    );
+  }, [calculatedData]);
 
   return (
     <View className="bg-white rounded-2xl mb-2.5">
@@ -97,12 +106,12 @@ const PaymentStore = ({
       >
         <Text className="text-sm text-[#676767]">Voucher của Shop</Text>
         <View className="flex-row flex-1 justify-end items-center ml-1">
-          {store.shopVoucher ? (
+          {orderShop?.shopProductVoucherDiscount ? (
             <Text
-              className="flex-1 text-sm text-right text-primary"
+              className="flex-1 text-xs text-right text-red-500"
               numberOfLines={1}
             >
-              {store.shopVoucher.description}
+              Đã giảm ₫{convertToK(orderShop?.shopProductVoucherDiscount)}k
             </Text>
           ) : (
             <Text className="text-sm text-[#AEAEAE] mr-2">

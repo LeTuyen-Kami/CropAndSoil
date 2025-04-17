@@ -253,12 +253,6 @@ export interface OrderShop {
   items: Item[];
 }
 
-export interface PaymentMethod {
-  key: string;
-  title: string;
-  description: string;
-}
-
 export interface ShippingAddres {
   id: number;
   name: string;
@@ -280,6 +274,8 @@ export interface ICalculateResponse {
   shippingVoucherDiscountTotal: number;
   productVoucherDiscountTotal: number;
   marketplaceDiscountTotal: number;
+  marketplaceProductVoucherDiscountTotal: number;
+  marketplaceShippingVoucherDiscountTotal: number;
   total: number;
 }
 

@@ -29,11 +29,15 @@ import Empty from "~/components/common/Empty";
 import { RootStackScreenProps } from "~/navigation/types";
 import { useNavigation } from "@react-navigation/native";
 import { userService } from "~/services/api/user.service";
-import { IOrderCalculateRequest } from "~/services/api/order.service";
+import {
+  ICalculateResponse,
+  IOrderCalculateRequest,
+} from "~/services/api/order.service";
 import { orderService } from "~/services/api/order.service";
 import ModalVoucherSelect from "~/screens/VoucherSelect/ModalVoucherSelect";
 import ModalSelectShopVoucher from "~/screens/VoucherSelect/ModalSelectShopVoucher";
 import { IVoucher } from "~/services/api/shop.service";
+import { paymentService } from "~/services/api/payment.service";
 const ShoppingCart = () => {
   const navigation = useNavigation<RootStackScreenProps<"ShoppingCart">>();
   const [stores, setStores] = useAtom(storeAtom);
@@ -59,6 +63,70 @@ const ShoppingCart = () => {
         cartItems: cartItemIds,
       }),
   });
+
+  const [calculatedData, setCalculatedData] =
+    useState<ICalculateResponse | null>(null);
+  const { data: paymentMethods } = useQuery({
+    queryKey: ["payment-methods"],
+    queryFn: () => paymentService.getAvailablePaymentMethods(),
+  });
+
+  const { data: address, refetch: refetchAddress } = useQuery({
+    queryKey: ["payment-address"],
+    queryFn: () => userService.getAddress({ skip: 0, take: 1 }),
+    select: (data) => data.data?.[0] || null,
+  });
+
+  const mutationCalculateOrder = useMutation({
+    mutationFn: (data: IOrderCalculateRequest) => orderService.calculate(data),
+  });
+
+  useEffect(() => {
+    if (paymentMethods && address && stores.length > 0) {
+      mutationCalculateOrder.mutate(
+        {
+          paymentMethodKey: paymentMethods[0].key,
+          shippingAddressId: address?.id!,
+          shippingVoucherCode:
+            selectedVoucher.voucher?.voucherType === "shipping"
+              ? selectedVoucher.voucher?.code!
+              : "",
+          productVoucherCode:
+            selectedVoucher.voucher?.voucherType !== "shipping"
+              ? selectedVoucher.voucher?.code!
+              : "",
+          shops:
+            stores?.map((store) => ({
+              id: Number(store.id),
+              shippingMethodKey: "ghtk",
+              note: "",
+              voucherCode: store.shopVoucher?.code || "",
+              items: store.items
+                ?.filter((item) => item.isSelected)
+                .map((item) => ({
+                  product: {
+                    id: Number(item.productId),
+                    name: item.name,
+                  },
+                  variation: {
+                    id: Number(item.variation.id),
+                    name: item?.variation.name,
+                  },
+                  quantity: item.quantity,
+                })),
+            })) || [],
+        },
+        {
+          onSuccess: (data) => {
+            setCalculatedData(data);
+          },
+          onError: (error) => {
+            toast.error(getErrorMessage(error, "Lỗi khi tính toán đơn hàng"));
+          },
+        }
+      );
+    }
+  }, [paymentMethods, stores, address, selectedVoucher.voucher]);
 
   useEffect(() => {
     if (detailCart) {
@@ -320,8 +388,10 @@ const ShoppingCart = () => {
             onItemDelete={handleItemDelete}
             onSelectAllItems={handleSelectAllItems}
             onShopVoucherPress={setVoucherShopId}
+            calculatedData={calculatedData!}
           />
         )}
+        extraData={calculatedData}
         estimatedItemSize={200}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 140 }}
@@ -339,6 +409,7 @@ const ShoppingCart = () => {
             onVoucherPress={onVoucherPress}
             voucher={selectedVoucher.voucher}
             stores={stores}
+            calculatedData={calculatedData!}
           />
         </View>
       )}

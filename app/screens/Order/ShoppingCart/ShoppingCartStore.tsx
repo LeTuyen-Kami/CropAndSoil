@@ -1,5 +1,5 @@
 import { deepEqual } from "fast-equals";
-import { memo, useCallback } from "react";
+import { memo, useCallback, useMemo } from "react";
 import { View, ImageSourcePropType, TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -10,7 +10,8 @@ import ShoppingCartItem from "~/components/common/ShoppingCartItem";
 import { Store } from "../types";
 import { useNavigation } from "@react-navigation/native";
 import { RootStackScreenProps } from "~/navigation/types";
-
+import { ICalculateResponse } from "~/services/api/order.service";
+import { convertToK } from "~/utils";
 const ShoppingCartStore = ({
   store,
   onItemSelect,
@@ -18,6 +19,7 @@ const ShoppingCartStore = ({
   onItemDelete,
   onSelectAllItems,
   onShopVoucherPress,
+  calculatedData,
 }: {
   store: Store;
   onItemSelect: (storeId: string, itemId: string, selected: boolean) => void;
@@ -29,6 +31,7 @@ const ShoppingCartStore = ({
   onItemDelete: (storeId: string, itemId: string) => void;
   onSelectAllItems: (storeId: string, selected: boolean) => void;
   onShopVoucherPress: (shopId: string) => void;
+  calculatedData?: ICalculateResponse;
 }) => {
   const navigation = useNavigation<RootStackScreenProps<"ShoppingCart">>();
 
@@ -63,6 +66,12 @@ const ShoppingCartStore = ({
   // Check if all items are selected
   const allItemsSelected =
     store.items.length > 0 && store.items.every((item) => item.isSelected);
+
+  const orderShop = useMemo(() => {
+    return calculatedData?.orderShops?.find(
+      (orderShop) => orderShop.shop.id + "" === store.id + ""
+    );
+  }, [calculatedData]);
 
   return (
     <View className="overflow-hidden mx-2 bg-white rounded-2xl">
@@ -136,9 +145,9 @@ const ShoppingCartStore = ({
             source={imagePaths.icTicketSale}
             style={{ width: 20, height: 20, tintColor: "#159747" }}
           />
-          {store?.shopVoucher ? (
+          {orderShop?.shopProductVoucherDiscount ? (
             <Text className="flex-1 text-xs text-primary" numberOfLines={1}>
-              {store.shopVoucher.description}
+              Đã giảm ₫{convertToK(orderShop?.shopProductVoucherDiscount)}k
             </Text>
           ) : (
             <Text className="text-xs text-[#676767]">

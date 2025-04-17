@@ -59,6 +59,10 @@ export type RootStackParamList = {
   Followings: undefined;
   ChangePassword: undefined;
   FlashSale: undefined;
+  FlashSaleProduct: {
+    id: string | number;
+  };
+  MyVoucher: undefined;
 };
 
 // Create a type for the navigation prop for stack screens

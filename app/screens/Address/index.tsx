@@ -38,6 +38,7 @@ const Address = () => {
     hasNextPage,
     isFetching,
     fetchNextPage,
+    isLoading,
   } = usePagination<IAddress, PaginationRequests>(userService.getAddress, {
     queryKey: ["address"],
     initialPagination: { skip: 0, take: 10 },
@@ -126,7 +127,9 @@ const Address = () => {
           ItemSeparatorComponent={() => <View className="h-2.5" />}
           contentContainerStyle={{ paddingBottom: 120 }}
           showsVerticalScrollIndicator={false}
-          ListEmptyComponent={() => <Empty title="Không có địa chỉ nào" />}
+          ListEmptyComponent={() => (
+            <Empty title="Không có địa chỉ nào" isLoading={isLoading} />
+          )}
           onEndReached={fetchNextPage}
           onEndReachedThreshold={0.5}
           ListFooterComponent={() =>

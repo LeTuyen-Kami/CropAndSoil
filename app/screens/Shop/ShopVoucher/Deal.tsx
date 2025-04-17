@@ -4,12 +4,12 @@ import { LinearGradient } from "expo-linear-gradient";
 import { TouchableOpacity, View } from "react-native";
 import { Text } from "~/components/ui/text";
 import { checkCanRender, getItemWidth } from "~/utils";
-import Timer from "./Timer";
 import { AntDesign } from "@expo/vector-icons";
 import { IProduct, productService } from "~/services/api/product.service";
 import { useQuery } from "@tanstack/react-query";
 import { formatCurrency } from "~/utils/format";
 import { useMemo } from "react";
+import Timer from "~/components/common/Timer";
 
 interface IProductItem {
   image: string;

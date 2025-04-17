@@ -284,6 +284,7 @@ const Payment = () => {
           <PaymentStore
             key={store.id}
             store={store}
+            calculatedData={calculatedData!}
             onMessagePress={() => handleOpenMessageModal(store.id)}
             message={storeMessage[store.id]}
             onShopVoucherPress={() => setVoucherShopId(store.id)}

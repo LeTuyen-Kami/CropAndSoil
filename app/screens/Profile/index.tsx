@@ -168,7 +168,7 @@ const ProfileScreen = () => {
               <UtilityItem
                 icon={imagePaths.icVoucher}
                 title="Kho Voucher"
-                onPress={() => navigation.smartNavigate("VoucherSelect")}
+                onPress={() => navigation.smartNavigate("MyVoucher")}
               />
               <UtilityItem
                 icon={imagePaths.icHeart}

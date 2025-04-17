@@ -39,6 +39,8 @@ import Followers from "~/screens/Follow/Followers";
 import Followings from "~/screens/Follow/Followings";
 import ChangePassword from "~/screens/ChangePassword";
 import FlashSale from "~/screens/FlashSale";
+import FlashSaleProduct from "~/screens/FlashSaleProduct";
+import MyVoucherScreen from "~/screens/VoucherSelect/MyVoucher";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -129,6 +131,8 @@ export const AppNavigator = () => {
         <Stack.Screen name="Followings" component={Followings} />
         <Stack.Screen name="ChangePassword" component={ChangePassword} />
         <Stack.Screen name="FlashSale" component={FlashSale} />
+        <Stack.Screen name="FlashSaleProduct" component={FlashSaleProduct} />
+        <Stack.Screen name="MyVoucher" component={MyVoucherScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

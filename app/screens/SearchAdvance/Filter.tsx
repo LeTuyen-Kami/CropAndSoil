@@ -162,6 +162,7 @@ interface FilterItem {
   id: string;
   label: string;
   isSelected: boolean;
+  value?: number;
 }
 
 // Interface for sections with proper typing
@@ -185,7 +186,7 @@ const Filter = ({
     maxPrice: number;
     categories: string[];
     locations: string[];
-    ratings: string[];
+    ratings: number[];
   }) => void;
   onResetFilter: () => void;
 }) => {
@@ -219,12 +220,12 @@ const Filter = ({
 
   // Rating data
   const [ratings, setRatings] = useState<FilterItem[]>([
-    { id: "all", label: "Tất cả", isSelected: false },
-    { id: "fiveStar", label: "Từ 5 sao", isSelected: false },
-    { id: "fourStar", label: "Từ 4 sao", isSelected: false },
-    { id: "threeStar", label: "Từ 3 sao", isSelected: false },
-    { id: "twoStar", label: "Từ 2 sao", isSelected: false },
-    { id: "oneStar", label: "Từ 1 sao", isSelected: false },
+    { id: "all", label: "Tất cả", isSelected: false, value: 0 },
+    { id: "fiveStar", label: "Từ 5 sao", isSelected: false, value: 5 },
+    { id: "fourStar", label: "Từ 4 sao", isSelected: false, value: 4 },
+    { id: "threeStar", label: "Từ 3 sao", isSelected: false, value: 3 },
+    { id: "twoStar", label: "Từ 2 sao", isSelected: false, value: 2 },
+    { id: "oneStar", label: "Từ 1 sao", isSelected: false, value: 1 },
   ]);
 
   // Group items into rows of 2
@@ -243,13 +244,25 @@ const Filter = ({
   const toggleItemSelection = (
     id: string,
     items: FilterItem[],
-    setter: React.Dispatch<React.SetStateAction<FilterItem[]>>
+    setter: React.Dispatch<React.SetStateAction<FilterItem[]>>,
+    sectionKey: string
   ) => {
-    setter(
-      items.map((item) =>
-        item.id === id ? { ...item, isSelected: !item.isSelected } : item
-      )
-    );
+    if (sectionKey === "ratings") {
+      // For ratings, only allow one selection
+      setter(
+        items.map((item) => ({
+          ...item,
+          isSelected: item.id === id ? !item.isSelected : false,
+        }))
+      );
+    } else {
+      // For other filters, keep multiple selection behavior
+      setter(
+        items.map((item) =>
+          item.id === id ? { ...item, isSelected: !item.isSelected } : item
+        )
+      );
+    }
   };
 
   // Create sections for SectionList with proper typing
@@ -260,10 +273,12 @@ const Filter = ({
     type?: "price";
     isOpen?: boolean;
     onOpen?: () => void;
+    key: string;
   }> = [
     {
       title: "Theo danh mục",
       data: groupIntoRows(categories).map((row) => row),
+      key: "categories",
     },
     {
       title: "Nơi bán",
@@ -271,6 +286,7 @@ const Filter = ({
       showDetails: categories?.length > 0,
       isOpen: isOpenCategory,
       onOpen: onToggleCategory,
+      key: "locations",
     },
     {
       title: "Theo giá",
@@ -279,10 +295,12 @@ const Filter = ({
       showDetails: locations?.length > 0,
       isOpen: isOpenLocation,
       onOpen: onToggleLocation,
+      key: "price",
     },
     {
       title: "Đánh giá",
       data: groupIntoRows(ratings).map((row) => row),
+      key: "ratings",
     },
   ];
 
@@ -309,7 +327,7 @@ const Filter = ({
       maxPrice: priceToNumber(store.get(maxPriceAtom)),
       categories: selectedCategories.map((category) => category.id),
       locations: selectedLocations.map((location) => location.id),
-      ratings: selectedRatings.map((rating) => rating.id),
+      ratings: selectedRatings.map((rating) => rating.value || 0),
     });
   };
 
@@ -379,16 +397,31 @@ const Filter = ({
             label={filterItem.label}
             isSelected={filterItem.isSelected}
             onPress={() => {
-              const sectionTitle = sections.find((s) =>
+              const sectionKey = sections.find((s) =>
                 s.data.some((row) => row === item)
-              )?.title;
+              )?.key;
 
-              if (sectionTitle === "Theo danh mục") {
-                toggleItemSelection(filterItem.id, categories, setCategories);
-              } else if (sectionTitle === "Nơi bán") {
-                toggleItemSelection(filterItem.id, locations, setLocations);
-              } else if (sectionTitle === "Đánh giá") {
-                toggleItemSelection(filterItem.id, ratings, setRatings);
+              if (sectionKey === "categories") {
+                toggleItemSelection(
+                  filterItem.id,
+                  categories,
+                  setCategories,
+                  sectionKey
+                );
+              } else if (sectionKey === "locations") {
+                toggleItemSelection(
+                  filterItem.id,
+                  locations,
+                  setLocations,
+                  sectionKey
+                );
+              } else if (sectionKey === "ratings") {
+                toggleItemSelection(
+                  filterItem.id,
+                  ratings,
+                  setRatings,
+                  sectionKey
+                );
               }
             }}
           />

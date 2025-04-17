@@ -1,87 +1,26 @@
 import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { TouchableOpacity, View } from "react-native";
-import { toggleLoading } from "~/components/common/ScreenLoading";
 import { Text } from "~/components/ui/text";
-import { ICalculateResponse, orderService } from "~/services/api/order.service";
-import { IOrderCalculateRequest } from "~/services/api/order.service";
-import { paymentService } from "~/services/api/payment.service";
-import { userService } from "~/services/api/user.service";
+import { ICalculateResponse } from "~/services/api/order.service";
 import { IVoucher } from "~/services/api/voucher.service";
+import { convertToK, formatPrice } from "~/utils";
 import { Store } from "../types";
-import { toast } from "~/components/common/Toast";
-import { formatPrice, getErrorMessage } from "~/utils";
+import React from "react";
+
 const Footer = ({
   onVoucherPress,
   voucher,
   stores,
+  calculatedData,
 }: {
   onVoucherPress: () => void;
   voucher: IVoucher | null;
   stores: Store[];
+  calculatedData?: ICalculateResponse;
 }) => {
   const navigation = useNavigation();
-  const [calculatedData, setCalculatedData] =
-    useState<ICalculateResponse | null>(null);
-  const { data: paymentMethods } = useQuery({
-    queryKey: ["payment-methods"],
-    queryFn: () => paymentService.getAvailablePaymentMethods(),
-  });
-
-  const { data: address, refetch: refetchAddress } = useQuery({
-    queryKey: ["payment-address"],
-    queryFn: () => userService.getAddress({ skip: 0, take: 1 }),
-    select: (data) => data.data?.[0] || null,
-  });
-
-  const mutationCalculateOrder = useMutation({
-    mutationFn: (data: IOrderCalculateRequest) => orderService.calculate(data),
-  });
-
-  useEffect(() => {
-    if (paymentMethods && address) {
-      mutationCalculateOrder.mutate(
-        {
-          paymentMethodKey: paymentMethods[0].key,
-          shippingAddressId: address?.id!,
-          shippingVoucherCode:
-            voucher?.voucherType === "shipping" ? voucher?.code : "",
-          productVoucherCode:
-            voucher?.voucherType !== "shipping" ? voucher?.code! : "",
-          shops:
-            stores?.map((store) => ({
-              id: Number(store.id),
-              shippingMethodKey: "ghtk",
-              note: "",
-              voucherCode: store.shopVoucher?.code || "",
-              items: store.items
-                ?.filter((item) => item.isSelected)
-                .map((item) => ({
-                  product: {
-                    id: Number(item.productId),
-                    name: item.name,
-                  },
-                  variation: {
-                    id: Number(item.variation.id),
-                    name: item?.variation.name,
-                  },
-                  quantity: item.quantity,
-                })),
-            })) || [],
-        },
-        {
-          onSuccess: (data) => {
-            setCalculatedData(data);
-          },
-          onError: (error) => {
-            toast.error(getErrorMessage(error, "Lỗi khi tính toán đơn hàng"));
-          },
-        }
-      );
-    }
-  }, [paymentMethods, stores, address, voucher]);
 
   const handlePayment = () => {
     navigation.navigate("Payment");
@@ -102,11 +41,7 @@ const Footer = ({
   }, [stores]);
 
   const savedAmount = useMemo(() => {
-    return (
-      (calculatedData?.productVoucherDiscountTotal || 0) +
-      (calculatedData?.shippingVoucherDiscountTotal || 0) +
-      (calculatedData?.marketplaceDiscountTotal || 0)
-    );
+    return (calculatedData?.subtotal || 0) - (calculatedData?.total || 0);
   }, [calculatedData]);
 
   return (
@@ -122,13 +57,31 @@ const Footer = ({
           onPress={onVoucherPress}
           activeOpacity={0.8}
         >
-          {!!voucher ? (
-            <Text
-              className="flex-1 text-sm text-right text-primary"
-              numberOfLines={1}
-            >
-              {voucher.description}
-            </Text>
+          {!!calculatedData?.marketplaceShippingVoucherDiscountTotal ||
+          !!calculatedData?.marketplaceProductVoucherDiscountTotal ? (
+            <React.Fragment>
+              {!!calculatedData?.marketplaceShippingVoucherDiscountTotal && (
+                <Text
+                  className="flex-1 text-xs text-right text-primary"
+                  numberOfLines={1}
+                >
+                  Giảm phí vận chuyển{" "}
+                  {calculatedData?.marketplaceShippingVoucherDiscountTotal}k
+                </Text>
+              )}
+              {!!calculatedData?.marketplaceProductVoucherDiscountTotal && (
+                <Text
+                  className="flex-1 text-xs text-right text-red-500"
+                  numberOfLines={1}
+                >
+                  Giảm ₫
+                  {convertToK(
+                    calculatedData?.marketplaceProductVoucherDiscountTotal
+                  )}
+                  k
+                </Text>
+              )}
+            </React.Fragment>
           ) : (
             <Text className="text-sm text-[#AEAEAE] mr-2 flex-1 text-right">
               Chọn hoặc nhập mã

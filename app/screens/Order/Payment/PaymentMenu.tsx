@@ -5,7 +5,7 @@ import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { imagePaths } from "~/assets/imagePath";
 import { IVoucher } from "~/services/api/voucher.service";
 import { ICalculateResponse } from "~/services/api/order.service";
-import { formatPrice } from "~/utils";
+import { convertToK, formatPrice } from "~/utils";
 type PaymentMenuProps = {
   onVoucherPress: () => void;
   onOrderPress: () => void;
@@ -20,11 +20,7 @@ const PaymentMenu = ({
   calculatedData,
 }: PaymentMenuProps) => {
   const savedAmount = useMemo(() => {
-    return (
-      (calculatedData?.productVoucherDiscountTotal || 0) +
-      (calculatedData?.shippingVoucherDiscountTotal || 0) +
-      (calculatedData?.marketplaceDiscountTotal || 0)
-    );
+    return (calculatedData?.subtotal || 0) - (calculatedData?.total || 0);
   }, [calculatedData]);
 
   return (
@@ -50,13 +46,30 @@ const PaymentMenu = ({
             className="flex-row flex-1 gap-2 items-center ml-1"
             onPress={onVoucherPress}
           >
-            {!!voucher ? (
-              <Text
-                className="flex-1 text-sm font-normal text-right text-primary"
-                numberOfLines={1}
-              >
-                {voucher?.description}
-              </Text>
+            {!!calculatedData?.marketplaceShippingVoucherDiscountTotal ||
+            !!calculatedData?.marketplaceProductVoucherDiscountTotal ? (
+              <React.Fragment>
+                {!!calculatedData?.marketplaceShippingVoucherDiscountTotal && (
+                  <Text
+                    className="flex-1 text-xs text-right text-primary"
+                    numberOfLines={1}
+                  >
+                    Giảm phí vận chuyển{" "}
+                    {calculatedData?.marketplaceShippingVoucherDiscountTotal}k
+                  </Text>
+                )}
+                {!!calculatedData?.marketplaceProductVoucherDiscountTotal && (
+                  <Text
+                    className="flex-1 text-xs text-right text-red-500"
+                    numberOfLines={1}
+                  >
+                    Giảm ₫
+                    {convertToK(
+                      calculatedData?.marketplaceProductVoucherDiscountTotal
+                    )}k
+                  </Text>
+                )}
+              </React.Fragment>
             ) : (
               <Text className="text-sm font-normal text-[#AEAEAE] flex-1 text-right">
                 Chọn hoặc nhập mã

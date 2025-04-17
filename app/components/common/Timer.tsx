@@ -5,9 +5,16 @@ import { useEffect, useState } from "react";
 interface TimerProps {
   expiredTime: Date;
   onExpire?: () => void;
+  textColor?: string;
+  backgroundColor?: string;
 }
 
-const Timer = ({ expiredTime, onExpire }: TimerProps) => {
+const Timer = ({
+  expiredTime,
+  onExpire,
+  textColor = "#0B5226",
+  backgroundColor = "#BEE2CB",
+}: TimerProps) => {
   const [timeLeft, setTimeLeft] = useState<{
     hours: string;
     minutes: string;
@@ -56,20 +63,33 @@ const Timer = ({ expiredTime, onExpire }: TimerProps) => {
 
   return (
     <View className="flex-row justify-center items-center py-4">
-      <View className="bg-[#BEE2CB] rounded-lg justify-center items-center mx-1 size-7">
-        <Text className="text-base font-medium text-[#0B5226]">
+      <View
+        className="justify-center items-center mx-1 rounded-lg size-7"
+        style={{ backgroundColor }}
+      >
+        <Text className="text-base font-medium" style={{ color: textColor }}>
           {timeLeft.hours}
         </Text>
       </View>
-      <Text className="text-base font-medium text-[#0B5226]">:</Text>
-      <View className="bg-[#BEE2CB] rounded-lg justify-center items-center mx-1 size-7">
-        <Text className="text-base font-medium text-[#0B5226]">
+      <Text className="text-base font-medium" style={{ color: textColor }}>
+        :
+      </Text>
+      <View
+        className="justify-center items-center mx-1 rounded-lg size-7"
+        style={{ backgroundColor }}
+      >
+        <Text className="text-base font-medium" style={{ color: textColor }}>
           {timeLeft.minutes}
         </Text>
       </View>
-      <Text className="text-base font-medium text-[#0B5226]">:</Text>
-      <View className="bg-[#BEE2CB] rounded-lg justify-center items-center mx-1 size-7">
-        <Text className="text-base font-medium text-[#0B5226]">
+      <Text className="text-base font-medium" style={{ color: textColor }}>
+        :
+      </Text>
+      <View
+        className="justify-center items-center mx-1 rounded-lg size-7"
+        style={{ backgroundColor }}
+      >
+        <Text className="text-base font-medium" style={{ color: textColor }}>
           {timeLeft.seconds}
         </Text>
       </View>

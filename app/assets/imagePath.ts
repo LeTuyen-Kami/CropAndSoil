@@ -128,7 +128,7 @@ import bag from "~/assets/images/bag.png";
 
 import icDollar from "~/assets/icons/dollar_icon.png";
 import icSort from "~/assets/icons/sort_vertical_icon.png";
-
+import icTimer from "~/assets/icons/icon_timer.png";
 export const imagePaths = {
   //images
   logo: logo,
@@ -258,4 +258,5 @@ export const imagePaths = {
   bag: bag,
   icDollar: icDollar,
   icSort: icSort,
+  icTimer: icTimer,
 };

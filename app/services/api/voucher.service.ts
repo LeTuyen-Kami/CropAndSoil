@@ -40,12 +40,19 @@ class VoucherService {
     return typedAxios.get<IVoucher>(`/vouchers/${id}`);
   }
 
-  async getVouchersByUserId(userId: string) {
-    return typedAxios.get<IVoucher[]>(`/vouchers/my-vouchers`);
+  async getMyVouchers(params: PaginationRequests) {
+    return typedAxios.get<PaginatedResponse<IVoucher>>(
+      `/vouchers/my-vouchers`,
+      {
+        params,
+      }
+    );
   }
 
-  async getAvailableVouchers() {
-    return typedAxios.get<IVoucher[]>(`/vouchers/available`);
+  async getAvailableVouchers(params: PaginationRequests) {
+    return typedAxios.get<PaginatedResponse<IVoucher>>(`/vouchers/available`, {
+      params,
+    });
   }
 
   async applyVoucher(voucherId: string) {

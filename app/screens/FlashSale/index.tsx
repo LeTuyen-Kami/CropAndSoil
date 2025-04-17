@@ -1,126 +1,76 @@
-import { Image } from "expo-image";
-import { useRef, useState } from "react";
-import {
-  GestureResponderEvent,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
-import { View } from "react-native";
+import { useQuery } from "@tanstack/react-query";
+import dayjs from "dayjs";
+import { useMemo, useRef, useState } from "react";
+import { GestureResponderEvent, ScrollView, View } from "react-native";
 import PagerView from "react-native-pager-view";
-import { imagePaths } from "~/assets/imagePath";
 import ScreenWrapper from "~/components/common/ScreenWrapper";
-import { Input } from "~/components/ui/input";
-import { Text } from "~/components/ui/text";
-import { useSmartNavigation } from "~/hooks/useSmartNavigation";
-import { cn } from "~/lib/utils";
+import { usePagination } from "~/hooks/usePagination";
+import { flashSaleService } from "~/services/api/flashsale.service";
 import { screen } from "~/utils";
-
-const TabItem = ({
-  title,
-  subTitle,
-  isActive,
-  onPress,
-}: {
-  title: string;
-  subTitle: string;
-  isActive?: boolean;
-  onPress?: (e: any) => void;
-}) => {
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      className={cn(
-        "flex-col bg-[#25B85D] justify-center items-center py-2.5 px-2",
-        isActive && "border-b border-white"
-      )}
-    >
-      <Text className="text-base font-bold text-white">{title}</Text>
-      <Text className="text-[10px] tracking-tight text-white">{subTitle}</Text>
-    </TouchableOpacity>
-  );
-};
-
-const Header = () => {
-  const navigation = useSmartNavigation();
-
-  return (
-    <View className="flex-row gap-4 items-center px-2">
-      <TouchableOpacity
-        onPress={navigation.smartGoBack}
-        className="px-2 py-1"
-        hitSlop={20}
-      >
-        <Image
-          source={imagePaths.icArrowLeft}
-          className="w-2 h-4"
-          contentFit="contain"
-        />
-      </TouchableOpacity>
-      <Input
-        placeholder="Tìm kiếm sản phẩm, cửa hàng"
-        placeholderTextColor="#AEAEAE"
-        className="flex-1"
-        textInputClassName="text-sm leading-4"
-        rightIcon={
-          <TouchableOpacity>
-            <Image
-              source={imagePaths.icMagnifier}
-              className="size-5"
-              contentFit="contain"
-            />
-          </TouchableOpacity>
-        }
-      />
-      <TouchableOpacity
-        className="h-12 rounded-full aspect-square bg-[#39CA71] justify-center items-center"
-        hitSlop={20}
-      >
-        <Image
-          source={imagePaths.icFilter}
-          className="size-6"
-          contentFit="contain"
-        />
-      </TouchableOpacity>
-    </View>
-  );
-};
+import Header from "./Header";
+import PagerViewScreen from "./PagerViewScreen";
+import TabItem from "./TabItem";
 
 const ITEMS = [
   {
     title: "15:00",
     subTitle: "Đang diễn ra",
     key: "1",
+    value: dayjs().toISOString(),
   },
   {
     title: "16:00",
     subTitle: "Sắp diễn ra",
     key: "2",
+    value: dayjs().add(1, "hour").toISOString(),
   },
   {
     title: "17:00",
     subTitle: "Sắp diễn ra",
     key: "3",
+    value: dayjs().add(2, "hour").toISOString(),
   },
   {
     title: "18:00",
     subTitle: "Sắp diễn ra",
     key: "4",
+    value: dayjs().add(3, "hour").toISOString(),
   },
   {
     title: "19:00",
     subTitle: "Sắp diễn ra",
     key: "5",
+    value: dayjs().add(4, "hour").toISOString(),
   },
   {
     title: "20:00",
     subTitle: "Sắp diễn ra",
     key: "6",
+    value: dayjs().add(5, "hour").toISOString(),
   },
 ];
 
 const FlashSale = () => {
   const [tabIndex, setTabIndex] = useState(0);
   const scrollRef = useRef<ScrollView>(null);
+
+  const { data: timeSlots } = useQuery({
+    queryKey: ["flash-sale-time-slots"],
+    queryFn: () => flashSaleService.getFlashSaleTimeSlot(),
+  });
+
+  console.log(timeSlots);
+
+  const { data } = usePagination(
+    (data) => {
+      return flashSaleService.getFlashSale(ITEMS[tabIndex].value, data);
+    },
+    {
+      queryKey: ["flash-sale", ITEMS[tabIndex].value],
+      enabled: !!ITEMS[tabIndex].value,
+    }
+  );
+
   const pagerRef = useRef<PagerView>(null);
   const onPressTab = (index: number, e: GestureResponderEvent) => {
     setTabIndex(index);
@@ -132,8 +82,25 @@ const FlashSale = () => {
     pagerRef.current?.setPage(index);
   };
 
+  const onPageSelected = (e: any) => {
+    setTabIndex(e.nativeEvent.position);
+    scrollRef.current?.scrollTo({
+      x: e.nativeEvent.position * (screen.width - 100),
+      animated: true,
+    });
+  };
+
+  // Memoize the FlashList components to prevent unnecessary re-renders
+  const renderPagerViews = useMemo(() => {
+    return ITEMS.map((item, index) => (
+      <View key={item.key} className="flex-1 bg-[#EEE]">
+        <PagerViewScreen />
+      </View>
+    ));
+  }, []);
+
   return (
-    <ScreenWrapper hasGradient>
+    <ScreenWrapper hasGradient hasSafeBottom={false}>
       <Header />
       <View className="flex-1">
         <View className="bg-[#25B85D] mt-4">
@@ -161,16 +128,14 @@ const FlashSale = () => {
             ))}
           </ScrollView>
         </View>
-        <PagerView style={{ flex: 1 }} ref={pagerRef}>
-          {ITEMS.map((item, index) => (
-            <View
-              key={item.key}
-              className="flex-1"
-              style={{ backgroundColor: Math.random() > 0.5 ? "red" : "blue" }}
-            >
-              <Text>{item.title}</Text>
-            </View>
-          ))}
+        <PagerView
+          style={{ flex: 1 }}
+          ref={pagerRef}
+          initialPage={tabIndex}
+          offscreenPageLimit={1}
+          onPageSelected={onPageSelected}
+        >
+          {renderPagerViews}
         </PagerView>
       </View>
     </ScreenWrapper>

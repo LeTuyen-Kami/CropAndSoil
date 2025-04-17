@@ -90,6 +90,7 @@ const Tabs = () => {
         onPageSelected={(e) => {
           handlePageChange(e.nativeEvent.position);
         }}
+        offscreenPageLimit={1}
       >
         <View
           className="overflow-hidden flex-1 bg-[#EEE] rounded-t-2xl"

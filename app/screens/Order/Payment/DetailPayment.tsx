@@ -30,7 +30,7 @@ const DetailPayment = ({
       },
       {
         label: "Tổng cộng voucher giảm giá",
-        value: formatPrice(calculatedData.productVoucherDiscountTotal),
+        value: formatPrice(calculatedData.subtotal - calculatedData.total),
         isNegative: true,
       },
       {
@@ -74,6 +74,7 @@ const DetailPayment = ({
                 : "text-[#676767]"
             }`}
           >
+            {item.isNegative ? "-" : ""}
             {item.value}
           </Text>
         </View>

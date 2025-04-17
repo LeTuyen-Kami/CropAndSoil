@@ -186,7 +186,7 @@ const Tabs = forwardRef<TabsRef, TabsProps>(
           ref={pagerRef}
           style={styles.pagerView}
           initialPage={initialPage}
-          // onPageScroll={onPageScroll}
+          offscreenPageLimit={1}
           onPageSelected={(e) => {
             const index = e.nativeEvent.position;
             handlePageChange(index, false);

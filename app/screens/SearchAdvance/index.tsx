@@ -271,6 +271,7 @@ const SearchAdvance = () => {
     isFetching,
     updateParams,
     resetParams,
+    forceUpdateParams,
   } = usePagination(productService.searchProducts, {
     initialPagination: {
       skip: 0,
@@ -331,12 +332,12 @@ const SearchAdvance = () => {
     maxPrice: number;
     categories: string[];
     locations: string[];
-    ratings: string[];
+    ratings: number[];
   }) => {
     const numberMinPrice = minPrice;
     const numberMaxPrice = maxPrice;
 
-    updateParams({
+    const params = {
       ...(numberMinPrice > 0 &&
         !!numberMinPrice &&
         numberMinPrice < numberMaxPrice && { minPrice: numberMinPrice }),
@@ -345,8 +346,17 @@ const SearchAdvance = () => {
         numberMaxPrice > numberMinPrice && { maxPrice: numberMaxPrice }),
       locations: locations?.map((i) => "p:" + i).join(","),
       categoryIds: categories.join(","),
-      averageRatingFrom: Number(ratings),
+      averageRatingFrom: ratings.length > 0 ? ratings?.[0] : 0,
+      search: searchText,
+    };
+
+    Object.keys(params).forEach((key) => {
+      if (!params[key as keyof typeof params]) {
+        delete params[key as keyof typeof params];
+      }
     });
+
+    forceUpdateParams(params);
   };
 
   const onResetFilter = () => {

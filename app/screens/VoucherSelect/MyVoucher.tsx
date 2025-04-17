@@ -1,9 +1,9 @@
 import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import { useMemo, useState } from "react";
-import { View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 import { RefreshControl } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { imagePaths } from "~/assets/imagePath";
@@ -18,6 +18,7 @@ import { selectedVoucherAtom } from "~/store/atoms";
 import { convertToK, formatDate } from "~/utils";
 import TicketVoucher from "./TicketVoucher";
 import Empty from "~/components/common/Empty";
+import { usePagination } from "~/hooks/usePagination";
 
 const WrapperHeader = ({ title }: { title: string }) => {
   return (
@@ -49,6 +50,7 @@ const ShippingVoucher = ({
   return (
     <WrapperVoucher>
       <TicketVoucher
+        isBestChoice={false}
         title={"Mã vận chuyển"}
         description={voucher.description}
         minOrder={`Đơn tối thiểu ${convertToK(voucher.minimumAmount)}đ`}
@@ -75,6 +77,7 @@ export const ProductVoucher = ({
     <WrapperVoucher>
       {
         <TicketVoucher
+          isBestChoice={false}
           linearGradientColors={["#FFFCF5", "#FFF6DD"]}
           borderColor="#FEEBC1"
           shadowColor="#FEEBC1"
@@ -96,56 +99,27 @@ export const ProductVoucher = ({
   );
 };
 
-const VoucherSelectScreen = () => {
+const MyVoucherScreen = () => {
   const { top } = useSafeAreaInsets();
   const [search, setSearch] = useState("");
   const [isShowMoreVoucher, setIsShowMoreVoucher] = useState(false);
   const [voucherState, setVoucherState] = useAtom(selectedVoucherAtom);
   const navigation = useNavigation<RootStackScreenProps<"VoucherSelect">>();
-
-  const mutateApplyVoucher = useMutation({
-    mutationFn: (voucherId: string) => voucherService.applyVoucher(voucherId),
-  });
-
   const {
-    data: shippingVouchers,
-    refetch,
-    isRefetching: isRefetchingShippingVouchers,
-    isPending: isPendingShippingVouchers,
-  } = useQuery({
-    queryKey: ["vouchers", "shipping"],
-    queryFn: () =>
-      voucherService.getVouchers({
-        voucherType: "shipping",
-        skip: 0,
-        take: 100,
-      }),
-    staleTime: 0,
-    refetchOnMount: "always",
+    data: availableVouchers,
+    isFetching,
+    fetchNextPage,
+    hasNextPage,
+    refresh,
+    isRefresh,
+    isLoading,
+  } = usePagination(voucherService.getMyVouchers, {
+    queryKey: ["vouchers", "my"],
+    initialPagination: {
+      skip: 0,
+      take: 10,
+    },
   });
-
-  const {
-    data: productVouchers,
-    refetch: refetchProductVouchers,
-    isRefetching: isRefetchingProductVouchers,
-    isPending: isPendingProductVouchers,
-  } = useQuery({
-    queryKey: ["vouchers", "product"],
-    queryFn: () =>
-      voucherService.getVouchers({
-        voucherType: "product",
-        skip: 0,
-        take: 100,
-      }),
-  });
-
-  const onRefresh = () => {
-    refetch();
-    refetchProductVouchers();
-  };
-
-  const isRefetching =
-    isRefetchingShippingVouchers || isRefetchingProductVouchers;
 
   const onPressMoreVoucher = () => {
     setIsShowMoreVoucher((prev) => !prev);
@@ -174,25 +148,24 @@ const VoucherSelectScreen = () => {
         );
       case "shippingFooter":
         return (
-          <View className="flex-row justify-center items-center px-2 py-2.5 mb-2.5 bg-white rounded-b-3xl">
-            {/* <TouchableOpacity onPress={onPressMoreVoucher}>
-              <Text className="text-xs tracking-tight leading-none">
-                {isShowMoreVoucher ? "Ẩn bớt voucher" : "Xem thêm voucher"}
-              </Text>
-            </TouchableOpacity>
-            <MaterialCommunityIcons
-              name="chevron-down"
-              size={18}
-              color="black"
-            /> */}
-          </View>
+          <View className="flex-row justify-center items-center px-2 py-2.5 mb-2.5 bg-white rounded-b-3xl"></View>
         );
       case "voucherHeader":
         return <WrapperHeader title={item.title} />;
       case "voucher":
+        if (item.item.voucherType === "shipping") {
+          return (
+            <ShippingVoucher
+              voucher={item.item}
+              onPressVoucher={onPressVoucher}
+            />
+          );
+        }
+
         return (
           <ProductVoucher voucher={item.item} onPressVoucher={onPressVoucher} />
         );
+
       case "voucherFooter":
         return <WrapperFooter title={item.title} />;
       case "otherHeader":
@@ -207,76 +180,56 @@ const VoucherSelectScreen = () => {
   };
 
   const flashListData = useMemo(() => {
-    if (!shippingVouchers && !productVouchers) return [];
+    if (!availableVouchers) return [];
 
     return [
       {
-        type: "shippingHeader",
-        title: "Ưu đãi phí vận chuyển",
-      },
-      ...(shippingVouchers?.data || [])?.map((voucher) => ({
-        type: "shipping",
-        item: voucher,
-      })),
-      {
-        type: "shippingFooter",
-      },
-      {
         type: "voucherHeader",
-        title: "Voucher Cropee",
+        title: "Voucher của tôi",
       },
-      ...(productVouchers?.data || [])?.map((voucher) => ({
+      ...(availableVouchers || [])?.map((voucher) => ({
         type: "voucher",
         item: voucher,
       })),
       {
         type: "voucherFooter",
       },
-      // {
-      //   type: "otherHeader",
-      //   title: "Voucher không khả dụng",
-      // },
-      // {
-      //   type: "otherFooter",
-      //   title: "Không áp dụng với một số sản phẩm",
-      // },
     ];
-  }, [shippingVouchers, productVouchers]);
+  }, [availableVouchers]);
 
   return (
     <ScreenWrapper hasGradient={true} hasSafeBottom={false}>
       <Header
-        title="Chọn Cropee Voucher"
+        title="Kho Voucher"
         titleClassName="font-bold"
         className="bg-transparent border-0"
         textColor="white"
         hasSafeTop={false}
       />
-      <View className="flex-1 bg-[#EEE] rounded-t-3xl overflow-hidden">
-        <Input
-          placeholder="Nhập mã Cropee Voucher"
-          className="mt-5 bg-white mb-2.5 mx-2"
-          placeholderTextColor="gray"
-          value={search}
-          onChangeText={setSearch}
-          rightIcon={<Text className="text-primary">Áp dụng</Text>}
-        />
+      <View className="flex-1 bg-[#fff] rounded-t-3xl overflow-hidden">
         <View className="flex-1">
           <FlashList
             refreshControl={
-              <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />
+              <RefreshControl refreshing={isRefresh} onRefresh={refresh} />
             }
             data={flashListData}
             renderItem={renderItem}
             getItemType={(item) => item.type}
             estimatedItemSize={100}
+            ListFooterComponent={() =>
+              hasNextPage && isFetching ? (
+                <View className="flex-row justify-center items-center px-2 py-2.5 mb-2.5 bg-white rounded-b-3xl">
+                  <ActivityIndicator size="small" color="#000" />
+                </View>
+              ) : (
+                <View className="h-10" />
+              )
+            }
             ListEmptyComponent={() => (
               <Empty
                 title="Không tìm thấy voucher"
                 backgroundColor="white"
-                isLoading={
-                  isPendingShippingVouchers || isPendingProductVouchers
-                }
+                isLoading={isLoading}
               />
             )}
           />
@@ -286,4 +239,4 @@ const VoucherSelectScreen = () => {
   );
 };
 
-export default VoucherSelectScreen;
+export default MyVoucherScreen;

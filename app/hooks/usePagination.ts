@@ -131,6 +131,10 @@ export function usePagination<T, P = Record<string, any>>(
     setCurrentParams((prev) => ({ ...prev, ...newParams }));
   }, []);
 
+  const forceUpdateParams = useCallback((newParams: Partial<P>) => {
+    setCurrentParams(newParams as P);
+  }, []);
+
   const resetParams = useCallback(() => {
     setCurrentParams(initialParams);
   }, [initialParams]);
@@ -148,6 +152,7 @@ export function usePagination<T, P = Record<string, any>>(
       refresh,
       updateParams,
       resetParams,
+      forceUpdateParams,
     }),
     [
       combinedData,
@@ -161,6 +166,7 @@ export function usePagination<T, P = Record<string, any>>(
       updateParams,
       total,
       resetParams,
+      forceUpdateParams,
     ]
   );
 
