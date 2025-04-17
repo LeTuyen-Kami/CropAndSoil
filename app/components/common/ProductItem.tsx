@@ -50,6 +50,7 @@ const ProductItem = ({
   const hasDiscount = !!discount && discount > 0;
   const hasSoldCount =
     typeof soldCount === "number" && typeof totalCount === "number";
+
   const hasRating = typeof rating === "number";
 
   const formatPrice = (value: number) => {
@@ -105,53 +106,52 @@ const ProductItem = ({
               </Text>
             )}
           </View>
-          {hasSoldCount ||
-            (hasRating && (
-              <View className="flex-row justify-between items-center">
-                {hasSoldCount && (
-                  <View className="flex-1 mt-1">
-                    <View className="bg-secondary-100 rounded-full h-[14] w-full overflow-hidden">
-                      <View
-                        className="h-full rounded-full bg-secondary-500"
-                        style={{
-                          width: `${calculateSoldPercentage()}%`,
-                        }}
+          {(hasSoldCount || hasRating) && (
+            <View className="flex-row justify-between items-center">
+              {hasSoldCount && (
+                <View className="flex-1 mt-1">
+                  <View className="bg-secondary-100 rounded-full h-[14] w-full overflow-hidden">
+                    <View
+                      className="h-full rounded-full bg-secondary-500"
+                      style={{
+                        width: `${calculateSoldPercentage()}%`,
+                      }}
+                    />
+                    <Text
+                      className="text-[10px] text-center w-full tracking-tight text-neutral-700 font-medium leading-[14px]"
+                      style={{
+                        position: "absolute",
+                      }}
+                    >
+                      {`Đã bán ${soldCount}/${totalCount}`}
+                    </Text>
+                  </View>
+                </View>
+              )}
+
+              {!hasSoldCount && hasRating && (
+                <View className="flex-row gap-2 items-center mt-1">
+                  {hasRating && (
+                    <View className="flex-row items-center bg-[#FDF8EA] rounded-[12px] py-[2] px-[4]">
+                      <Text className="text-[10px] text-[#545454] mr-[2]">
+                        {rating.toFixed(1)}
+                      </Text>
+                      <Image
+                        source={imagePaths.icStar}
+                        style={{ width: 10, height: 10 }}
                       />
-                      <Text
-                        className="text-[10px] text-center w-full tracking-tight text-neutral-700 font-medium leading-[14px]"
-                        style={{
-                          position: "absolute",
-                        }}
-                      >
-                        {`Đã bán ${soldCount}/${totalCount}`}
-                      </Text>
                     </View>
-                  </View>
-                )}
+                  )}
 
-                {!hasSoldCount && hasRating && (
-                  <View className="flex-row gap-2 items-center mt-1">
-                    {hasRating && (
-                      <View className="flex-row items-center bg-[#FDF8EA] rounded-[12px] py-[2] px-[4]">
-                        <Text className="text-[10px] text-[#545454] mr-[2]">
-                          {rating.toFixed(1)}
-                        </Text>
-                        <Image
-                          source={imagePaths.icStar}
-                          style={{ width: 10, height: 10 }}
-                        />
-                      </View>
-                    )}
-
-                    {soldCount && (
-                      <Text className="text-[10px] tracking-tight text-neutral-700">
-                        Đã bán {soldCount}
-                      </Text>
-                    )}
-                  </View>
-                )}
-              </View>
-            ))}
+                  {soldCount && (
+                    <Text className="text-[10px] tracking-tight text-neutral-700">
+                      Đã bán {soldCount}
+                    </Text>
+                  )}
+                </View>
+              )}
+            </View>
+          )}
           {location && (
             <View className="flex-row gap-[2] items-center pt-1 mt-auto">
               <Image

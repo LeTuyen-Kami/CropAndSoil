@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "280371240775",
+    "project_id": "cropandsoild",
+    "storage_bucket": "cropandsoild.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:280371240775:android:14049ee92f7857989e7662",
+        "android_client_info": {
+          "package_name": "com.dgvdigital.CropAndSoil"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCYs-KyfHes5mMykJZIfuIG7JOtVeJY6yE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,25 +1,25 @@
 import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
+import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, useState } from "react";
-import { FlatList, ScrollView, TouchableOpacity, View } from "react-native";
+import { FlatList, TouchableOpacity, View } from "react-native";
 import { imagePaths } from "~/assets/imagePath";
 import Carousel from "~/components/common/Carusel";
 import Category from "~/components/common/Category";
 import ProductItem from "~/components/common/ProductItem";
 import ScreenWrapper from "~/components/common/ScreenWrapper";
 import { Text } from "~/components/ui/text";
+import { useSmartNavigation } from "~/hooks/useSmartNavigation";
+import { productService } from "~/services/api/product.service";
 import { calculateDiscount, checkCanRender, screen } from "~/utils";
 import ContainerList from "./ContainerList";
 import Header from "./Header";
 import HeaderSearch from "./HeaderSearch";
-import { productService } from "~/services/api/product.service";
-import { useQuery } from "@tanstack/react-query";
-import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 
 const FlashSale = () => {
   const navigation = useSmartNavigation();
+
   const { data } = useQuery({
     queryKey: ["flashSale", "home"],
     queryFn: () => productService.getRecommendedProducts(),
@@ -190,14 +190,6 @@ export const HomeScreen: React.FC = () => {
   const onPressQuestionCircle = () => {
     console.log("question circle");
   };
-
-  useEffect(() => {
-    SplashScreen.setOptions({
-      fade: true,
-      duration: 500,
-    });
-    SplashScreen.hideAsync();
-  }, []);
 
   useEffect(() => {
     setFlashlistData([

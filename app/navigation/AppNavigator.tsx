@@ -1,7 +1,10 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { NavigationContainer } from "@react-navigation/native";
+import {
+  NavigationContainer,
+  useNavigationContainerRef,
+} from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import React from "react";
+import React, { useEffect } from "react";
 import { Text } from "react-native";
 import Address from "~/screens/Address";
 import BusinessVoucherScreen from "~/screens/BussinessVoucher";
@@ -41,6 +44,9 @@ import ChangePassword from "~/screens/ChangePassword";
 import FlashSale from "~/screens/FlashSale";
 import FlashSaleProduct from "~/screens/FlashSaleProduct";
 import MyVoucherScreen from "~/screens/VoucherSelect/MyVoucher";
+import useFirebase from "~/hooks/useFirebase";
+import useFCMNavigation from "~/hooks/useFCMNavigation";
+import * as SplashScreen from "expo-splash-screen";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -49,6 +55,16 @@ const TempSearchScreen = () => {
 };
 
 const TabNavigator = () => {
+  const { token, permissionGranted } = useFirebase({
+    onMessage: (msg) => {
+      console.log("onMessage", msg);
+    },
+  });
+
+  useEffect(() => {
+    console.log("permissionGranted", permissionGranted, token);
+  }, [permissionGranted, token]);
+
   return (
     <Tab.Navigator
       tabBar={(props) => <CustomTabBar {...props} />}
@@ -65,8 +81,25 @@ const TabNavigator = () => {
 };
 
 export const AppNavigator = () => {
+  const navigationRef = useNavigationContainerRef();
+
+  useEffect(() => {
+    SplashScreen.setOptions({
+      fade: true,
+      duration: 500,
+    });
+    SplashScreen.hideAsync();
+  }, []);
+
+  useFCMNavigation(navigationRef);
+
   return (
-    <NavigationContainer>
+    <NavigationContainer
+      ref={navigationRef}
+      onReady={() => {
+        console.log("onReady");
+      }}
+    >
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="MainTabs" component={TabNavigator} />
         <Stack.Screen name="Buttons" component={Buttons} />

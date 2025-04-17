@@ -1,9 +1,10 @@
 import { FlashList } from "@shopify/flash-list";
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import { useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
-  GestureResponderEvent,
+  ActivityIndicator,
+  RefreshControl,
   ScrollView,
   TouchableOpacity,
 } from "react-native";
@@ -19,18 +20,27 @@ import { Text } from "~/components/ui/text";
 import { usePagination } from "~/hooks/usePagination";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 import { cn } from "~/lib/utils";
-import { flashSaleService } from "~/services/api/flashsale.service";
+import {
+  flashSaleService,
+  IFlashSaleProduct,
+} from "~/services/api/flashsale.service";
 import { IProduct } from "~/services/api/product.service";
-import { calculateDiscount, getItemWidth, screen } from "~/utils";
+import {
+  calculateDiscount,
+  getItemWidth,
+  preHandleFlashListData,
+  screen,
+} from "~/utils";
 import TabItem from "./TabItem";
 import Header from "./Header";
 import dayjs from "dayjs";
+import { COLORS } from "~/constants/theme";
 
 const BannerItem = () => {
   return (
     <View className="">
       <Image
-        source={"https://placehold.co/300x100"}
+        source={"https://picsum.photos/300/100"}
         className="w-full aspect-[3/1]"
         contentFit="contain"
       />
@@ -38,24 +48,34 @@ const BannerItem = () => {
   );
 };
 
-const TimerItem = () => {
+const TimerItem = ({ expiredTime }: { expiredTime: Date }) => {
+  const isExpired = dayjs().isAfter(expiredTime);
+
   return (
-    <View className="flex-row gap-1 items-center px-5">
+    <View className="flex-row gap-1 items-center px-5 my-4">
       <View className="flex-1 h-[1px] bg-white"></View>
       <Image
         source={imagePaths.icTimer}
         className="size-4"
         contentFit="contain"
+        style={{ tintColor: "white" }}
       />
-      <Text className="text-xs font-medium tracking-tight text-white">
-        KẾT THÚC TRONG
-      </Text>
-      <Timer
-        expiredTime={new Date(Date.now() + 1000 * 60 * 60 * 24)}
-        textColor="white"
-        backgroundColor="#E8AA24"
-      />
-
+      {isExpired ? (
+        <Text className="text-xs font-medium tracking-tight text-white">
+          ĐÃ KẾT THÚC
+        </Text>
+      ) : (
+        <React.Fragment>
+          <Text className="text-xs font-medium tracking-tight text-white">
+            KẾT THÚC TRONG
+          </Text>
+          <Timer
+            expiredTime={expiredTime}
+            textColor="white"
+            backgroundColor="#E8AA24"
+          />
+        </React.Fragment>
+      )}
       <View className="flex-1 h-[1px] bg-white"></View>
     </View>
   );
@@ -75,7 +95,7 @@ const HeaderItem = () => {
   );
 };
 
-const TwoProductItem = ({ items }: { items: IProduct[] }) => {
+const TwoProductItem = ({ items }: { items: IFlashSaleProduct[] }) => {
   const width = useMemo(() => {
     return getItemWidth({
       containerPadding: 16,
@@ -94,17 +114,16 @@ const TwoProductItem = ({ items }: { items: IProduct[] }) => {
         <ProductItem
           width={width}
           key={item.id}
-          name={item?.name}
+          name={item?.flashSaleProduct?.name}
           height={"100%"}
           price={item?.salePrice}
-          originalPrice={item?.regularPrice}
-          discount={calculateDiscount(item)}
-          rating={item?.averageRating}
-          soldCount={item?.totalSales}
-          image={item?.images[0]}
-          onSale={item?.regularPrice > item?.salePrice}
+          originalPrice={item?.flashSaleProduct?.regularPrice}
+          discount={item?.discountPercent}
+          soldCount={item?.bought}
+          totalCount={item?.campaignStock}
+          image={item?.flashSaleProduct?.thumbnail}
+          onSale={true}
           id={item?.id}
-          location={item?.shop?.shopWarehouseLocation?.province?.name}
         />
       ))}
     </View>
@@ -119,14 +138,31 @@ const NoData = () => {
   );
 };
 
-const PagerViewScreen = () => {
+const BottomItem = () => {
+  return (
+    <View className="flex-row justify-center items-center bg-[#EEE] h-[200px]"></View>
+  );
+};
+
+const PagerViewScreen = ({ timeSlot }: { timeSlot: string }) => {
+  const { data, isLoading, isRefresh, refresh, hasNextPage, fetchNextPage } =
+    usePagination(
+      (data) => {
+        return flashSaleService.getFlashSale(timeSlot, data);
+      },
+      {
+        queryKey: ["flash-sale", timeSlot],
+        enabled: !!timeSlot,
+      }
+    );
+
   const renderItem = ({ item }: { item: any }) => {
     if (item.type === "banner") {
       return <BannerItem />;
     }
 
     if (item.type === "timer") {
-      return <TimerItem />;
+      return <TimerItem expiredTime={item.expiredTime} />;
     }
 
     if (item.type === "header") {
@@ -141,17 +177,30 @@ const PagerViewScreen = () => {
       return <NoData />;
     }
 
+    if (item.type === "bottom") {
+      return <BottomItem />;
+    }
+
     return null;
   };
 
   const flashlistData = useMemo(() => {
+    const handledData = preHandleFlashListData(data, "product");
+
     return [
       { type: "banner" },
-      { type: "timer" },
+      { type: "timer", expiredTime: dayjs(timeSlot).add(1, "hour").toDate() },
       { type: "header" },
-      { type: "noData" },
+      ...(handledData.length > 0 ? handledData : [{ type: "noData" }]),
+      ...(handledData.length < 2
+        ? [
+            {
+              type: "bottom",
+            },
+          ]
+        : []),
     ];
-  }, []);
+  }, [data]);
 
   return (
     <FlashList
@@ -161,6 +210,18 @@ const PagerViewScreen = () => {
       keyExtractor={(item, i) => `${item.type}-${i}`}
       removeClippedSubviews
       getItemType={(item) => item.type}
+      refreshControl={
+        <RefreshControl refreshing={isRefresh} onRefresh={refresh} />
+      }
+      onEndReached={fetchNextPage}
+      onEndReachedThreshold={0.5}
+      ListFooterComponent={() => {
+        return hasNextPage && isLoading ? (
+          <View className="flex-row justify-center items-center py-4">
+            <ActivityIndicator size="small" color={COLORS.primary} />
+          </View>
+        ) : null;
+      }}
     />
   );
 };

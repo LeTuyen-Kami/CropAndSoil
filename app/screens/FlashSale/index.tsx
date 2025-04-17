@@ -11,44 +11,44 @@ import Header from "./Header";
 import PagerViewScreen from "./PagerViewScreen";
 import TabItem from "./TabItem";
 
-const ITEMS = [
-  {
-    title: "15:00",
-    subTitle: "Đang diễn ra",
-    key: "1",
-    value: dayjs().toISOString(),
-  },
-  {
-    title: "16:00",
-    subTitle: "Sắp diễn ra",
-    key: "2",
-    value: dayjs().add(1, "hour").toISOString(),
-  },
-  {
-    title: "17:00",
-    subTitle: "Sắp diễn ra",
-    key: "3",
-    value: dayjs().add(2, "hour").toISOString(),
-  },
-  {
-    title: "18:00",
-    subTitle: "Sắp diễn ra",
-    key: "4",
-    value: dayjs().add(3, "hour").toISOString(),
-  },
-  {
-    title: "19:00",
-    subTitle: "Sắp diễn ra",
-    key: "5",
-    value: dayjs().add(4, "hour").toISOString(),
-  },
-  {
-    title: "20:00",
-    subTitle: "Sắp diễn ra",
-    key: "6",
-    value: dayjs().add(5, "hour").toISOString(),
-  },
-];
+// const ITEMS = [
+//   {
+//     title: "15:00",
+//     subTitle: "Đang diễn ra",
+//     key: "1",
+//     value: dayjs().toISOString(),
+//   },
+//   {
+//     title: "16:00",
+//     subTitle: "Sắp diễn ra",
+//     key: "2",
+//     value: dayjs().add(1, "hour").toISOString(),
+//   },
+//   {
+//     title: "17:00",
+//     subTitle: "Sắp diễn ra",
+//     key: "3",
+//     value: dayjs().add(2, "hour").toISOString(),
+//   },
+//   {
+//     title: "18:00",
+//     subTitle: "Sắp diễn ra",
+//     key: "4",
+//     value: dayjs().add(3, "hour").toISOString(),
+//   },
+//   {
+//     title: "19:00",
+//     subTitle: "Sắp diễn ra",
+//     key: "5",
+//     value: dayjs().add(4, "hour").toISOString(),
+//   },
+//   {
+//     title: "20:00",
+//     subTitle: "Sắp diễn ra",
+//     key: "6",
+//     value: dayjs().add(5, "hour").toISOString(),
+//   },
+// ];
 
 const FlashSale = () => {
   const [tabIndex, setTabIndex] = useState(0);
@@ -59,15 +59,25 @@ const FlashSale = () => {
     queryFn: () => flashSaleService.getFlashSaleTimeSlot(),
   });
 
-  console.log(timeSlots);
+  const listTimeSlots = useMemo(() => {
+    return timeSlots?.map((item, index) => ({
+      title: dayjs(item).format("HH:mm"),
+      subTitle: dayjs(item).isBefore(dayjs()) ? "Đã diễn ra" : "Sắp diễn ra",
+      key: index + 1,
+      value: item,
+    }));
+  }, [timeSlots]);
 
   const { data } = usePagination(
     (data) => {
-      return flashSaleService.getFlashSale(ITEMS[tabIndex].value, data);
+      return flashSaleService.getFlashSale(
+        listTimeSlots?.[tabIndex].value!,
+        data
+      );
     },
     {
-      queryKey: ["flash-sale", ITEMS[tabIndex].value],
-      enabled: !!ITEMS[tabIndex].value,
+      queryKey: ["flash-sale", listTimeSlots?.[tabIndex].value!],
+      enabled: !!listTimeSlots?.[tabIndex].value,
     }
   );
 
@@ -92,9 +102,9 @@ const FlashSale = () => {
 
   // Memoize the FlashList components to prevent unnecessary re-renders
   const renderPagerViews = useMemo(() => {
-    return ITEMS.map((item, index) => (
-      <View key={item.key} className="flex-1 bg-[#EEE]">
-        <PagerViewScreen />
+    return listTimeSlots?.map((item, index) => (
+      <View key={item.key} className="flex-1">
+        <PagerViewScreen timeSlot={item.value} />
       </View>
     ));
   }, []);
@@ -115,7 +125,7 @@ const FlashSale = () => {
               gap: 4,
             }}
           >
-            {ITEMS.map((item, index) => (
+            {listTimeSlots?.map((item, index) => (
               <TabItem
                 key={item.key}
                 isActive={index === tabIndex}

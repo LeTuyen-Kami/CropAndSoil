@@ -27,7 +27,13 @@
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="com.letuyen1277.CropAndSoil"/>
-      </intent-filter>
+        <data android:scheme="exp+cropandsoil"/>
+        <data android:scheme="com.dgvdigital.CropAndSoil"/>
+    </intent-filter>
+          <intent-filter>
+        <action android:name=".MainActivity" />
+          <category android:name="android.intent.category.DEFAULT" />
+    </intent-filter>
     </activity>
   </application>
 </manifest>

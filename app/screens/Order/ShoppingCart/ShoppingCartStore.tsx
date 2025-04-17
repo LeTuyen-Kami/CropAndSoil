@@ -140,7 +140,7 @@ const ShoppingCartStore = ({
         className="flex-row justify-between items-center p-4"
         onPress={() => onShopVoucherPress(store.id)}
       >
-        <View className="flex-row gap-2 items-center">
+        <View className="flex-row flex-1 gap-2 items-center">
           <Image
             source={imagePaths.icTicketSale}
             style={{ width: 20, height: 20, tintColor: "#159747" }}

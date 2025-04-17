@@ -9,13 +9,21 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.letuyen1277.CropAndSoil"
+      "bundleIdentifier": "com.dgvdigital.CropAndSoil",
+      "googleServicesFile": "./assets/GoogleService-Info.plist",
+      "entitlements": {
+        "aps-environment": "development"
+      },
+      "infoPlist": {
+        "UIBackgroundModes": ["remote-notification"]
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/ic_launcher.png"
       },
-      "package": "com.letuyen1277.CropAndSoil",
+      "googleServicesFile": "./assets/google-services.json",
+      "package": "com.dgvdigital.CropAndSoil",
       "splash": {
         "image": "./assets/ic_launcher_round.png",
         "backgroundColor": "#ffffff"
@@ -34,6 +42,16 @@
         "projectId": "bf1935de-993c-497f-bd3f-542b308c2e2c"
       }
     },
-    "plugins": ["react-native-edge-to-edge"]
+    "plugins": [
+      "react-native-edge-to-edge",
+      "@react-native-firebase/app",
+      "@react-native-firebase/messaging",
+      [
+        "expo-build-properties",
+        {
+          "ios": { "useFrameworks": "static" }
+        }
+      ]
+    ]
   }
 }

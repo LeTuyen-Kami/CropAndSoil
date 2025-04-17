@@ -160,11 +160,11 @@ const Toast = ({ toast, onHide }: { toast: ToastData; onHide: () => void }) => {
       <Text style={styles.message} numberOfLines={3}>
         {toast.message}
       </Text>
-      {onHide && (
+      {/* {onHide && (
         <TouchableOpacity style={styles.closeButton} onPress={onHide}>
           <AntDesign name="close" size={16} color="#fff" />
         </TouchableOpacity>
-      )}
+      )} */}
     </Animated.View>
   );
 };
@@ -193,7 +193,7 @@ export const ToastHolder = () => {
       {topToasts.length > 0 && (
         <View
           style={[styles.container, { top: insets.top + 10 }]}
-          pointerEvents="box-none"
+          pointerEvents="none"
         >
           {topToasts.map((toast) => (
             <Animated.View
@@ -210,7 +210,7 @@ export const ToastHolder = () => {
       {bottomToasts.length > 0 && (
         <View
           style={[styles.container, { bottom: insets.bottom + 10 }]}
-          pointerEvents="box-none"
+          pointerEvents="none"
         >
           {bottomToasts.map((toast) => (
             <Animated.View

@@ -44,6 +44,8 @@ const Footer = ({
     return (calculatedData?.subtotal || 0) - (calculatedData?.total || 0);
   }, [calculatedData]);
 
+  console.log("calculatedData", savedAmount);
+
   return (
     <View className="overflow-hidden bg-white rounded-t-2xl">
       {/* Voucher Section */}
@@ -96,13 +98,15 @@ const Footer = ({
         {!!calculatedData ? (
           <View>
             <Text className="text-xs text-[#676767]">Tổng thanh toán</Text>
-            <View className="flex-row items-center">
-              <Text className="text-sm font-bold text-[#FCBA27] mr-2">
-                {formatPrice(calculatedData?.total || 0)}
-              </Text>
-              <Feather name="chevron-up" size={16} color="#FCBA27" />
-            </View>
-            {!!savedAmount && savedAmount > 0 && (
+            {!!calculatedData?.total && (
+              <View className="flex-row items-center">
+                <Text className="text-sm font-bold text-[#FCBA27] mr-2">
+                  {formatPrice(calculatedData?.total || 0)}
+                </Text>
+                <Feather name="chevron-up" size={16} color="#FCBA27" />
+              </View>
+            )}
+            {!!savedAmount && (
               <Text className="text-[10px] text-[#12B76A]">
                 Tiết kiệm {formatPrice(savedAmount)}
               </Text>

@@ -2,6 +2,15 @@ import { registerRootComponent } from "expo";
 
 import App from "./App";
 import { startNetworkLogging } from "react-native-network-logger";
+import { getMessaging } from "@react-native-firebase/messaging";
+import { setBackgroundMessageHandler } from "@react-native-firebase/messaging";
+import { getApp } from "@react-native-firebase/app";
+
+setBackgroundMessageHandler(getMessaging(getApp()), async (msg) => {
+  console.log("BG message:", msg);
+});
+
+// (globalThis as any).RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
 
 startNetworkLogging();
 

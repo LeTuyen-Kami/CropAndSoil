@@ -1,4 +1,4 @@
-package com.letuyen1277.CropAndSoil
+package com.dgvdigital.CropAndSoil
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build
