@@ -1,4 +1,8 @@
-import { useIsFocused, useNavigation } from "@react-navigation/native";
+import {
+  useIsFocused,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -13,11 +17,12 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
 import useDisclosure from "~/hooks/useDisclosure";
-import { RootStackScreenProps } from "~/navigation/types";
+import { RootStackRouteProp, RootStackScreenProps } from "~/navigation/types";
 import ModalSelectShopVoucher from "~/screens/VoucherSelect/ModalSelectShopVoucher";
 import {
   ICalculateResponse,
   IOrderCalculateRequest,
+  IOrderCheckoutResponse,
   orderService,
 } from "~/services/api/order.service";
 import { paymentService } from "~/services/api/payment.service";
@@ -35,9 +40,13 @@ import PaymentMethod from "./PaymentMethod";
 import PaymentStore from "./PaymentStore";
 const Payment = () => {
   const navigation = useNavigation<RootStackScreenProps<"Payment">>();
+  const route = useRoute<RootStackRouteProp<"Payment">>();
+  const { isClearCart } = route.params;
+
   const [voucherShopId, setVoucherShopId] = useState<string>();
 
   const [voucherState, setVoucherState] = useAtom(selectedVoucherAtom);
+  const [checkoutData, setCheckoutData] = useState<IOrderCheckoutResponse>();
 
   const isFocused = useIsFocused();
   const {
@@ -150,6 +159,7 @@ const Payment = () => {
           voucherState?.voucher?.voucherType !== "shipping"
             ? voucherState?.voucher?.code!
             : "",
+        isClearCart: isClearCart,
         shops: selectedStore?.map((store) => ({
           id: Number(store.id),
           shippingMethodKey: "ghtk",
@@ -172,6 +182,7 @@ const Payment = () => {
       },
       {
         onSuccess: (data) => {
+          setCheckoutData(data);
           onOpenSuccess();
         },
         onError: (error) => {
@@ -243,9 +254,7 @@ const Payment = () => {
 
   const handlePressContinueOrder = () => {
     onCloseSuccess();
-    navigation.replace("MyOrder", {
-      tabIndex: 2,
-    });
+    navigation.goBack();
   };
 
   const handleShopVoucherPress = useCallback(
@@ -261,8 +270,20 @@ const Payment = () => {
 
   const handlePressViewOrder = () => {
     onCloseSuccess();
-    navigation.replace("MyOrder", {
-      tabIndex: 2,
+    navigation.reset({
+      index: 0,
+      routes: [
+        {
+          name: "MainTabs",
+          params: {
+            screen: "Profile",
+            params: {
+              screen: "DetailOrder",
+              params: { id: checkoutData?.payload.orders[0].id },
+            },
+          },
+        },
+      ],
     });
   };
 
@@ -356,6 +377,9 @@ const Payment = () => {
         isOpen={!!voucherShopId}
         onClose={() => setVoucherShopId("")}
         shopId={voucherShopId}
+        productIds={selectedStore?.flatMap((store) =>
+          store.items.map((item) => Number(item.productId))
+        )}
         onSelectVoucher={(voucher) => {
           handleShopVoucherPress(voucherShopId!, voucher);
           setVoucherShopId("");

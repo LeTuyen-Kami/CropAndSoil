@@ -2,6 +2,7 @@ import { View, Text, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import { AntDesign } from "@expo/vector-icons";
 import { imagePaths } from "~/assets/imagePath";
+import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 
 interface ProductItemProps {
   name: string;
@@ -10,6 +11,7 @@ interface ProductItemProps {
   originalPrice: string;
   discountedPrice: string;
   imageUri: string;
+  productId: string | number;
 }
 
 interface ProductCartProps {
@@ -21,6 +23,7 @@ interface ProductCartProps {
   status?: string;
   quantity?: number;
   statusColor?: string;
+  shopId: string | number;
 }
 
 const ProductItem = ({
@@ -30,9 +33,19 @@ const ProductItem = ({
   originalPrice,
   discountedPrice,
   imageUri,
+  productId,
 }: ProductItemProps) => {
+  const navigation = useSmartNavigation();
+
+  const navigationToProduct = (productId: string) => {
+    navigation.navigate("DetailProduct", { id: productId });
+  };
+
   return (
-    <View className="flex-row gap-1.5 py-3">
+    <TouchableOpacity
+      className="flex-row gap-1.5 py-3"
+      onPress={() => navigationToProduct(productId + "")}
+    >
       <View className="flex-row p-2.5 justify-center items-center rounded-2xl border border-[#F0F0F0]">
         <Image
           source={{ uri: imageUri }}
@@ -78,7 +91,7 @@ const ProductItem = ({
           </View>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
@@ -91,11 +104,21 @@ const ProductCart = ({
   quantity,
   status,
   statusColor,
+  shopId,
 }: ProductCartProps) => {
+  const navigation = useSmartNavigation();
+
+  const onViewShop = () => {
+    navigation.navigate("Shop", { id: shopId });
+  };
+
   return (
     <View className="px-2 w-full bg-white rounded-2xl">
       <View className="flex-row items-center justify-between gap-2.5 py-3">
-        <View className="flex-row gap-2 items-center">
+        <TouchableOpacity
+          className="flex-row gap-2 items-center"
+          onPress={onViewShop}
+        >
           <Image
             source={imagePaths.icShop}
             className="w-5 h-5"
@@ -108,14 +131,16 @@ const ProductCart = ({
           >
             {shopName}
           </Text>
-        </View>
+        </TouchableOpacity>
         {status && (
-          <Text
-            className="text-[#383B45] text-sm font-medium leading-[20px]"
-            style={{ color: statusColor }}
+          <View
+            className="px-2 py-1 rounded-full"
+            style={{ backgroundColor: statusColor }}
           >
-            {status}
-          </Text>
+            <Text className="text-white text-sm font-medium leading-[20px]">
+              {status}
+            </Text>
+          </View>
         )}
       </View>
 

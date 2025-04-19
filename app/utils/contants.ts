@@ -28,13 +28,15 @@ export const BREAKPOINTS = {
   900: 4, // ≥900px thì 4 item
   1200: 5, // ≥1200px thì 5 item
 };
+
 export const ORDER_STATUS = {
-  PENDING: "wc-pending",
-  PROCESSING: "wc-processing",
-  SHIPPED: "wc-transport",
-  DELIVERED: "wc-delivered",
+  PENDING:
+    "wc-pending,wc-processing,wc-on-hold,wc-checkout-draft,wc-error-send-shipping,wc-payment-pending,wc-payment-fail",
+  PROCESSING: "wc-wait-pickup,wc-failed-pickup,wc-payment-success",
+  SHIPPED: "wc-transport,wc-failed-delivery",
+  DELIVERED: "wc-completed,wc-delivered",
   RETURNED: "wc-refunded",
-  CANCELLED: "wc-cancelled",
+  CANCELLED: "wc-cancelled,wc-failed,wc-failed-pickup,wc-failed-delivery",
 };
 
 export const ORDER_STATUS_COLOR = {
@@ -51,5 +53,6 @@ export const ORDER_STATUS_TEXT = {
   [ORDER_STATUS.PROCESSING]: "Chờ vận chuyển",
   [ORDER_STATUS.SHIPPED]: "Đang vận chuyển",
   [ORDER_STATUS.DELIVERED]: "Đã giao",
-  [ORDER_STATUS.RETURNED]: "Đã trả hàng",
+  [ORDER_STATUS.RETURNED]: "Đổi trả",
+  [ORDER_STATUS.CANCELLED]: "Hủy đơn",
 };

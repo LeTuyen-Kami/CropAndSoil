@@ -8,6 +8,7 @@ interface ModalSelectShopVoucherProps {
   isOpen: boolean;
   onClose: () => void;
   shopId?: string;
+  productIds?: number[];
   onSelectVoucher: (voucher: IVoucher) => void;
 }
 
@@ -16,10 +17,16 @@ const ModalSelectShopVoucher = ({
   onClose,
   shopId,
   onSelectVoucher,
+  productIds,
 }: ModalSelectShopVoucherProps) => {
   const { data, isLoading } = useQuery({
     queryKey: ["vouchers", shopId?.toString()],
-    queryFn: () => shopService.getListVoucher({ shopId, take: 100 }),
+    queryFn: () =>
+      shopService.getListVoucher({
+        shopId,
+        take: 100,
+        productIds: productIds?.join(","),
+      }),
     enabled: !!shopId,
   });
 

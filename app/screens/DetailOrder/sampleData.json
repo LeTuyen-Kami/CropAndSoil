@@ -1,0 +1,94 @@
+{
+  "id": 2125,
+  "note": "Lời nhắn cho shop nèeeeee",
+  "createdAt": "2025-04-10T05:19:26.000Z",
+  "status": "wc-on-hold",
+  "statusHistory": [
+    {
+      "status": "wc-on-hold",
+      "at": "2025-04-10T05:19:26.000Z"
+    }
+  ],
+  "buyerId": 85,
+  "shopId": 1,
+  "orderCurrency": "VND",
+  "orderTotal": 4488780,
+  "cartDiscount": 45220,
+  "paymentMethod": {
+    "type": "vnpay",
+    "title": "Thanh toán qua chuyển khoản"
+  },
+  "shippingMethod": {
+    "key": "ghtk",
+    "title": "Giao hàng tiết kiệm",
+    "total": 45000
+  },
+  "billing": {
+    "name": "Hùng",
+    "email": "0349223019@gmail.com",
+    "phone": "0394828373",
+    "addressLineText": "111",
+    "addressWardText": "Phường Quảng An",
+    "addressDistrictText": "Quận Tây Hồ",
+    "addressProvinceText": "Thành phố Hà Nội",
+    "addressCountryText": "VN"
+  },
+  "shipping": {
+    "name": "Hùng",
+    "phone": "0394828373",
+    "addressLineText": "111",
+    "addressWardText": "Phường Quảng An",
+    "addressDistrictText": "Quận Tây Hồ",
+    "addressProvinceText": "Thành phố Hà Nội",
+    "addressCountryText": "VN"
+  },
+  "items": [
+    {
+      "name": "Phân Bón NPK Greenhome, Chuyên Rau Ăn Lá, Củ, Cây Ăn Trái, Hoa, Chắc Rễ, Khoẻ Cây, Bông To, Sai Quả - NPK củ Phú Mỹ 500gr",
+      "productId": 296,
+      "variationId": 297,
+      "quantity": 5,
+      "subtotal": 3230000,
+      "total": 3197700,
+      "attributes": [
+        {
+          "slug": "pa_phan-loai",
+          "optionSlug": "npk-cu-phu-my-500gr"
+        }
+      ]
+    },
+    {
+      "name": "Phân Bón NPK Greenhome, Chuyên Rau Ăn Lá, Củ, Cây Ăn Trái, Hoa, Chắc Rễ, Khoẻ Cây, Bông To, Sai Quả - NPK rau Phú Mỹ 500gr",
+      "productId": 296,
+      "variationId": 299,
+      "quantity": 2,
+      "subtotal": 1292000,
+      "total": 1279080,
+      "attributes": [
+        {
+          "slug": "pa_phan-loai",
+          "optionSlug": "npk-rau-phu-my-500gr"
+        }
+      ]
+    }
+  ],
+  "fees": [
+    {
+      "type": "shipping",
+      "name": "Phí vận chuyển",
+      "amount": 12000,
+      "total": 12000
+    }
+  ],
+  "vouchers": [
+    {
+      "name": "v29vt3s7",
+      "discount": 45220,
+      "info": {
+        "id": 1501,
+        "code": "v29vt3s7",
+        "discountType": "percent"
+      }
+    }
+  ]
+}

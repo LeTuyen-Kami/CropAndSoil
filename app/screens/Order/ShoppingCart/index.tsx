@@ -454,6 +454,9 @@ const ShoppingCart = () => {
         isOpen={!!voucherShopId}
         onClose={() => setVoucherShopId("")}
         shopId={voucherShopId}
+        productIds={stores.flatMap((store) =>
+          store.items.map((item) => Number(item.productId))
+        )}
         onSelectVoucher={(voucher) => {
           handleShopVoucherPress(voucherShopId, voucher);
           setVoucherShopId("");

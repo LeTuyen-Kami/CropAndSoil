@@ -44,6 +44,7 @@ export interface IOrderCalculateRequest {
   shippingVoucherCode: string;
   productVoucherCode: string;
   shops: IShop[];
+  isClearCart?: boolean;
 }
 
 export interface ShippingMethod {
@@ -343,10 +344,14 @@ export interface PaymentMethod {
   title: string;
 }
 
-export interface ShippingMethod {
-  key: string;
+export interface StatusHistory {
+  status: string;
+  at: string;
+}
+
+export interface PaymentMethod {
+  type: string;
   title: string;
-  total: number;
 }
 
 export interface Billing {
@@ -362,6 +367,7 @@ export interface Billing {
 
 export interface Shipping {
   name: string;
+  phone: string;
   addressLineText: string;
   addressWardText: string;
   addressDistrictText: string;
@@ -369,97 +375,38 @@ export interface Shipping {
   addressCountryText: string;
 }
 
-export interface Province {
-  id: string;
-  name: string;
-  type: string;
-  slug: string;
-}
-
-export interface District {
-  id: string;
-  name: string;
-  type: string;
-  provinceId: string;
-}
-
-export interface Ward {
-  id: string;
-  name: string;
-  type: string;
-  districtId: string;
-}
-
-export interface ShopWarehouseLocation {
-  province: Province;
-  district: District;
-  ward: Ward;
-  addressLine: string;
-}
-
-export interface Shop {
-  id: number;
-  shopName: string;
-  shopLogoUrl: string;
-  shopCoverUrl: string;
-  shopRating: number;
-  isOfficial: boolean;
-  totalProducts: number;
-  totalReviews: number;
-  totalFollowers: number;
-  totalFollowing: number;
-  lastOnlineAt: string;
-  createdAt: string;
-  replyRate: string;
-  replyIn: string;
-  shopWarehouseLocation: ShopWarehouseLocation;
-}
-
-export interface Value {
-  id: number;
-  name: string;
-  slug: string;
-}
-
-export interface Property {
-  name: string;
-  key: string;
-  values: Value[];
-}
-
-export interface Category {
-  id: number;
-  name: string;
-  slug: string;
-}
-
-export interface Brand {
-  id: number;
-  name: string;
-  slug: string;
-}
-
-export interface Option {
-  id: number;
-  name: string;
-  slug: string;
-}
-
-export interface Attribute {
-  id: number;
-  name: string;
-  slug: string;
-  options: Option[];
-}
-
 export interface Attribute {
   slug: string;
   optionSlug: string;
 }
 
-export interface Attribute {
-  slug: string;
-  optionSlug: string;
+export interface Item {
+  name: string;
+  productId: number;
+  variationId: number;
+  quantity: number;
+  subtotal: number;
+  total: number;
+  attributes: Attribute[];
+}
+
+export interface Fee {
+  type: string;
+  name: string;
+  amount: number;
+  total: number;
+}
+
+export interface Info {
+  id: number;
+  code: string;
+  discountType: string;
+}
+
+export interface Voucher {
+  name: string;
+  discount: number;
+  info: Info;
 }
 
 export interface Variation {
@@ -482,38 +429,48 @@ export interface Variation {
   attributes: Attribute[];
 }
 
-export interface Item {
-  name: string;
-  productId: number;
-  product: Product;
-  variationId: number;
-  variation: Variation;
-  quantity: number;
-  unitPrice: number;
-  subtotal: number;
-  total: number;
-}
-
 export interface IOrder {
   id: number;
   note: string;
   createdAt: string;
-  updatedAt: string;
   status: string;
   statusHistory: StatusHistory[];
   buyerId: number;
   shopId: number;
-  shop: Shop;
   orderCurrency: string;
   orderTotal: number;
   cartDiscount: number;
   paymentMethod: PaymentMethod;
-  shippingMethod: ShippingMethod;
   billing: Billing;
   shipping: Shipping;
   items: Item[];
-  fees: any[];
-  vouchers: any[];
+  fees: Fee[];
+  vouchers: Voucher[];
+  shop: Shop;
+  shippingMethod: ShippingMethod;
+}
+
+export interface Order {
+  id: number;
+  orderTotal: number;
+}
+
+export interface PaymentMethod {
+  key: string;
+  title: string;
+  description: string;
+}
+
+export interface Payload {
+  orders: Order[];
+  receiptTotal: number;
+  paymentMethod: PaymentMethod;
+  paymentUrl?: any;
+}
+
+export interface IOrderCheckoutResponse {
+  message: string;
+  payload: Payload;
 }
 
 class OrderService {
@@ -522,7 +479,7 @@ class OrderService {
   }
 
   async checkout(data: IOrderCalculateRequest) {
-    return typedAxios.post("/orders/checkout", data);
+    return typedAxios.post<IOrderCheckoutResponse>("/orders/checkout", data);
   }
 
   async search(data: IOrderSearchRequest) {
@@ -546,7 +503,7 @@ class OrderService {
   }
 
   async cancel(orderId: string) {
-    return typedAxios.post(`/orders/cancel/${orderId}`);
+    return typedAxios.put(`/orders/${orderId}/cancel`);
   }
 }
 

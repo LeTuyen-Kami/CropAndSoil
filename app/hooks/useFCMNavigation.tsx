@@ -6,16 +6,16 @@ import {
 export const navigationRef = createNavigationContainerRef();
 
 // hooks/useFCMNavigation.ts -----------------------------------------
-import { useEffect } from "react";
+import { getApp } from "@react-native-firebase/app";
 import {
+  FirebaseMessagingTypes,
+  getInitialNotification,
   getMessaging,
   onMessage,
   onNotificationOpenedApp,
-  getInitialNotification,
-  FirebaseMessagingTypes,
 } from "@react-native-firebase/messaging";
-import { useSmartNavigation } from "./useSmartNavigation";
-import { getApp } from "@react-native-firebase/app";
+import { useEffect } from "react";
+import { toast } from "~/components/common/Toast";
 
 export default function useFCMNavigation(
   navigationRef: NavigationContainerRef<any>
@@ -24,12 +24,16 @@ export default function useFCMNavigation(
   const messaging = getMessaging(app);
 
   const handle = async (msg: FirebaseMessagingTypes.RemoteMessage | null) => {
-    console.log("msg", msg);
-
-    if (!msg?.data?.screen) return;
-    const { screen, ...params } = msg.data;
+    if (!msg?.data?.id) return;
+    const { id, ...params } = msg.data;
     if (navigationRef.isReady()) {
-      navigationRef.navigate(screen as never, params as never);
+      navigationRef.navigate("MainTabs", {
+        screen: "Notifications",
+        params: {
+          screen: "DetailNotification",
+          params: { id },
+        },
+      });
     }
   };
 
@@ -45,8 +49,9 @@ export default function useFCMNavigation(
   useEffect(
     () =>
       onMessage(messaging, (msg) => {
-        // tuỳ: navigate ngay, hay hiển thị custom toast rồi navigate khi user tap
-        handle(msg);
+        if (msg.notification?.body) {
+          toast.info(msg.notification?.body);
+        }
       }),
     [messaging]
   );

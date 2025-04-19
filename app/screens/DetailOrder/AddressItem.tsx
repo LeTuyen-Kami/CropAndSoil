@@ -1,79 +1,69 @@
-import { useNavigation } from "@react-navigation/native";
-import { Image } from "expo-image";
-import { TouchableOpacity, View } from "react-native";
-import { imagePaths } from "~/assets/imagePath";
+import React from "react";
+import { View } from "react-native";
 import { Text } from "~/components/ui/text";
-import { IAddress } from "~/services/api/user.service";
-import { formatPhoneNumber } from "~/utils";
 
-const AddressItem = ({ address }: { address?: IAddress }) => {
-  const navigation = useNavigation();
+interface AddressItemProps {
+  address: {
+    id?: string | number;
+    phoneNumber?: string;
+    isDefault?: boolean;
+    name?: string;
+    phone?: string;
+    addressLineText?: string;
+    addressWardText?: string;
+    addressDistrictText?: string;
+    addressProvinceText?: string;
+    addressCountryText?: string;
+  };
+}
 
-  const hasAddress = !!address;
+const AddressItem = ({ address }: AddressItemProps) => {
+  const {
+    name = "",
+    phone = "",
+    phoneNumber = "",
+    addressLineText = "",
+    addressWardText = "",
+    addressDistrictText = "",
+    addressProvinceText = "",
+    isDefault = false,
+  } = address;
 
-  if (!hasAddress) {
-    return (
-      <TouchableOpacity
-        className="flex-row gap-3 justify-center items-center p-4 mb-3 bg-white rounded-2xl"
-        onPress={() => navigation.navigate("Address")}
-      >
-        <Image
-          source={imagePaths.icLocation}
-          style={{ width: 24, height: 24 }}
-          contentFit="contain"
-        />
-        <View className="flex-1">
-          <Text className="text-[#383B45] font-medium text-base mb-1">
-            Bạn chưa có địa chỉ
-          </Text>
-          <Text className="text-[#676767] text-xs leading-[18px]">
-            Vui lòng thêm địa chỉ để tiếp tục thanh toán
-          </Text>
-        </View>
-        <View className="px-3 py-2 rounded-lg bg-primary">
-          <Text className="text-xs font-medium text-white">Thêm ngay</Text>
-        </View>
-      </TouchableOpacity>
-    );
-  }
+  const displayName = name || "Người nhận";
+  const displayPhone = phone || phoneNumber || "";
+  const fullAddress = [
+    addressLineText,
+    addressWardText,
+    addressDistrictText,
+    addressProvinceText,
+  ]
+    .filter(Boolean)
+    .join(", ");
 
   return (
-    <TouchableOpacity
-      className="flex-row gap-2 p-3 mb-3 bg-white rounded-2xl"
-      onPress={() => navigation.navigate("Address")}
-    >
-      <View className="justify-start items-start">
-        <Image
-          source={imagePaths.icLocation}
-          style={{ width: 20, height: 20 }}
-          contentFit="contain"
-        />
-      </View>
-      <View className="flex-1">
-        <View className="flex-row gap-2 items-center pb-1">
-          <Text className="text-[#383B45] font-medium text-sm">
-            {address?.name}
-          </Text>
-          <View className="w-[1] h-4 bg-[#E3E3E3]" />
-          <Text className="text-[#AEAEAE] text-xs">
-            {formatPhoneNumber(address?.phoneNumber)}
-          </Text>
-        </View>
-        <Text className="text-[#676767] text-xs leading-[18px]">
-          {address?.addressLine}
-          {"\n"}
-          {address?.ward.name}, {address?.district.name},{" "}
-          {address?.province.name}
+    <View className="p-3 bg-white rounded-lg border border-gray-100">
+      <View className="flex-row items-center mb-1">
+        <Text className="text-[14px] font-medium text-[#383B45]">
+          {displayName}
         </Text>
+        {displayPhone && (
+          <>
+            <Text className="text-xs text-[#AEAEAE] mx-2">|</Text>
+            <Text className="text-xs text-[#676767]">{displayPhone}</Text>
+          </>
+        )}
       </View>
-      <TouchableOpacity className="justify-center">
-        <Image
-          source={imagePaths.icArrowRight}
-          style={{ width: 20, height: 20, tintColor: "#393B45" }}
-          contentFit="contain"
-        />
-      </TouchableOpacity>
-    </TouchableOpacity>
+
+      <Text className="text-xs text-[#676767]">{fullAddress}</Text>
+
+      {isDefault && (
+        <View className="mt-2">
+          <View className="self-start px-2 py-1 border rounded-full border-[#FCBA27]">
+            <Text className="text-[10px] text-[#FCBA27]">Mặc định</Text>
+          </View>
+        </View>
+      )}
+    </View>
   );
 };
 

@@ -30,7 +30,9 @@ export type RootStackParamList = {
   LikedProduct: undefined;
   EditProfile: undefined;
   ShoppingCart: undefined;
-  Payment: undefined;
+  Payment: {
+    isClearCart?: boolean;
+  };
   Address: undefined;
   VoucherSelect: {
     productIds?: number[];

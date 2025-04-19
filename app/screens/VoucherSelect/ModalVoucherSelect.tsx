@@ -5,9 +5,13 @@ import ModalBottom from "~/components/common/ModalBottom";
 import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
 import { IVoucher } from "~/services/api/shop.service";
-import { screen } from "~/utils";
+import { getErrorMessage, screen } from "~/utils";
 import { ProductVoucher } from ".";
 import Empty from "~/components/common/Empty";
+import { useMutation } from "@tanstack/react-query";
+import { voucherService } from "~/services/api/voucher.service";
+import { toggleLoading } from "~/components/common/ScreenLoading";
+import { toast } from "~/components/common/Toast";
 
 interface ModalVoucherSelectProps {
   isOpen: boolean;
@@ -26,8 +30,25 @@ const ModalVoucherSelect = ({
 }: ModalVoucherSelectProps) => {
   const [applyVoucher, setApplyVoucher] = useState<string>("");
 
+  const mutateApplyVoucher = useMutation({
+    mutationFn: (voucherCode: string) => voucherService.findByCode(voucherCode),
+    onMutate: () => {
+      toggleLoading(true);
+    },
+    onSuccess: (data) => {
+      onSelectVoucher(data as any);
+      onClose();
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error, "Lỗi khi áp dụng voucher"));
+    },
+    onSettled: () => {
+      toggleLoading(false);
+    },
+  });
+
   const handleApplyVoucher = () => {
-    console.log("applyVoucher", applyVoucher);
+    mutateApplyVoucher.mutate(applyVoucher);
   };
 
   return (

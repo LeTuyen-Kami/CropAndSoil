@@ -23,7 +23,9 @@ const Footer = ({
   const navigation = useNavigation();
 
   const handlePayment = () => {
-    navigation.navigate("Payment");
+    navigation.navigate("Payment", {
+      isClearCart: true,
+    });
   };
 
   const { selectedCount } = useMemo(() => {

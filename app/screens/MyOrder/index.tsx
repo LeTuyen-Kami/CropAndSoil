@@ -1,47 +1,19 @@
 import { Feather } from "@expo/vector-icons";
-import { FlashList } from "@shopify/flash-list";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { Image } from "expo-image";
-import { useSetAtom } from "jotai";
-import { RefreshControl, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import { imagePaths } from "~/assets/imagePath";
 import GradientBackground from "~/components/common/GradientBackground";
 import Header from "~/components/common/Header";
 import Tabs from "~/components/common/Tabs";
 import { Text } from "~/components/ui/text";
-import { confirmAtom } from "~/store/atoms";
-import ProductCart from "./ProductCart";
-import { useQuery } from "@tanstack/react-query";
-import { orderService } from "~/services/api/order.service";
-import { usePagination } from "~/hooks/usePagination";
-import ListOrder from "./ListOrder";
-import { ORDER_STATUS } from "~/utils/contants";
-import { useNavigation, useRoute } from "@react-navigation/native";
 import { RootStackRouteProp, RootStackScreenProps } from "~/navigation/types";
-import { useEffect, useRef } from "react";
-import { TabsRef } from "~/components/common/Tabs";
+import { ORDER_STATUS } from "~/utils/contants";
+import ListOrder from "./ListOrder";
 const MyOrderScreen = () => {
   const route = useRoute<RootStackRouteProp<"MyOrder">>();
   const tabIndex = route.params?.tabIndex || 0;
-  const setConfirmState = useSetAtom(confirmAtom);
   const navigation = useNavigation<RootStackScreenProps<"MyOrder">>();
-
-  const handleCancelOrder = () => {
-    setConfirmState({
-      title: "Hủy đơn hàng",
-      message: "Bạn có chắc chắn muốn hủy đơn hàng này không?",
-      onConfirm: () => {
-        console.log("confirm order");
-      },
-      onCancel: () => {
-        console.log("Cancel order");
-      },
-      isOpen: true,
-    });
-  };
-
-  const handleViewDetails = () => {
-    console.log("View details");
-  };
 
   const handleSearchOrder = () => {
     navigation.navigate("SearchOrder");
