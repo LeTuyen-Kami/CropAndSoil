@@ -15,13 +15,15 @@ import {
   FirebaseMessagingTypes,
 } from "@react-native-firebase/messaging";
 import { useSmartNavigation } from "./useSmartNavigation";
+import { getApp } from "@react-native-firebase/app";
 
 export default function useFCMNavigation(
   navigationRef: NavigationContainerRef<any>
 ) {
-  const messaging = getMessaging();
+  const app = getApp();
+  const messaging = getMessaging(app);
 
-  const handle = (msg: FirebaseMessagingTypes.RemoteMessage | null) => {
+  const handle = async (msg: FirebaseMessagingTypes.RemoteMessage | null) => {
     console.log("msg", msg);
 
     if (!msg?.data?.screen) return;
@@ -31,12 +33,12 @@ export default function useFCMNavigation(
     }
   };
 
-  // 1) Cold‑start
+  // // 1) Cold‑start
   useEffect(() => {
     getInitialNotification(messaging).then(handle);
   }, [messaging]);
 
-  // 2) Background → foreground (tap)
+  // // 2) Background → foreground (tap)
   useEffect(() => onNotificationOpenedApp(messaging, handle), [messaging]);
 
   // 3) Foreground message realtime

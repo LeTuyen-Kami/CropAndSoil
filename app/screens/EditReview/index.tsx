@@ -1,48 +1,99 @@
-import { ScrollView, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Dimensions,
+  Modal,
+  StatusBar,
+  ActivityIndicator,
+} from "react-native";
 import { Text } from "~/components/ui/text";
 import Header from "~/components/common/Header";
 import ScreenWrapper from "~/components/common/ScreenWrapper";
-import { AntDesign, Feather } from "@expo/vector-icons";
-import React, { useState } from "react";
+import { AntDesign, Feather, Ionicons } from "@expo/vector-icons";
+import React, { useState, useEffect, useRef } from "react";
 import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
 import { toast } from "~/components/common/Toast";
 import ModalBottom from "~/components/common/ModalBottom";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import Checkbox from "expo-checkbox";
+import { Video, ResizeMode } from "expo-av";
 import {
   ICreateReviewRequest,
   IUpdateReviewRequest,
   reviewService,
 } from "~/services/api/review.service";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRoute } from "@react-navigation/native";
 import { RootStackRouteProp } from "~/navigation/types";
+import { orderService } from "~/services/api/order.service";
+import { getErrorMessage, getMediaTypes } from "~/utils";
+import { useAtomValue } from "jotai";
+import { authAtom } from "~/store/atoms";
+import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 
 // Define types for the images/videos
 type MediaAsset = {
   uri: string;
   type: "image" | "video";
+  size?: number;
+  fromServer?: boolean;
 };
 
 // Define rating options
 const RATING_OPTIONS = ["Tốt", "Bình thường", "Kém"];
 
+// Media constraints
+const MAX_IMAGE_SIZE = 1.5 * 1024 * 1024; // 1.5MB in bytes
+const MAX_VIDEO_SIZE = 25 * 1024 * 1024; // 25MB in bytes
+const MAX_IMAGES = 5;
+const MAX_VIDEOS = 1;
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+
 const EditReview = () => {
-  const { bottom } = useSafeAreaInsets();
+  const { bottom, top } = useSafeAreaInsets();
   const [rating, setRating] = useState(4);
   const [mediaAssets, setMediaAssets] = useState<MediaAsset[]>([]);
+  const [videoCount, setVideoCount] = useState(0);
+  const [imageCount, setImageCount] = useState(0);
   const [qualityRating, setQualityRating] = useState("");
   const [packagingRating, setPackagingRating] = useState("");
   const [comment, setComment] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [showQualityModal, setShowQualityModal] = useState(false);
   const [showPackagingModal, setShowPackagingModal] = useState(false);
+  const [selectedMedia, setSelectedMedia] = useState<MediaAsset | null>(null);
+  const [showFullscreenPreview, setShowFullscreenPreview] = useState(false);
+  const navigation = useSmartNavigation();
+  const auth = useAtomValue(authAtom);
+  const videoRef = useRef<Video>(null);
+  const queryClient = useQueryClient();
 
   const route = useRoute<RootStackRouteProp<"EditReview">>();
 
-  const id = route.params.id || "";
+  const {
+    orderId,
+    productId,
+    variationId,
+    thumbnail,
+    productName,
+    variationName,
+    isEdit,
+    review,
+  } = route.params;
+
+  // Update counts when mediaAssets changes
+  useEffect(() => {
+    const videos = mediaAssets.filter((asset) => asset.type === "video").length;
+    const images = mediaAssets.filter((asset) => asset.type === "image").length;
+    setVideoCount(videos);
+    setImageCount(images);
+  }, [mediaAssets]);
 
   const mutationSendReview = useMutation({
     mutationFn: (data: ICreateReviewRequest) =>
@@ -51,7 +102,7 @@ const EditReview = () => {
 
   const mutationUpdateReview = useMutation({
     mutationFn: (data: IUpdateReviewRequest) =>
-      reviewService.updateReview(id!, data),
+      reviewService.updateReview(review?.id!, data),
   });
 
   // Function to render stars based on rating
@@ -70,32 +121,76 @@ const EditReview = () => {
       ));
   };
 
-  // Function to handle image picking
-  const handlePickImage = async () => {
-    if (mediaAssets.length >= 5) {
-      toast.warning("Bạn chỉ có thể tải lên tối đa 5 ảnh/video");
-      return;
-    }
+  // Function to get file info
+  const getFileInfo = async (
+    fileUri: string
+  ): Promise<{ size: number; type: "image" | "video" }> => {
+    const fileInfo = await FileSystem.getInfoAsync(fileUri, { size: true });
 
+    // Determine file type based on extension
+    const isVideo =
+      fileUri.toLowerCase().endsWith(".mp4") ||
+      fileUri.toLowerCase().endsWith(".mov") ||
+      fileUri.toLowerCase().endsWith(".avi");
+
+    return {
+      size: fileInfo.exists
+        ? (fileInfo as FileSystem.FileInfo & { size: number }).size || 0
+        : 0,
+      type: isVideo ? "video" : "image",
+    };
+  };
+
+  // Function to handle image picking
+  const handlePickImage = async (pickVideo = false) => {
     try {
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      // Check media limits
+      if (pickVideo && videoCount >= MAX_VIDEOS) {
+        toast.warning(`Bạn chỉ có thể tải lên tối đa ${MAX_VIDEOS} video`);
+        return;
+      }
+
+      if (!pickVideo && imageCount >= MAX_IMAGES) {
+        toast.warning(`Bạn chỉ có thể tải lên tối đa ${MAX_IMAGES} ảnh`);
+        return;
+      }
+
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
 
       if (status !== "granted") {
         toast.error("Cần quyền truy cập vào thư viện ảnh");
         return;
       }
 
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ["images", "videos"],
+      const mediaType = pickVideo ? "videos" : "images";
+
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: mediaType,
         allowsEditing: true,
         quality: 0.8,
       });
 
       if (!result.canceled && result.assets[0]) {
+        const fileUri = result.assets[0].uri;
+        const fileInfo = await getFileInfo(fileUri);
+
+        console.log("fileInfo", fileInfo);
+
+        // Check file size
+        if (fileInfo.type === "image" && fileInfo.size > MAX_IMAGE_SIZE) {
+          toast.error(`Kích thước ảnh không được vượt quá 2MB`);
+          return;
+        }
+
+        if (fileInfo.type === "video" && fileInfo.size > MAX_VIDEO_SIZE) {
+          toast.error(`Kích thước video không được vượt quá 30MB`);
+          return;
+        }
+
         const newAsset: MediaAsset = {
-          uri: result.assets[0].uri,
-          type: result.assets[0].type === "video" ? "video" : "image",
+          uri: fileUri,
+          type: fileInfo.type,
+          size: fileInfo.size,
         };
 
         setMediaAssets([...mediaAssets, newAsset]);
@@ -104,6 +199,65 @@ const EditReview = () => {
       console.error("Error picking media:", error);
       toast.error("Đã xảy ra lỗi khi chọn ảnh/video");
     }
+  };
+
+  // Function to handle taking a photo
+  const handleTakePhoto = async () => {
+    try {
+      if (imageCount >= MAX_IMAGES) {
+        toast.warning(`Bạn chỉ có thể tải lên tối đa ${MAX_IMAGES} ảnh`);
+        return;
+      }
+
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (status !== "granted") {
+        toast.error("Cần quyền truy cập vào camera");
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: "images",
+        allowsEditing: true,
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const fileUri = result.assets[0].uri;
+        const fileInfo = await getFileInfo(fileUri);
+
+        console.log("fileInfo", fileInfo.size);
+
+        if (fileInfo.size > MAX_IMAGE_SIZE) {
+          toast.error(`Kích thước ảnh không được vượt quá 1.5MB`);
+          return;
+        }
+
+        const newAsset: MediaAsset = {
+          uri: fileUri,
+          type: "image",
+          size: fileInfo.size,
+        };
+
+        setMediaAssets([...mediaAssets, newAsset]);
+      }
+    } catch (error) {
+      console.error("Error taking photo:", error);
+      toast.error("Đã xảy ra lỗi khi chụp ảnh");
+    }
+  };
+
+  // Function to open media preview
+  const handleOpenPreview = (asset: MediaAsset) => {
+    setSelectedMedia(asset);
+    setShowFullscreenPreview(true);
+  };
+
+  // Function to close media preview
+  const handleClosePreview = () => {
+    setSelectedMedia(null);
+    setShowFullscreenPreview(false);
   };
 
   // Function to remove media asset
@@ -121,9 +275,187 @@ const EditReview = () => {
       return;
     }
 
-    // Would normally send review data to API
-    toast.success("Đã gửi đánh giá thành công");
+    if (!qualityRating) {
+      toast.error("Vui lòng đánh giá chất lượng sản phẩm");
+      return;
+    }
+
+    if (!packagingRating) {
+      toast.error("Vui lòng đánh giá đóng gói");
+      return;
+    }
+
+    if (!comment.trim()) {
+      toast.error("Vui lòng nhập nhận xét của bạn");
+      return;
+    }
+
+    // Prepare media files - separate images and video
+    const images = mediaAssets
+      .filter((asset) => asset.type === "image")
+      .filter((asset) => !asset.fromServer)
+      .map((asset) => ({
+        uri: asset.uri,
+        type: "image/jpeg",
+        name: `image_${new Date().getTime()}.jpg`,
+      }));
+
+    // Get the first video if exists
+    const videoAsset = mediaAssets
+      .filter((asset) => !asset.fromServer)
+      .find((asset) => asset.type === "video");
+    const video = videoAsset
+      ? {
+          uri: videoAsset.uri,
+          type: "video/mp4",
+          name: `video_${new Date().getTime()}.mp4`,
+        }
+      : { uri: "", type: "", name: "" };
+
+    if (isEdit) {
+      // Update existing review
+      const updateData: IUpdateReviewRequest = {
+        productId: productId?.toString() || "",
+        variationId: variationId?.toString() || "",
+        rating,
+        comment,
+        quality: qualityRating,
+        packaging: packagingRating,
+        isAnonymous: !!isAnonymous,
+        orderId: orderId?.toString() || "",
+        images,
+        video,
+        oldGallery: mediaAssets
+          .filter((asset) => asset.fromServer)
+          .map((asset) => asset.uri),
+      };
+
+      mutationUpdateReview.mutate(updateData, {
+        onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: ["list-unrated", "reviews"],
+          });
+          toast.success("Cập nhật đánh giá thành công");
+        },
+        onError: (error) => {
+          console.error("Error updating review:", error);
+          toast.error("Đã xảy ra lỗi khi cập nhật đánh giá");
+        },
+      });
+    } else {
+      // Create new review
+      const reviewData: ICreateReviewRequest = {
+        orderId: orderId?.toString() || "",
+        productId: productId?.toString() || "",
+        variationId: variationId?.toString() || "",
+        rating,
+        comment,
+        quality: qualityRating,
+        packaging: packagingRating,
+        isAnonymous: !!isAnonymous,
+        images,
+        video,
+      };
+
+      mutationSendReview.mutate(reviewData, {
+        onSuccess: () => {
+          toast.success("Đã gửi đánh giá thành công");
+          navigation.smartGoBack();
+          queryClient.invalidateQueries({
+            queryKey: ["list-unrated", "reviews"],
+          });
+        },
+        onError: (error) => {
+          toast.error(getErrorMessage(error, "Đã xảy ra lỗi khi gửi đánh giá"));
+        },
+      });
+    }
   };
+
+  const hideName = (name?: string) => {
+    if (!name || name.length <= 2) return "Ẩn danh";
+
+    const firstChar = name.charAt(0);
+    const lastChar = name.charAt(name.length - 1);
+    const middleStars = "*".repeat(name.length - 2);
+
+    return firstChar + middleStars + lastChar;
+  };
+
+  // Fullscreen media preview
+  const renderFullscreenPreview = () => {
+    if (!selectedMedia) return null;
+
+    return (
+      <Modal
+        visible={showFullscreenPreview}
+        transparent={false}
+        animationType="fade"
+        onRequestClose={handleClosePreview}
+      >
+        <StatusBar backgroundColor="#000" barStyle="light-content" />
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "#000",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          {/* Close button */}
+          <TouchableOpacity
+            style={{
+              position: "absolute",
+              top: top + 20,
+              right: 20,
+              zIndex: 10,
+              backgroundColor: "rgba(0,0,0,0.5)",
+              borderRadius: 20,
+              padding: 8,
+            }}
+            onPress={handleClosePreview}
+          >
+            <Ionicons name="close" size={24} color="#fff" />
+          </TouchableOpacity>
+
+          {selectedMedia.type === "image" ? (
+            <Image
+              source={{ uri: selectedMedia.uri }}
+              style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT * 0.8 }}
+              contentFit="contain"
+            />
+          ) : (
+            <Video
+              ref={videoRef}
+              source={{ uri: selectedMedia.uri }}
+              style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT * 0.8 }}
+              useNativeControls
+              resizeMode={ResizeMode.CONTAIN}
+              isLooping
+              shouldPlay
+            />
+          )}
+        </View>
+      </Modal>
+    );
+  };
+
+  useEffect(() => {
+    if (review) {
+      setComment(review.comment);
+      setQualityRating(review.quality);
+      setPackagingRating(review.packaging);
+      setRating(review.rating);
+      setMediaAssets(
+        review.gallery.map((media) => ({
+          uri: media,
+          type: getMediaTypes(media),
+          fromServer: true,
+        }))
+      );
+      setIsAnonymous(review.isAnonymous);
+    }
+  }, [review]);
 
   return (
     <ScreenWrapper hasGradient={true} hasSafeBottom={false}>
@@ -142,18 +474,17 @@ const EditReview = () => {
           <View className="flex-row mb-4 bg-white">
             <View className="w-[68px] h-[66px] p-2.5 border border-gray-100 rounded-l-lg">
               <Image
-                source="https://picsum.photos/200"
+                source={{ uri: thumbnail }}
                 style={{ width: "100%", height: "100%", borderRadius: 8 }}
                 contentFit="cover"
               />
             </View>
             <View className="flex-1 p-2">
               <Text className="text-[#383B45] text-xs" numberOfLines={2}>
-                Phân Bón NPK Greenhome, Chuyên Rau Ăn Lá, Củ, Cây Ăn Trái, Hoa,
-                Chắc Rễ, Khoẻ Cây, Bông To, Sai Quả
+                {productName}
               </Text>
               <Text className="text-[#AEAEAE] text-xs mt-1">
-                Phân loại: NPK Rau Phú Mỹ
+                Phân loại: {variationName}
               </Text>
             </View>
           </View>
@@ -168,11 +499,44 @@ const EditReview = () => {
           <View className="flex-row flex-wrap gap-2 mb-4">
             {mediaAssets.map((asset, index) => (
               <View key={index} className="w-[88px] h-[88px] relative">
-                <Image
-                  source={{ uri: asset.uri }}
+                <TouchableOpacity
                   style={{ width: "100%", height: "100%", borderRadius: 6 }}
-                  contentFit="cover"
-                />
+                  onPress={() => handleOpenPreview(asset)}
+                >
+                  {asset.type === "image" ? (
+                    <Image
+                      source={{ uri: asset.uri }}
+                      style={{ width: "100%", height: "100%", borderRadius: 6 }}
+                      contentFit="cover"
+                    />
+                  ) : (
+                    <>
+                      <Video
+                        source={{ uri: asset.uri }}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          borderRadius: 6,
+                        }}
+                        resizeMode={ResizeMode.COVER}
+                        useNativeControls={false}
+                      />
+                      <View
+                        style={{
+                          position: "absolute",
+                          width: "100%",
+                          height: "100%",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          backgroundColor: "rgba(0,0,0,0.2)",
+                          borderRadius: 6,
+                        }}
+                      >
+                        <Feather name="play" size={24} color="white" />
+                      </View>
+                    </>
+                  )}
+                </TouchableOpacity>
                 <TouchableOpacity
                   className="absolute top-1 right-1 bg-black/40 w-[14px] h-[14px] rounded-lg flex items-center justify-center border border-white/40"
                   onPress={() => removeMediaAsset(index)}
@@ -185,12 +549,31 @@ const EditReview = () => {
             {/* Image Upload Button */}
             <TouchableOpacity
               className="w-[88px] h-[88px] border border-dashed border-gray-400 rounded-md flex items-center justify-center"
-              onPress={handlePickImage}
+              onPress={() => handlePickImage(false)}
             >
               <View className="items-center">
                 <Feather name="camera" size={24} color="#AEAEAE" />
-                <Text className="text-[#AEAEAE] text-sm font-medium mt-1">
-                  {mediaAssets.length}/5
+                <Text className="text-[#AEAEAE] text-xs font-medium mt-1">
+                  Chụp ảnh
+                </Text>
+                <Text className="text-[#AEAEAE] text-xs mt-1">
+                  {imageCount}/{MAX_IMAGES}
+                </Text>
+              </View>
+            </TouchableOpacity>
+
+            {/* Gallery Upload Button */}
+            <TouchableOpacity
+              className="w-[88px] h-[88px] border border-dashed border-gray-400 rounded-md flex items-center justify-center"
+              onPress={() => handleTakePhoto()}
+            >
+              <View className="items-center">
+                <Feather name="image" size={24} color="#AEAEAE" />
+                <Text className="text-[#AEAEAE] text-xs font-medium mt-1">
+                  Thư viện
+                </Text>
+                <Text className="text-[#AEAEAE] text-xs mt-1">
+                  {imageCount}/{MAX_IMAGES}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -198,12 +581,15 @@ const EditReview = () => {
             {/* Video Upload Button */}
             <TouchableOpacity
               className="w-[88px] h-[88px] border border-dashed border-gray-400 rounded-md flex items-center justify-center"
-              onPress={handlePickImage}
+              onPress={() => handlePickImage(true)}
             >
               <View className="items-center">
                 <Feather name="video" size={24} color="#AEAEAE" />
-                <Text className="text-[#AEAEAE] text-sm font-medium mt-1">
+                <Text className="text-[#AEAEAE] text-xs font-medium mt-1">
                   Video
+                </Text>
+                <Text className="text-[#AEAEAE] text-xs mt-1">
+                  {videoCount}/{MAX_VIDEOS}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -268,7 +654,7 @@ const EditReview = () => {
               />
             </View>
             <Text className="text-[#676767] text-xs">
-              Tên của bạn sẽ được hiển thị là C********n
+              Tên của bạn sẽ được hiển thị là {hideName(auth?.user?.name)}
             </Text>
           </View>
         </View>
@@ -280,9 +666,16 @@ const EditReview = () => {
           className="bg-[#FCBA27] rounded-full py-3 items-center"
           onPress={handleSubmitReview}
         >
-          <Text className="text-base font-medium text-white">Gửi</Text>
+          {mutationSendReview.isPending || mutationUpdateReview.isPending ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Text className="text-base font-medium text-white">Gửi</Text>
+          )}
         </TouchableOpacity>
       </View>
+
+      {/* Fullscreen Media Preview */}
+      {renderFullscreenPreview()}
 
       {/* Quality Rating Modal */}
       <ModalBottom

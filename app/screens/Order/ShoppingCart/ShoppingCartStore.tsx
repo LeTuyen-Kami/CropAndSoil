@@ -101,7 +101,9 @@ const ShoppingCartStore = ({
               });
             }}
           >
-            <Text className="text-sm font-medium">{store.name}</Text>
+            <Text className="text-sm font-medium" numberOfLines={1}>
+              {store.name}
+            </Text>
           </TouchableOpacity>
         </View>
         <TouchableOpacity

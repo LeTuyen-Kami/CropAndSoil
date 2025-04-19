@@ -47,6 +47,9 @@ import MyVoucherScreen from "~/screens/VoucherSelect/MyVoucher";
 import useFirebase from "~/hooks/useFirebase";
 import useFCMNavigation from "~/hooks/useFCMNavigation";
 import * as SplashScreen from "expo-splash-screen";
+import AllProductReview from "~/screens/AllProductReview";
+import DetailOrder from "~/screens/DetailOrder";
+import useUpdateFCMToken from "~/hooks/useUpdateFCMToken";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -55,16 +58,7 @@ const TempSearchScreen = () => {
 };
 
 const TabNavigator = () => {
-  const { token, permissionGranted } = useFirebase({
-    onMessage: (msg) => {
-      console.log("onMessage", msg);
-    },
-  });
-
-  useEffect(() => {
-    console.log("permissionGranted", permissionGranted, token);
-  }, [permissionGranted, token]);
-
+  useUpdateFCMToken();
   return (
     <Tab.Navigator
       tabBar={(props) => <CustomTabBar {...props} />}
@@ -83,13 +77,13 @@ const TabNavigator = () => {
 export const AppNavigator = () => {
   const navigationRef = useNavigationContainerRef();
 
-  useEffect(() => {
-    SplashScreen.setOptions({
-      fade: true,
-      duration: 500,
-    });
-    SplashScreen.hideAsync();
-  }, []);
+  // useEffect(() => {
+  //   SplashScreen.setOptions({
+  //     fade: true,
+  //     duration: 500,
+  //   });
+  //   SplashScreen.hideAsync();
+  // }, []);
 
   useFCMNavigation(navigationRef);
 
@@ -160,12 +154,14 @@ export const AppNavigator = () => {
           component={DetailNotification}
         />
         <Stack.Screen name="SearchOrder" component={SearchOrder} />
+        <Stack.Screen name="DetailOrder" component={DetailOrder} />
         <Stack.Screen name="Followers" component={Followers} />
         <Stack.Screen name="Followings" component={Followings} />
         <Stack.Screen name="ChangePassword" component={ChangePassword} />
         <Stack.Screen name="FlashSale" component={FlashSale} />
         <Stack.Screen name="FlashSaleProduct" component={FlashSaleProduct} />
         <Stack.Screen name="MyVoucher" component={MyVoucherScreen} />
+        <Stack.Screen name="AllProductReview" component={AllProductReview} />
       </Stack.Navigator>
     </NavigationContainer>
   );

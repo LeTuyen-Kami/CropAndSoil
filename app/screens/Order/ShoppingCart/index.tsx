@@ -1,43 +1,39 @@
+import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import Checkbox from "expo-checkbox";
 import { Image } from "expo-image";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useAtom } from "jotai";
+import { useCallback, useEffect, useState } from "react";
 import { Pressable, TouchableOpacity, View } from "react-native";
+import { RefreshControl } from "react-native-gesture-handler";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { imagePaths } from "~/assets/imagePath";
-import Badge from "~/components/common/Badge";
+import Empty from "~/components/common/Empty";
 import Header from "~/components/common/Header";
-import ScreenContainer from "~/components/common/ScreenContainer";
+import { toggleLoading } from "~/components/common/ScreenLoading";
+import ScreenWrapper from "~/components/common/ScreenWrapper";
+import { toast } from "~/components/common/Toast";
 import { Text } from "~/components/ui/text";
-import ShoppingCartStore from "./ShoppingCartStore";
-import { Store } from "../types";
-import Footer from "./Footer";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { RootStackScreenProps } from "~/navigation/types";
+import ModalSelectShopVoucher from "~/screens/VoucherSelect/ModalSelectShopVoucher";
 import {
   cartService,
-  IUpdateCartItemRequest,
+  IUpdatePatchCartItemRequest,
 } from "~/services/api/cart.service";
-import { toggleLoading } from "~/components/common/ScreenLoading";
-import { RefreshControl } from "react-native-gesture-handler";
-import ScreenWrapper from "~/components/common/ScreenWrapper";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAtom } from "jotai";
-import { storeAtom } from "../atom";
-import { showModalConfirm, selectedVoucherAtom } from "~/store/atoms";
-import { toast } from "~/components/common/Toast";
-import { getErrorMessage } from "~/utils";
-import Empty from "~/components/common/Empty";
-import { RootStackScreenProps } from "~/navigation/types";
-import { useNavigation } from "@react-navigation/native";
-import { userService } from "~/services/api/user.service";
 import {
   ICalculateResponse,
   IOrderCalculateRequest,
+  orderService,
 } from "~/services/api/order.service";
-import { orderService } from "~/services/api/order.service";
-import ModalVoucherSelect from "~/screens/VoucherSelect/ModalVoucherSelect";
-import ModalSelectShopVoucher from "~/screens/VoucherSelect/ModalSelectShopVoucher";
-import { IVoucher } from "~/services/api/shop.service";
 import { paymentService } from "~/services/api/payment.service";
+import { IVoucher } from "~/services/api/shop.service";
+import { userService } from "~/services/api/user.service";
+import { selectedVoucherAtom, showModalConfirm } from "~/store/atoms";
+import { getErrorMessage } from "~/utils";
+import { storeAtom } from "../atom";
+import Footer from "./Footer";
+import ShoppingCartStore from "./ShoppingCartStore";
 const ShoppingCart = () => {
   const navigation = useNavigation<RootStackScreenProps<"ShoppingCart">>();
   const [stores, setStores] = useAtom(storeAtom);
@@ -62,6 +58,15 @@ const ShoppingCart = () => {
       cartService.removeCartItem({
         cartItems: cartItemIds,
       }),
+  });
+
+  const mutationUpdatePatchCartItem = useMutation({
+    mutationFn: (data: IUpdatePatchCartItemRequest) =>
+      cartService.updatePatchCartItem(data),
+    onError: (error) => {
+      refetch();
+      toast.error(getErrorMessage(error, "Lỗi khi cập nhật giỏ hàng"));
+    },
   });
 
   const [calculatedData, setCalculatedData] =
@@ -96,25 +101,27 @@ const ShoppingCart = () => {
               ? selectedVoucher.voucher?.code!
               : "",
           shops:
-            stores?.map((store) => ({
-              id: Number(store.id),
-              shippingMethodKey: "ghtk",
-              note: "",
-              voucherCode: store.shopVoucher?.code || "",
-              items: store.items
-                ?.filter((item) => item.isSelected)
-                .map((item) => ({
-                  product: {
-                    id: Number(item.productId),
-                    name: item.name,
-                  },
-                  variation: {
-                    id: Number(item.variation.id),
-                    name: item?.variation.name,
-                  },
-                  quantity: item.quantity,
-                })),
-            })) || [],
+            stores
+              ?.filter((store) => store.isSelected)
+              ?.map((store) => ({
+                id: Number(store.id),
+                shippingMethodKey: "ghtk",
+                note: "",
+                voucherCode: store.shopVoucher?.code || "",
+                items: store.items
+                  ?.filter((item) => item.isSelected)
+                  .map((item) => ({
+                    product: {
+                      id: Number(item.productId),
+                      name: item.name,
+                    },
+                    variation: {
+                      id: Number(item.variation.id),
+                      name: item?.variation.name,
+                    },
+                    quantity: item.quantity,
+                  })),
+              })) || [],
         },
         {
           onSuccess: (data) => {
@@ -191,6 +198,18 @@ const ShoppingCart = () => {
         })),
       }))
     );
+
+    mutationUpdatePatchCartItem.mutate({
+      cartItems: stores.flatMap((store) =>
+        store.items.map((item) => ({
+          cartItemId: Number(item.id),
+          productId: Number(item.productId),
+          variationId: Number(item.variation.id),
+          quantity: item.quantity,
+          isChecked: selected,
+        }))
+      ),
+    });
   }, []);
 
   const handleSelectAllItems = useCallback(
@@ -209,6 +228,20 @@ const ShoppingCart = () => {
             : store
         )
       );
+
+      const store = stores.find((store) => store.id === storeId);
+
+      if (store) {
+        mutationUpdatePatchCartItem.mutate({
+          cartItems: store.items.map((item) => ({
+            cartItemId: Number(item.id),
+            productId: Number(item.productId),
+            variationId: Number(item.variation.id),
+            quantity: item.quantity,
+            isChecked: selected,
+          })),
+        });
+      }
     },
     []
   );
@@ -302,7 +335,11 @@ const ShoppingCart = () => {
       voucher: null,
       canSelect: true,
     });
-    navigation.navigate("VoucherSelect");
+    navigation.navigate("VoucherSelect", {
+      productIds: stores.flatMap((store) =>
+        store.items.map((item) => Number(item.productId))
+      ),
+    });
   };
 
   useEffect(() => {

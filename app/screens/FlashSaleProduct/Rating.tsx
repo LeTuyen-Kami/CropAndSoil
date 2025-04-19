@@ -10,15 +10,16 @@ import { Text } from "~/components/ui/text";
 import { flashSaleService } from "~/services/api/flashsale.service";
 import { reviewService } from "~/services/api/review.service";
 import AllMedia from "./AllMedia";
+import { formatDate, getMediaTypes } from "~/utils";
+import { toast } from "~/components/common/Toast";
+import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 type RatingProps = {
-  rating?: number;
-  totalReviews?: number;
-  onViewAllPress?: () => void;
   id: string | number;
 };
 
-const Rating: React.FC<RatingProps> = ({ onViewAllPress, id }) => {
+const Rating: React.FC<RatingProps> = ({ id }) => {
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
+  const navigation = useSmartNavigation();
 
   const { data: productDetail } = useQuery({
     queryKey: ["flash-sale-product-detail", id],
@@ -46,8 +47,6 @@ const Rating: React.FC<RatingProps> = ({ onViewAllPress, id }) => {
     staleTime: 1000 * 60 * 5,
   });
 
-  console.log(reviews);
-
   // Render stars based on rating
   const renderStars = () => {
     const stars = [];
@@ -68,9 +67,20 @@ const Rating: React.FC<RatingProps> = ({ onViewAllPress, id }) => {
     return stars;
   };
 
+  const onViewAllPress = () => {
+    if (!productDetail?.averageRating) {
+      toast.info("Chưa có đánh giá nào");
+      return;
+    }
+
+    navigation.smartNavigate("AllProductReview", {
+      productId: productDetail?.productId,
+    });
+  };
+
   return (
     <View className="mt-2 w-full bg-white rounded-3xl">
-      <AllMedia />
+      {/* <AllMedia /> */}
       <View className="p-2 border-b border-gray-100">
         {/* Header Section */}
         <View className="flex-row justify-between items-center w-full">
@@ -103,7 +113,7 @@ const Rating: React.FC<RatingProps> = ({ onViewAllPress, id }) => {
         </View>
 
         {/* Filters */}
-        <ScrollView
+        {/* <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           className="mt-4 mb-2"
@@ -143,7 +153,7 @@ const Rating: React.FC<RatingProps> = ({ onViewAllPress, id }) => {
               Đánh giá sản phẩm có hình ảnh (2)
             </Text>
           </TouchableOpacity>
-        </ScrollView>
+        </ScrollView> */}
       </View>
 
       {/* Review List */}
@@ -157,9 +167,14 @@ const Rating: React.FC<RatingProps> = ({ onViewAllPress, id }) => {
             }}
             rating={review.rating}
             quality={review.quality}
-            date={review.createdAt}
+            date={formatDate(review.createdAt)}
             productVariant={review.variation.name}
             likes={review.totalLikes}
+            comment={review.comment}
+            media={review.gallery.map((media) => ({
+              type: getMediaTypes(media),
+              uri: media,
+            }))}
           />
         ))}
       </View>

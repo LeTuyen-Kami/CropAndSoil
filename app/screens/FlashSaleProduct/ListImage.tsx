@@ -34,7 +34,7 @@ const ListImage = ({ id }: { id: string | number }) => {
   });
 
   useQuery({
-    queryKey: ["topProducts", ...(productDetail?.upsellIds || [])],
+    queryKey: ["topProducts", id, ...(productDetail?.upsellIds || [])],
     queryFn: () =>
       productService.searchProducts({
         ids: productDetail?.upsellIds?.join(","),

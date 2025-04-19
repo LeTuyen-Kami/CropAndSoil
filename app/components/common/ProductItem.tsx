@@ -11,7 +11,7 @@ import { RootStackScreenProps } from "~/navigation/types";
 export interface ProductItemProps {
   image?: string;
   name: string;
-  price: number;
+  price?: number;
   originalPrice?: number;
   discount?: number;
   soldCount?: number;
@@ -25,6 +25,7 @@ export interface ProductItemProps {
   footer?: React.ReactNode;
   onSale?: boolean;
   id: string | number;
+  overrideSalePrice?: string;
 }
 
 const ProductItem = ({
@@ -44,6 +45,7 @@ const ProductItem = ({
   footer,
   onSale,
   id,
+  overrideSalePrice,
 }: ProductItemProps) => {
   const navigation = useNavigation<RootStackScreenProps<"DetailProduct">>();
 
@@ -98,7 +100,9 @@ const ProductItem = ({
           </Text>
           <View className="flex-row gap-[6] items-center justify-between">
             <Text className="text-sm font-bold leading-tight text-error-500">
-              {formatPrice(price || originalPrice || 0)}
+              {!!overrideSalePrice
+                ? overrideSalePrice
+                : formatPrice(price || originalPrice || 0)}
             </Text>
             {onSale && originalPrice && (
               <Text className="text-xs tracking-tight line-through text-neutral-400">

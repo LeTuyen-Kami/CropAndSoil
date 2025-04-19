@@ -76,6 +76,7 @@ export interface IVoucher {
 
 export interface IListVoucherRequest extends PaginationRequests {
   shopId?: string | number;
+  productIds?: string; // comma separated
 }
 
 class ShopService {

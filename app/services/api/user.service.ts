@@ -121,7 +121,7 @@ class UserService {
   }
 
   async changeDeviceToken(payload: ChangeDeviceTokenPayload) {
-    return typedAxios.post<{
+    return typedAxios.put<{
       code: string;
       message: string;
     }>("/account/change-device-token", payload);

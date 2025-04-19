@@ -1,11 +1,13 @@
 import { AntDesign } from "@expo/vector-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import dayjs from "dayjs";
 import { Image } from "expo-image";
 import { deepEqual } from "fast-equals";
 import { useAtomValue } from "jotai";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { imagePaths } from "~/assets/imagePath";
+import FlashSaleBadge from "~/components/common/FlashSaleBadge";
 import ProductTypeChip from "~/components/common/ProductTypeChip";
 import { toast } from "~/components/common/Toast";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
@@ -76,9 +78,13 @@ const SalesCount = ({
 const PromotionBadge = ({ title }: { title: string }) => {
   return (
     <View style={styles.promotionContainer}>
-      <View style={styles.promotionContent}>
+      <View style={styles.promotionContent} className="flex-shrink">
         <Image source={imagePaths.icPromotion} style={styles.promotionIcon} />
-        <Text style={styles.promotionText} numberOfLines={1}>
+        <Text
+          style={styles.promotionText}
+          numberOfLines={1}
+          className="flex-shrink"
+        >
           {title}
         </Text>
       </View>
@@ -94,8 +100,10 @@ const PromotionBadge = ({ title }: { title: string }) => {
 
 const Atribute = ({
   attributes,
+  selectedVariation,
 }: {
   attributes: IFlashSaleProduct["flashSaleProduct"]["attributes"] | undefined;
+  selectedVariation: IFlashSaleProduct["flashSaleVariation"] | undefined;
 }) => {
   return (
     <React.Fragment>
@@ -108,7 +116,11 @@ const Atribute = ({
                 <ProductTypeChip
                   key={option.id}
                   label={option.name}
-                  // isSelected={selectedType === option.name}
+                  isSelected={
+                    selectedVariation?.attributes?.find(
+                      (attr) => attr.slug === attribute.slug
+                    )?.optionSlug === option.slug
+                  }
                   // onPress={() => setSelectedType(option.name)}
                 />
               ))}
@@ -133,6 +145,7 @@ const Info = ({ id }: { id: string | number }) => {
       return {
         ...data.flashSaleProduct,
         flashSaleVariation: [data.flashSaleVariation],
+        flashSaleEndAt: data.flashSaleEndAt,
       };
     },
   });
@@ -145,11 +158,13 @@ const Info = ({ id }: { id: string | number }) => {
         shopId: productDetail?.shop?.id,
         take: 1,
         skip: 0,
+        productIds: productDetail?.id!.toString() || "",
       }),
   });
 
   const mutationLikeProduct = useMutation({
-    mutationFn: () => wishlistService.addWishlist(id.toString()),
+    mutationFn: () =>
+      wishlistService.addWishlist(productDetail?.id!.toString() || ""),
     onSuccess: () => {
       refetch();
       queryClient.invalidateQueries({ queryKey: ["wishlist"] });
@@ -161,7 +176,8 @@ const Info = ({ id }: { id: string | number }) => {
   });
 
   const mutationUnlikeProduct = useMutation({
-    mutationFn: () => wishlistService.removeWishlist(id.toString()),
+    mutationFn: () =>
+      wishlistService.removeWishlist(productDetail?.id!.toString() || ""),
     onSuccess: () => {
       refetch();
       queryClient.invalidateQueries({ queryKey: ["wishlist"] });
@@ -182,8 +198,7 @@ const Info = ({ id }: { id: string | number }) => {
       return;
     }
 
-    if (true) {
-      //TODO: Remove this
+    if (productDetail?.isLiked) {
       mutationUnlikeProduct.mutate();
     } else {
       mutationLikeProduct.mutate();
@@ -192,6 +207,20 @@ const Info = ({ id }: { id: string | number }) => {
 
   return (
     <View style={styles.container}>
+      <FlashSaleBadge
+        expiredTime={
+          dayjs(productDetail?.flashSaleEndAt).isValid()
+            ? dayjs(productDetail?.flashSaleEndAt).toDate()
+            : undefined
+        }
+        onExpire={() => {
+          if (productDetail?.flashSaleEndAt) {
+            toast.info("Đã kết thúc khuyến mãi");
+            navigation.replace("DetailProduct", { id: productDetail?.id });
+          }
+        }}
+      />
+
       {productDetail?.brands?.[0]?.name && (
         <Text style={styles.brandInfoText}>
           Thương hiệu:{" "}
@@ -208,7 +237,7 @@ const Info = ({ id }: { id: string | number }) => {
         </View>
         <SalesCount
           quantity={productDetail?.totalSales}
-          isLiked={true} //TODO: Remove this
+          isLiked={productDetail?.isLiked || false}
           onPress={handleLikeProduct}
         />
       </View>
@@ -219,23 +248,29 @@ const Info = ({ id }: { id: string | number }) => {
         <View style={styles.priceContent}>
           <Text style={styles.discountedPrice}>
             {formatPrice(
-              productDetail?.salePrice || productDetail?.regularPrice
+              productDetail?.flashSaleVariation?.[0]?.salePrice ||
+                productDetail?.flashSaleVariation?.[0]?.regularPrice
             )}
           </Text>
-          {productDetail?.regularPrice &&
-            productDetail?.regularPrice > productDetail?.salePrice && (
+          {productDetail?.flashSaleVariation?.[0]?.salePrice &&
+            productDetail?.flashSaleVariation?.[0]?.salePrice <
+              productDetail?.flashSaleVariation?.[0]?.regularPrice && (
               <Text style={styles.originalPrice}>
-                {formatPrice(productDetail?.regularPrice)}
+                {formatPrice(
+                  productDetail?.flashSaleVariation?.[0]?.regularPrice
+                )}
               </Text>
             )}
         </View>
-        {productDetail?.regularPrice &&
-          productDetail?.salePrice &&
-          productDetail?.regularPrice > productDetail?.salePrice && (
+        {productDetail?.flashSaleVariation?.[0]?.regularPrice &&
+          productDetail?.flashSaleVariation?.[0]?.salePrice &&
+          productDetail?.flashSaleVariation?.[0]?.regularPrice >
+            productDetail?.flashSaleVariation?.[0]?.salePrice && (
             <View style={styles.discountBadge}>
               <Text style={styles.discountText}>
-                {((productDetail?.regularPrice - productDetail?.salePrice) /
-                  productDetail?.regularPrice) *
+                {((productDetail?.flashSaleVariation?.[0]?.regularPrice -
+                  productDetail?.flashSaleVariation?.[0]?.salePrice) /
+                  productDetail?.flashSaleVariation?.[0]?.regularPrice) *
                   100}
                 %
               </Text>
@@ -247,7 +282,10 @@ const Info = ({ id }: { id: string | number }) => {
         <PromotionBadge title={voucher?.data?.[0]?.description} />
       )}
 
-      <Atribute attributes={productDetail?.attributes} />
+      <Atribute
+        attributes={productDetail?.attributes}
+        selectedVariation={productDetail?.flashSaleVariation?.[0]}
+      />
     </View>
   );
 };

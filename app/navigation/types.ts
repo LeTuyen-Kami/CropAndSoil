@@ -1,6 +1,7 @@
 import { NavigatorScreenParams, RouteProp } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
+import { IReview } from "~/services/api/review.service";
 
 // Define the param list for the tab navigator
 export type TabParamList = {
@@ -31,7 +32,9 @@ export type RootStackParamList = {
   ShoppingCart: undefined;
   Payment: undefined;
   Address: undefined;
-  VoucherSelect: undefined;
+  VoucherSelect: {
+    productIds?: number[];
+  };
   EditAddress: undefined;
   MyOrder: {
     tabIndex: number;
@@ -40,7 +43,14 @@ export type RootStackParamList = {
   BusinessVoucher: undefined;
   MyRating: undefined;
   EditReview: {
-    id: string | number;
+    orderId: number;
+    productId: number;
+    variationId: number;
+    thumbnail: string;
+    productName: string;
+    variationName: string;
+    review?: IReview;
+    isEdit?: boolean;
   };
   HelpCenter: undefined;
   HelpCenterDetail: undefined;
@@ -63,6 +73,12 @@ export type RootStackParamList = {
     id: string | number;
   };
   MyVoucher: undefined;
+  AllProductReview: {
+    id: string | number;
+  };
+  DetailOrder: {
+    orderId: number;
+  };
 };
 
 // Create a type for the navigation prop for stack screens

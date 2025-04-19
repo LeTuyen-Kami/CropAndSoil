@@ -32,7 +32,7 @@ const BottomButton = ({ productId }: { productId: number | string }) => {
   const setVoucherState = useSetAtom(selectedVoucherAtom);
 
   const { data: productDetail } = useQuery({
-    queryKey: ["product-detail", productId],
+    queryKey: ["productDetail", productId],
     queryFn: () => productService.getProductDetail(productId),
     staleTime: 1000 * 60 * 5,
     enabled: !!productId,

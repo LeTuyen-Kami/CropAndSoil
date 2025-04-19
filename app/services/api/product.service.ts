@@ -128,6 +128,7 @@ export interface IProduct {
   slug: string;
   shopId: number;
   shop: Shop;
+  isTopDeal: boolean;
   description: string;
   isLiked: boolean;
   shortDescription: string;
@@ -167,7 +168,7 @@ export interface IProductResquest extends PaginationRequests {
   averageRatingFrom: number;
   categoryIds: string; // comma separated
   ids: string; // comma separated
-  sortBy: "salePrice" | "createdAt";
+  sortBy: "salePrice" | "createdAt" | "bestSelling";
   sortDirection: "asc" | "desc";
 }
 
@@ -176,6 +177,10 @@ class ProductService {
     return typedAxios.get<PaginatedResponse<IProduct>>("/products", {
       params,
     });
+  }
+
+  async getTopDealProducts(params: Partial<IProductResquest>) {
+    return typedAxios.get<PaginatedResponse<IProduct>>(`/products/top-deals`);
   }
 
   async getProductDetail(id: string | number) {

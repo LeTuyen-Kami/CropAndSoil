@@ -116,6 +116,7 @@ export interface FlashSaleProduct {
   slug: string;
   shopId: number;
   shop: Shop;
+  isLiked: boolean;
   description: string;
   shortDescription: string;
   totalSales: number;
@@ -189,7 +190,16 @@ class FlashSaleService {
     return typedAxios.get<string[]>("/flash-sales/time-slots");
   }
 
-  async getFlashSale(timeSlot: string, params: PaginationRequests) {
+  async getFlashSale(params: PaginationRequests, timeSlot?: string) {
+    if (!timeSlot) {
+      return typedAxios.get<PaginatedResponse<IFlashSaleProduct>>(
+        `/flash-sales/items`,
+        {
+          params,
+        }
+      );
+    }
+
     return typedAxios.get<PaginatedResponse<IFlashSaleProduct>>(
       `/flash-sales/items?timeSlot=${timeSlot}`,
       {

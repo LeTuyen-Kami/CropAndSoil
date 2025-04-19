@@ -28,7 +28,7 @@ const TopProduct = ({ id }: { id: string | number }) => {
   });
 
   const { data: topProducts } = useQuery({
-    queryKey: ["topProducts", ...(data?.upsellIds || [])],
+    queryKey: ["topProducts", id, ...(data?.upsellIds || [])],
     queryFn: () =>
       productService.searchProducts({
         ids: data?.upsellIds?.join(","),

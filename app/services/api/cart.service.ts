@@ -266,6 +266,16 @@ export interface IRemoveCartItemRequest {
   cartItems: number[];
 }
 
+export interface IUpdatePatchCartItemRequest {
+  cartItems: {
+    cartItemId: number;
+    productId: number;
+    variationId: number;
+    quantity: number;
+    isChecked: boolean;
+  }[];
+}
+
 class CartService {
   async getDetailCart() {
     return typedAxios.get<ICart>("/cart");
@@ -283,6 +293,10 @@ class CartService {
     data: IUpdateCartItemRequest;
   }) {
     return typedAxios.put<ICartItem>(`/cart/${cartItemId}`, data);
+  }
+
+  async updatePatchCartItem(data: IUpdatePatchCartItemRequest) {
+    return typedAxios.patch<ICartItem>("/cart", data);
   }
 
   async removeCartItem(data: IRemoveCartItemRequest) {

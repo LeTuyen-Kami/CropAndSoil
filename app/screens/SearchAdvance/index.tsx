@@ -51,10 +51,12 @@ const Header = ({
   isOpen,
   onOpen,
   searchText,
+  hasActiveFilters,
 }: {
   isOpen: boolean;
   onOpen: () => void;
   searchText: string;
+  hasActiveFilters: boolean;
 }) => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -117,14 +119,19 @@ const Header = ({
       </TouchableOpacity>
       <TouchableOpacity
         onPress={onOpen}
-        className="h-12 rounded-full aspect-square bg-[#39CA71] justify-center items-center"
+        className={cn(
+          "h-12 rounded-full aspect-square bg-[#39CA71] justify-center items-center",
+          hasActiveFilters && "border-2 border-white"
+        )}
         hitSlop={20}
       >
-        <Image
-          source={imagePaths.icFilter}
-          className="size-6"
-          contentFit="contain"
-        />
+        <View className="relative">
+          <Image
+            source={imagePaths.icFilter}
+            className="size-6"
+            contentFit="contain"
+          />
+        </View>
       </TouchableOpacity>
     </View>
   );
@@ -260,6 +267,23 @@ const SearchAdvance = () => {
     sortBy: "salePrice" | "createdAt";
     sortDirection: "asc" | "desc";
   } | null>(null);
+  const [activeFilters, setActiveFilters] = useState({
+    minPrice: 0,
+    maxPrice: 0,
+    categories: [] as string[],
+    locations: [] as string[],
+    ratings: [] as number[],
+  });
+  const hasActiveFilters = useMemo(() => {
+    return (
+      !!sort ||
+      activeFilters.minPrice > 0 ||
+      activeFilters.maxPrice > 0 ||
+      activeFilters.categories.length > 0 ||
+      activeFilters.locations.length > 0 ||
+      activeFilters.ratings.length > 0
+    );
+  }, [sort, activeFilters]);
 
   const {
     data,
@@ -334,6 +358,14 @@ const SearchAdvance = () => {
     locations: string[];
     ratings: number[];
   }) => {
+    setActiveFilters({
+      minPrice,
+      maxPrice,
+      categories,
+      locations,
+      ratings,
+    });
+
     const numberMinPrice = minPrice;
     const numberMaxPrice = maxPrice;
 
@@ -360,6 +392,13 @@ const SearchAdvance = () => {
   };
 
   const onResetFilter = () => {
+    setActiveFilters({
+      minPrice: 0,
+      maxPrice: 0,
+      categories: [],
+      locations: [],
+      ratings: [],
+    });
     resetParams();
   };
 
@@ -380,7 +419,12 @@ const SearchAdvance = () => {
 
   return (
     <ScreenWrapper hasGradient hasSafeBottom={false}>
-      <Header isOpen={isOpen} onOpen={onOpen} searchText={searchText} />
+      <Header
+        isOpen={isOpen}
+        onOpen={onOpen}
+        searchText={searchText}
+        hasActiveFilters={hasActiveFilters}
+      />
       <View className="flex-1">
         <FlashList
           className="mt-4"

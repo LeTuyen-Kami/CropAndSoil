@@ -1,85 +1,56 @@
+import { AntDesign } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { useMemo, useRef, useState } from "react";
-import { GestureResponderEvent, ScrollView, View } from "react-native";
+import {
+  ActivityIndicator,
+  GestureResponderEvent,
+  ScrollView,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import PagerView from "react-native-pager-view";
 import ScreenWrapper from "~/components/common/ScreenWrapper";
-import { usePagination } from "~/hooks/usePagination";
+import { Text } from "~/components/ui/text";
+import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 import { flashSaleService } from "~/services/api/flashsale.service";
 import { screen } from "~/utils";
 import Header from "./Header";
 import PagerViewScreen from "./PagerViewScreen";
 import TabItem from "./TabItem";
 
-// const ITEMS = [
-//   {
-//     title: "15:00",
-//     subTitle: "Đang diễn ra",
-//     key: "1",
-//     value: dayjs().toISOString(),
-//   },
-//   {
-//     title: "16:00",
-//     subTitle: "Sắp diễn ra",
-//     key: "2",
-//     value: dayjs().add(1, "hour").toISOString(),
-//   },
-//   {
-//     title: "17:00",
-//     subTitle: "Sắp diễn ra",
-//     key: "3",
-//     value: dayjs().add(2, "hour").toISOString(),
-//   },
-//   {
-//     title: "18:00",
-//     subTitle: "Sắp diễn ra",
-//     key: "4",
-//     value: dayjs().add(3, "hour").toISOString(),
-//   },
-//   {
-//     title: "19:00",
-//     subTitle: "Sắp diễn ra",
-//     key: "5",
-//     value: dayjs().add(4, "hour").toISOString(),
-//   },
-//   {
-//     title: "20:00",
-//     subTitle: "Sắp diễn ra",
-//     key: "6",
-//     value: dayjs().add(5, "hour").toISOString(),
-//   },
-// ];
-
 const FlashSale = () => {
   const [tabIndex, setTabIndex] = useState(0);
   const scrollRef = useRef<ScrollView>(null);
-
-  const { data: timeSlots } = useQuery({
+  const navigation = useSmartNavigation();
+  const { data: timeSlots, isLoading } = useQuery({
     queryKey: ["flash-sale-time-slots"],
     queryFn: () => flashSaleService.getFlashSaleTimeSlot(),
   });
 
   const listTimeSlots = useMemo(() => {
-    return timeSlots?.map((item, index) => ({
-      title: dayjs(item).format("HH:mm"),
-      subTitle: dayjs(item).isBefore(dayjs()) ? "Đã diễn ra" : "Sắp diễn ra",
-      key: index + 1,
-      value: item,
-    }));
-  }, [timeSlots]);
+    const now = dayjs();
+    return timeSlots?.map((item, index) => {
+      const itemTime = dayjs(item);
+      const oneHourAfterItem = itemTime.add(1, "hour");
 
-  const { data } = usePagination(
-    (data) => {
-      return flashSaleService.getFlashSale(
-        listTimeSlots?.[tabIndex].value!,
-        data
-      );
-    },
-    {
-      queryKey: ["flash-sale", listTimeSlots?.[tabIndex].value!],
-      enabled: !!listTimeSlots?.[tabIndex].value,
-    }
-  );
+      let status = "";
+      if (itemTime.isAfter(now)) {
+        status = "Sắp diễn ra";
+      } else if (now.isAfter(itemTime) && now.isBefore(oneHourAfterItem)) {
+        status = "Đang diễn ra";
+      } else {
+        status = "Đã diễn ra";
+      }
+
+      return {
+        title: itemTime.format("HH:mm"),
+        subTitle: status,
+        key: index + 1,
+        value: item,
+      };
+    });
+  }, [timeSlots]);
 
   const pagerRef = useRef<PagerView>(null);
   const onPressTab = (index: number, e: GestureResponderEvent) => {
@@ -107,47 +78,78 @@ const FlashSale = () => {
         <PagerViewScreen timeSlot={item.value} />
       </View>
     ));
-  }, []);
+  }, [listTimeSlots]);
+
+  const renderEmpty = () => {
+    return (
+      <View className="flex-1 gap-4 justify-center items-center pb-20">
+        <AntDesign name="inbox" size={64} color="#CCCCCC" />
+        <Text className="text-base font-medium text-white">
+          Không có dữ liệu flash sale
+        </Text>
+        <TouchableOpacity
+          className="flex-row items-center px-6 py-3 mt-4 rounded-full bg-primary"
+          onPress={() => navigation.smartGoBack()}
+        >
+          <AntDesign
+            name="arrowleft"
+            size={16}
+            color="white"
+            className="mr-2"
+          />
+          <Text className="font-medium text-white">Quay lại</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
   return (
     <ScreenWrapper hasGradient hasSafeBottom={false}>
       <Header />
-      <View className="flex-1">
-        <View className="bg-[#25B85D] mt-4">
-          <ScrollView
-            ref={scrollRef}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{
-              paddingHorizontal: 8,
-              backgroundColor: "#25B85D",
-              flexDirection: "row",
-              gap: 4,
-            }}
-          >
-            {listTimeSlots?.map((item, index) => (
-              <TabItem
-                key={item.key}
-                isActive={index === tabIndex}
-                onPress={(e) => {
-                  onPressTab(index, e);
-                }}
-                title={item.title}
-                subTitle={item.subTitle}
-              />
-            ))}
-          </ScrollView>
+      {isLoading ? (
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color={"white"} />
         </View>
-        <PagerView
-          style={{ flex: 1 }}
-          ref={pagerRef}
-          initialPage={tabIndex}
-          offscreenPageLimit={1}
-          onPageSelected={onPageSelected}
-        >
-          {renderPagerViews}
-        </PagerView>
-      </View>
+      ) : !!timeSlots && timeSlots?.length > 0 ? (
+        <View className="flex-1">
+          <View className="bg-[#25B85D] mt-4">
+            <ScrollView
+              ref={scrollRef}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{
+                paddingHorizontal: 8,
+                backgroundColor: "#25B85D",
+                flexDirection: "row",
+                gap: 4,
+              }}
+            >
+              {listTimeSlots?.map((item, index) => (
+                <TabItem
+                  key={item.key}
+                  isActive={index === tabIndex}
+                  onPress={(e) => {
+                    onPressTab(index, e);
+                  }}
+                  title={item.title}
+                  subTitle={item.subTitle}
+                />
+              ))}
+            </ScrollView>
+          </View>
+          <PagerView
+            style={{ flex: 1 }}
+            ref={pagerRef}
+            initialPage={tabIndex}
+            offscreenPageLimit={1}
+            onPageSelected={onPageSelected}
+          >
+            {renderPagerViews}
+          </PagerView>
+        </View>
+      ) : (
+        renderEmpty()
+      )}
     </ScreenWrapper>
   );
 };

@@ -76,7 +76,10 @@ const PaymentStore = ({
             contentFit="contain"
             style={{ tintColor: "#676767", width: 18, height: 18 }}
           />
-          <Text className="font-medium text-sm text-[#383B45]">
+          <Text
+            className="font-medium text-sm text-[#383B45]"
+            numberOfLines={1}
+          >
             {store.name}
           </Text>
         </Pressable>

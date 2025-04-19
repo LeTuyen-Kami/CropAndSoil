@@ -16,6 +16,7 @@ import MaybeLike from "./MaybeLike";
 import Rating from "./Rating";
 import ShopInfo from "./ShopInfo";
 import TopProduct from "./TopProduct";
+import { COLORS } from "~/constants/theme";
 const Header = () => {
   const { top } = useSafeAreaInsets();
   const navigation = useNavigation();
@@ -98,8 +99,12 @@ const FlashSaleProduct = () => {
 
   const onRefresh = async () => {
     setIsRefreshing(true);
-    await queryClient.refetchQueries({
-      queryKey: ["flash-sale-product", id],
+    await queryClient.invalidateQueries({
+      predicate: (query) =>
+        (query.queryKey.includes("flash-sale-product-detail") &&
+          query.queryKey.includes(id.toString())) ||
+        (query.queryKey.includes("topProducts") &&
+          query.queryKey.includes(id.toString())),
     });
     setIsRefreshing(false);
   };
@@ -114,7 +119,11 @@ const FlashSaleProduct = () => {
       <Header />
       <FlashList
         refreshControl={
-          <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={onRefresh}
+            tintColor={COLORS.primary}
+          />
         }
         ListHeaderComponent={<ListImage id={id} />}
         data={flashListData}

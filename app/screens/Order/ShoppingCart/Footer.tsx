@@ -40,12 +40,6 @@ const Footer = ({
     return { selectedCount: count };
   }, [stores]);
 
-  const savedAmount = useMemo(() => {
-    return (calculatedData?.subtotal || 0) - (calculatedData?.total || 0);
-  }, [calculatedData]);
-
-  console.log("calculatedData", savedAmount);
-
   return (
     <View className="overflow-hidden bg-white rounded-t-2xl">
       {/* Voucher Section */}
@@ -106,9 +100,9 @@ const Footer = ({
                 <Feather name="chevron-up" size={16} color="#FCBA27" />
               </View>
             )}
-            {!!savedAmount && (
+            {!!calculatedData?.saveMoney && (
               <Text className="text-[10px] text-[#12B76A]">
-                Tiết kiệm {formatPrice(savedAmount)}
+                Tiết kiệm {formatPrice(calculatedData?.saveMoney || 0)}
               </Text>
             )}
           </View>

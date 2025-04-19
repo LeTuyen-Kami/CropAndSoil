@@ -1,9 +1,9 @@
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import { useMemo, useState } from "react";
-import { View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import { RefreshControl } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { imagePaths } from "~/assets/imagePath";
@@ -11,13 +11,15 @@ import Header from "~/components/common/Header";
 import ScreenWrapper from "~/components/common/ScreenWrapper";
 import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
-import { RootStackScreenProps } from "~/navigation/types";
+import { RootStackRouteProp, RootStackScreenProps } from "~/navigation/types";
 import { IVoucher } from "~/services/api/shop.service";
 import { voucherService } from "~/services/api/voucher.service";
 import { selectedVoucherAtom } from "~/store/atoms";
-import { convertToK, formatDate } from "~/utils";
+import { convertToK, formatDate, getErrorMessage } from "~/utils";
 import TicketVoucher from "./TicketVoucher";
 import Empty from "~/components/common/Empty";
+import { toggleLoading } from "~/components/common/ScreenLoading";
+import { toast } from "~/components/common/Toast";
 
 const WrapperHeader = ({ title }: { title: string }) => {
   return (
@@ -73,25 +75,64 @@ export const ProductVoucher = ({
 }) => {
   return (
     <WrapperVoucher>
-      {
+      <TicketVoucher
+        linearGradientColors={["#FFFCF5", "#FFF6DD"]}
+        borderColor="#FEEBC1"
+        shadowColor="#FEEBC1"
+        shadowBorderColor="#FEEBC1"
+        image={imagePaths.bag}
+        title="Voucher toàn sàn"
+        minOrder={`Đơn tối thiểu ${convertToK(voucher.minimumAmount)}đ`}
+        expiryDate={formatDate(voucher.expiryDate)}
+        description={voucher.description}
+        usagePercent={Math.round(
+          (voucher.usedCount / (voucher.usageLimit || 1)) * 100
+        )}
+        onPress={() => {
+          onPressVoucher(voucher);
+        }}
+      />
+    </WrapperVoucher>
+  );
+};
+
+export const UnavailableVoucher = ({ voucher }: { voucher: IVoucher }) => {
+  return (
+    <WrapperVoucher>
+      <View className="opacity-70">
         <TicketVoucher
-          linearGradientColors={["#FFFCF5", "#FFF6DD"]}
-          borderColor="#FEEBC1"
-          shadowColor="#FEEBC1"
-          shadowBorderColor="#FEEBC1"
-          image={imagePaths.bag}
-          title="Voucher toàn sàn"
+          linearGradientColors={
+            voucher?.voucherType === "shipping"
+              ? ["#FBFDFB", "#FBFDFB"]
+              : ["#FFFCF5", "#FFF6DD"]
+          }
+          borderColor={
+            voucher?.voucherType === "shipping" ? "#BEE2CB" : "#FEEBC1"
+          }
+          shadowColor={
+            voucher?.voucherType === "shipping" ? "#BEE2CB" : "#FEEBC1"
+          }
+          shadowBorderColor={
+            voucher?.voucherType === "shipping" ? "#EBF6F0" : "#FEEBC1"
+          }
+          image={
+            voucher?.voucherType === "shipping"
+              ? imagePaths.freeShipping
+              : imagePaths.bag
+          }
+          title={
+            voucher?.voucherType === "shipping"
+              ? "Mã vận chuyển"
+              : "Voucher toàn sàn"
+          }
           minOrder={`Đơn tối thiểu ${convertToK(voucher.minimumAmount)}đ`}
           expiryDate={formatDate(voucher.expiryDate)}
           description={voucher.description}
           usagePercent={Math.round(
             (voucher.usedCount / (voucher.usageLimit || 1)) * 100
           )}
-          onPress={() => {
-            onPressVoucher(voucher);
-          }}
         />
-      }
+      </View>
     </WrapperVoucher>
   );
 };
@@ -102,9 +143,25 @@ const VoucherSelectScreen = () => {
   const [isShowMoreVoucher, setIsShowMoreVoucher] = useState(false);
   const [voucherState, setVoucherState] = useAtom(selectedVoucherAtom);
   const navigation = useNavigation<RootStackScreenProps<"VoucherSelect">>();
+  const route = useRoute<RootStackRouteProp<"VoucherSelect">>();
+
+  const productIds = route.params?.productIds;
 
   const mutateApplyVoucher = useMutation({
-    mutationFn: (voucherId: string) => voucherService.applyVoucher(voucherId),
+    mutationFn: (voucherCode: string) => voucherService.findByCode(voucherCode),
+    onMutate: () => {
+      toggleLoading(true);
+    },
+    onSuccess: (data) => {
+      toast.success("Áp dụng voucher thành công");
+      onPressVoucher(data as any);
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error, "Lỗi khi áp dụng voucher"));
+    },
+    onSettled: () => {
+      toggleLoading(false);
+    },
   });
 
   const {
@@ -119,7 +176,9 @@ const VoucherSelectScreen = () => {
         voucherType: "shipping",
         skip: 0,
         take: 100,
+        productIds: productIds?.join(","),
       }),
+
     staleTime: 0,
     refetchOnMount: "always",
   });
@@ -136,6 +195,23 @@ const VoucherSelectScreen = () => {
         voucherType: "product",
         skip: 0,
         take: 100,
+        productIds: productIds?.join(","),
+      }),
+  });
+
+  const {
+    data: unavailableVouchers,
+    refetch: refetchUnavailableVouchers,
+    isRefetching: isRefetchingUnavailableVouchers,
+    isPending: isPendingUnavailableVouchers,
+  } = useQuery({
+    queryKey: ["vouchers", "unavailable"],
+    queryFn: () =>
+      voucherService.getVouchers({
+        isAvailable: false,
+        skip: 0,
+        take: 100,
+        productIds: productIds?.join(","),
       }),
   });
 
@@ -195,11 +271,11 @@ const VoucherSelectScreen = () => {
         );
       case "voucherFooter":
         return <WrapperFooter title={item.title} />;
-      case "otherHeader":
+      case "unavailableHeader":
         return <WrapperHeader title={item.title} />;
-      case "other":
-        return <WrapperVoucher>{<TicketVoucher />}</WrapperVoucher>;
-      case "otherFooter":
+      case "unavailable":
+        return <UnavailableVoucher voucher={item.item} />;
+      case "unavailableFooter":
         return <WrapperFooter title={item.title} />;
       default:
         return null;
@@ -232,16 +308,20 @@ const VoucherSelectScreen = () => {
       {
         type: "voucherFooter",
       },
-      // {
-      //   type: "otherHeader",
-      //   title: "Voucher không khả dụng",
-      // },
-      // {
-      //   type: "otherFooter",
-      //   title: "Không áp dụng với một số sản phẩm",
-      // },
+      {
+        type: "unavailableHeader",
+        title: "Voucher không khả dụng",
+      },
+      ...(unavailableVouchers?.data || [])?.map((voucher) => ({
+        type: "unavailable",
+        item: voucher,
+      })),
+      {
+        type: "unavailableFooter",
+        title: "Không áp dụng với một số sản phẩm",
+      },
     ];
-  }, [shippingVouchers, productVouchers]);
+  }, [shippingVouchers, productVouchers, unavailableVouchers]);
 
   return (
     <ScreenWrapper hasGradient={true} hasSafeBottom={false}>
@@ -259,7 +339,15 @@ const VoucherSelectScreen = () => {
           placeholderTextColor="gray"
           value={search}
           onChangeText={setSearch}
-          rightIcon={<Text className="text-primary">Áp dụng</Text>}
+          rightIcon={
+            <TouchableOpacity
+              onPress={() => {
+                mutateApplyVoucher.mutate(search);
+              }}
+            >
+              <Text className="text-primary">Áp dụng</Text>
+            </TouchableOpacity>
+          }
         />
         <View className="flex-1">
           <FlashList

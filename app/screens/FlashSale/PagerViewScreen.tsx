@@ -28,6 +28,8 @@ import { IProduct } from "~/services/api/product.service";
 import {
   calculateDiscount,
   getItemWidth,
+  isNowBetween,
+  maskVNDPriceBeforeSale,
   preHandleFlashListData,
   screen,
 } from "~/utils";
@@ -48,8 +50,15 @@ const BannerItem = () => {
   );
 };
 
-const TimerItem = ({ expiredTime }: { expiredTime: Date }) => {
+const TimerItem = ({
+  expiredTime,
+  startTime,
+}: {
+  expiredTime: Date;
+  startTime: Date;
+}) => {
   const isExpired = dayjs().isAfter(expiredTime);
+  const hasNotStarted = dayjs().isBefore(startTime);
 
   return (
     <View className="flex-row gap-1 items-center px-5 my-4">
@@ -62,8 +71,19 @@ const TimerItem = ({ expiredTime }: { expiredTime: Date }) => {
       />
       {isExpired ? (
         <Text className="text-xs font-medium tracking-tight text-white">
-          ĐÃ KẾT THÚC
+          ĐÃ DIỄN RA
         </Text>
+      ) : hasNotStarted ? (
+        <React.Fragment>
+          <Text className="text-xs font-medium tracking-tight text-white">
+            SẮP DIỄN RA
+          </Text>
+          <Timer
+            expiredTime={startTime}
+            textColor="white"
+            backgroundColor="#E8AA24"
+          />
+        </React.Fragment>
       ) : (
         <React.Fragment>
           <Text className="text-xs font-medium tracking-tight text-white">
@@ -96,6 +116,7 @@ const HeaderItem = () => {
 };
 
 const TwoProductItem = ({ items }: { items: IFlashSaleProduct[] }) => {
+  const navigation = useSmartNavigation();
   const width = useMemo(() => {
     return getItemWidth({
       containerPadding: 16,
@@ -114,14 +135,31 @@ const TwoProductItem = ({ items }: { items: IFlashSaleProduct[] }) => {
         <ProductItem
           width={width}
           key={item.id}
+          onPress={() => {
+            if (isNowBetween(item?.flashSaleStartAt, item?.flashSaleEndAt)) {
+              navigation.push("FlashSaleProduct", { id: item?.id });
+            } else {
+              navigation.push("DetailProduct", {
+                id: item?.flashSaleProduct?.id,
+              });
+            }
+          }}
+          overrideSalePrice={
+            dayjs().isBefore(dayjs(item?.flashSaleStartAt))
+              ? maskVNDPriceBeforeSale(item?.flashSaleVariation?.regularPrice)
+              : undefined
+          }
+          price={item?.flashSaleVariation?.salePrice}
           name={item?.flashSaleProduct?.name}
           height={"100%"}
-          price={item?.salePrice}
-          originalPrice={item?.flashSaleProduct?.regularPrice}
+          originalPrice={item?.flashSaleVariation?.regularPrice}
           discount={item?.discountPercent}
           soldCount={item?.bought}
           totalCount={item?.campaignStock}
-          image={item?.flashSaleProduct?.thumbnail}
+          image={
+            item?.flashSaleVariation?.thumbnail ||
+            item?.flashSaleProduct?.thumbnail
+          }
           onSale={true}
           id={item?.id}
         />
@@ -130,10 +168,10 @@ const TwoProductItem = ({ items }: { items: IFlashSaleProduct[] }) => {
   );
 };
 
-const NoData = () => {
+const NoData = ({ isLoading }: { isLoading: boolean }) => {
   return (
     <View className="flex-1 justify-center items-center bg-[#EEE]">
-      <Empty title="Không có sản phẩm nào" />
+      <Empty title="Không có sản phẩm nào" isLoading={isLoading} />
     </View>
   );
 };
@@ -148,7 +186,7 @@ const PagerViewScreen = ({ timeSlot }: { timeSlot: string }) => {
   const { data, isLoading, isRefresh, refresh, hasNextPage, fetchNextPage } =
     usePagination(
       (data) => {
-        return flashSaleService.getFlashSale(timeSlot, data);
+        return flashSaleService.getFlashSale(data, timeSlot);
       },
       {
         queryKey: ["flash-sale", timeSlot],
@@ -162,7 +200,12 @@ const PagerViewScreen = ({ timeSlot }: { timeSlot: string }) => {
     }
 
     if (item.type === "timer") {
-      return <TimerItem expiredTime={item.expiredTime} />;
+      return (
+        <TimerItem
+          expiredTime={item.expiredTime || ""}
+          startTime={item.startTime || ""}
+        />
+      );
     }
 
     if (item.type === "header") {
@@ -174,7 +217,7 @@ const PagerViewScreen = ({ timeSlot }: { timeSlot: string }) => {
     }
 
     if (item.type === "noData") {
-      return <NoData />;
+      return <NoData isLoading={isLoading} />;
     }
 
     if (item.type === "bottom") {
@@ -187,9 +230,17 @@ const PagerViewScreen = ({ timeSlot }: { timeSlot: string }) => {
   const flashlistData = useMemo(() => {
     const handledData = preHandleFlashListData(data, "product");
 
+    const expiredTime = dayjs(data?.[0]?.flashSaleEndAt).isValid()
+      ? new Date(data?.[0]?.flashSaleEndAt)
+      : dayjs().add(1, "hour").toDate();
+
+    const startTime = dayjs(data?.[0]?.flashSaleStartAt).isValid()
+      ? new Date(data?.[0]?.flashSaleStartAt)
+      : dayjs().toDate();
+
     return [
       { type: "banner" },
-      { type: "timer", expiredTime: dayjs(timeSlot).add(1, "hour").toDate() },
+      { type: "timer", expiredTime: expiredTime, startTime: startTime },
       { type: "header" },
       ...(handledData.length > 0 ? handledData : [{ type: "noData" }]),
       ...(handledData.length < 2

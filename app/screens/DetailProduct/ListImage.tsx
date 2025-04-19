@@ -22,7 +22,7 @@ const ListImage = ({ id }: { id: string | number }) => {
   const flatListRef = useRef<FlatList>(null);
   const navigation = useNavigation();
   const { data: productDetail, error } = useQuery({
-    queryKey: ["product-detail", id],
+    queryKey: ["productDetail", id],
     queryFn: () => productService.getProductDetail(id),
     staleTime: 1000 * 60 * 5,
     enabled: !!id,
@@ -35,7 +35,7 @@ const ListImage = ({ id }: { id: string | number }) => {
   });
 
   useQuery({
-    queryKey: ["topProducts", ...(productDetail?.upsellIds || [])],
+    queryKey: ["topProducts", id, ...(productDetail?.upsellIds || [])],
     queryFn: () =>
       productService.searchProducts({
         ids: productDetail?.upsellIds?.join(","),

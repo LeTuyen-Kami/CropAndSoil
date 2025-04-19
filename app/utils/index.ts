@@ -211,7 +211,7 @@ export const checkCanRender = (data: any) => {
 
   if (Array.isArray(data) && data.length === 0) return false;
 
-  if (data?.some((item: any) => !item)) return false;
+  if (data?.some?.((item: any) => !item)) return false;
 
   return true;
 };
@@ -228,4 +228,60 @@ export const priceToNumber = (formattedPrice: string): number => {
   const normalized = formattedPrice.replace(/[^\d]/g, "");
 
   return Number(normalized);
+};
+
+export const getMediaTypes = (media: string) => {
+  const extension = media.split(".").pop();
+
+  if (!extension) return "image";
+
+  if (
+    extension?.includes("jpg") ||
+    extension?.includes("jpeg") ||
+    extension?.includes("png")
+  ) {
+    return "image";
+  }
+
+  if (
+    extension?.includes("mp4") ||
+    extension?.includes("mov") ||
+    extension?.includes("avi")
+  ) {
+    return "video";
+  }
+
+  return "image";
+};
+
+export const isNowBetween = (start?: string, end?: string) => {
+  if (!start || !end) return false;
+
+  const now = dayjs();
+  const startDate = dayjs(start);
+  const endDate = dayjs(end);
+
+  return now.isAfter(startDate) && now.isBefore(endDate);
+};
+
+export const maskVNDPriceBeforeSale = (
+  price: number,
+  visibleDigits = 1
+): string => {
+  const priceStr = price.toString();
+  const masked = priceStr
+    .split("")
+    .map((digit, i) => (i < visibleDigits ? digit : "?"))
+    .join("");
+
+  const numberOfHidden = priceStr.length - visibleDigits;
+  const padded = masked.padEnd(priceStr.length, "?");
+
+  // Thêm dấu phẩy ngăn cách và đơn vị ₫
+  const formatted = Number(padded.replace(/\?/g, "0")).toLocaleString("vi-VN");
+
+  // Thay số 0 (fake) bằng dấu ? lại
+  const finalMasked = formatted.replace(/0/g, "?") + " ₫";
+
+  return finalMasked;
 };

@@ -15,6 +15,7 @@ import { authAtom } from "~/store/atoms";
 import { useAtomValue } from "jotai";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 import { shopService } from "~/services/api/shop.service";
+import FlashSaleBadge from "~/components/common/FlashSaleBadge";
 
 const BrandBadge = () => {
   return (
@@ -55,18 +56,22 @@ const SalesCount = ({
   isLiked: boolean;
   onPress: () => void;
 }) => {
+  const auth = useAtomValue(authAtom);
+
   return (
     <View style={styles.salesCountContainer}>
       <Text style={styles.salesCountText}>
         Đã bán {(quantity || 0)?.toLocaleString()}
       </Text>
-      <TouchableOpacity onPress={onPress}>
-        <AntDesign
-          name={isLiked ? "heart" : "hearto"}
-          size={15}
-          color={isLiked ? "#E01739" : "#AEAEAE"}
-        />
-      </TouchableOpacity>
+      {auth?.isLoggedIn && (
+        <TouchableOpacity onPress={onPress}>
+          <AntDesign
+            name={isLiked ? "heart" : "hearto"}
+            size={15}
+            color={isLiked ? "#E01739" : "#AEAEAE"}
+          />
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -74,9 +79,13 @@ const SalesCount = ({
 const PromotionBadge = ({ title }: { title: string }) => {
   return (
     <View style={styles.promotionContainer}>
-      <View style={styles.promotionContent}>
+      <View style={styles.promotionContent} className="flex-shrink">
         <Image source={imagePaths.icPromotion} style={styles.promotionIcon} />
-        <Text style={styles.promotionText} numberOfLines={1}>
+        <Text
+          style={styles.promotionText}
+          numberOfLines={1}
+          className="flex-shrink"
+        >
           {title}
         </Text>
       </View>
@@ -137,6 +146,7 @@ const Info = ({ id }: { id: string | number }) => {
         shopId: productDetail?.shop?.id,
         take: 1,
         skip: 0,
+        productIds: id.toString(),
       }),
   });
 
@@ -194,7 +204,7 @@ const Info = ({ id }: { id: string | number }) => {
 
       <View style={styles.brandInfoContent}>
         <View style={styles.badgesContainer}>
-          <BrandBadge />
+          {productDetail?.isTopDeal && <BrandBadge />}
           {productDetail?.shop?.isOfficial && <AuthenticBadge />}
         </View>
         <SalesCount

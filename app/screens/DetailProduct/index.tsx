@@ -29,6 +29,7 @@ import { RootStackRouteProp } from "~/navigation/types";
 import ListImage from "./ListImage";
 import { FlashList } from "@shopify/flash-list";
 import BottomButton from "./BottomButton";
+import { COLORS } from "~/constants/theme";
 const Header = () => {
   const { top } = useSafeAreaInsets();
   const navigation = useNavigation();
@@ -111,8 +112,12 @@ const DetailProduct = () => {
 
   const onRefresh = async () => {
     setIsRefreshing(true);
-    await queryClient.refetchQueries({
-      queryKey: ["productDetail", id],
+    await queryClient.invalidateQueries({
+      predicate: (query) =>
+        (query.queryKey.includes("productDetail") &&
+          query.queryKey.includes(id.toString())) ||
+        (query.queryKey.includes("topProducts") &&
+          query.queryKey.includes(id.toString())),
     });
     setIsRefreshing(false);
   };
@@ -127,7 +132,11 @@ const DetailProduct = () => {
       <Header />
       <FlashList
         refreshControl={
-          <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={onRefresh}
+            tintColor={COLORS.primary}
+          />
         }
         ListHeaderComponent={<ListImage id={id} />}
         data={flashListData}

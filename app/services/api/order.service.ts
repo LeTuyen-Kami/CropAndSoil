@@ -270,6 +270,7 @@ export interface ICalculateResponse {
   paymentMethod: PaymentMethod;
   subtotal: number;
   shippingAddress: ShippingAddres;
+  saveMoney: number;
   shippingFeeTotal: number;
   shippingVoucherDiscountTotal: number;
   productVoucherDiscountTotal: number;
@@ -283,6 +284,7 @@ export interface IListOrderRequest extends PaginationRequests {
   status?: string;
   ids?: string; // comma separated
   search?: string;
+  isNotReviewed?: boolean;
 }
 
 export interface StatusHistory {
@@ -536,7 +538,7 @@ class OrderService {
   }
 
   async detail(orderId: string) {
-    return typedAxios.get(`/orders/${orderId}`);
+    return typedAxios.get<IOrder>(`/orders/${orderId}`);
   }
 
   async tracking(orderId: string) {

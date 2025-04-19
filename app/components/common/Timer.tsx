@@ -1,12 +1,17 @@
 import { View } from "react-native";
 import { Text } from "~/components/ui/text";
 import { useEffect, useState } from "react";
+import { cn } from "~/lib/utils";
+import dayjs from "dayjs";
 
 interface TimerProps {
-  expiredTime: Date;
+  expiredTime?: Date;
   onExpire?: () => void;
   textColor?: string;
   backgroundColor?: string;
+  className?: string;
+  wrapperTimerClassName?: string;
+  textTimerClassName?: string;
 }
 
 const Timer = ({
@@ -14,6 +19,9 @@ const Timer = ({
   onExpire,
   textColor = "#0B5226",
   backgroundColor = "#BEE2CB",
+  className,
+  wrapperTimerClassName,
+  textTimerClassName,
 }: TimerProps) => {
   const [timeLeft, setTimeLeft] = useState<{
     hours: string;
@@ -28,13 +36,17 @@ const Timer = ({
 
   useEffect(() => {
     const calculateTimeLeft = () => {
+      if (!expiredTime) return;
+
       const now = new Date();
-      const difference = expiredTime.getTime() - now.getTime();
+      const difference = expiredTime?.getTime() - now.getTime();
 
       if (difference <= 0) {
         setIsExpired(true);
         onExpire?.();
         return;
+      } else {
+        setIsExpired(false);
       }
 
       // Calculate hours, minutes, seconds
@@ -59,40 +71,40 @@ const Timer = ({
     return () => clearInterval(timer);
   }, [expiredTime, onExpire]);
 
-  if (isExpired) return null;
+  if (isExpired || !expiredTime || !dayjs(expiredTime).isValid()) return null;
+
+  const Time = ({ timeLeft }: { timeLeft: string }) => {
+    return (
+      <View
+        className={cn(
+          "justify-center items-center mx-1 rounded-lg size-7",
+          wrapperTimerClassName
+        )}
+        style={{ backgroundColor }}
+      >
+        <Text
+          className={cn("text-base font-medium", textTimerClassName)}
+          style={{ color: textColor }}
+        >
+          {timeLeft}
+        </Text>
+      </View>
+    );
+  };
 
   return (
-    <View className="flex-row justify-center items-center py-4">
-      <View
-        className="justify-center items-center mx-1 rounded-lg size-7"
-        style={{ backgroundColor }}
-      >
-        <Text className="text-base font-medium" style={{ color: textColor }}>
-          {timeLeft.hours}
-        </Text>
-      </View>
+    <View
+      className={cn("flex-row justify-center items-center py-4", className)}
+    >
+      <Time timeLeft={timeLeft.hours} />
       <Text className="text-base font-medium" style={{ color: textColor }}>
         :
       </Text>
-      <View
-        className="justify-center items-center mx-1 rounded-lg size-7"
-        style={{ backgroundColor }}
-      >
-        <Text className="text-base font-medium" style={{ color: textColor }}>
-          {timeLeft.minutes}
-        </Text>
-      </View>
+      <Time timeLeft={timeLeft.minutes} />
       <Text className="text-base font-medium" style={{ color: textColor }}>
         :
       </Text>
-      <View
-        className="justify-center items-center mx-1 rounded-lg size-7"
-        style={{ backgroundColor }}
-      >
-        <Text className="text-base font-medium" style={{ color: textColor }}>
-          {timeLeft.seconds}
-        </Text>
-      </View>
+      <Time timeLeft={timeLeft.seconds} />
     </View>
   );
 };

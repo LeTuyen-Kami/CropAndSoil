@@ -1,23 +1,24 @@
-import { Image as ExpoImage } from "expo-image";
-import React, { useState } from "react";
-import { ScrollView, TouchableOpacity, View } from "react-native";
-import { imagePaths } from "~/assets/imagePath";
-import AllMedia from "./AllMedia";
-import ReviewItem, { ReviewItemProps } from "~/components/common/ReviewItem";
-import { Text } from "~/components/ui/text";
-import { deepEqual } from "fast-equals";
+import { AntDesign } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
+import { Image as ExpoImage } from "expo-image";
+import { deepEqual } from "fast-equals";
+import React, { useState } from "react";
+import { TouchableOpacity, View } from "react-native";
+import { imagePaths } from "~/assets/imagePath";
+import ReviewItem from "~/components/common/ReviewItem";
+import { toast } from "~/components/common/Toast";
+import { Text } from "~/components/ui/text";
+import { usePagination } from "~/hooks/usePagination";
+import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 import { productService } from "~/services/api/product.service";
 import { reviewService } from "~/services/api/review.service";
-import { AntDesign } from "@expo/vector-icons";
+import { formatDate, getMediaTypes } from "~/utils";
 type RatingProps = {
-  rating?: number;
-  totalReviews?: number;
-  onViewAllPress?: () => void;
   id: string | number;
 };
 
-const Rating: React.FC<RatingProps> = ({ onViewAllPress, id }) => {
+const Rating: React.FC<RatingProps> = ({ id }) => {
+  const navigation = useSmartNavigation();
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
 
   const { data: productDetail } = useQuery({
@@ -34,21 +35,21 @@ const Rating: React.FC<RatingProps> = ({ onViewAllPress, id }) => {
     },
   });
 
-  const { data: reviews } = useQuery({
-    queryKey: ["reviews", productDetail?.productId],
-    queryFn: () =>
-      reviewService.getProductReviews(productDetail?.productId!, {
+  const { data: reviews } = usePagination(
+    (params) =>
+      reviewService.getProductReviews(productDetail?.productId!, params),
+    {
+      initialPagination: {
         take: 10,
         skip: 0,
-        rating: 4,
-      }),
-    enabled: !!productDetail?.productId,
-    staleTime: 1000 * 60 * 5,
-  });
+      },
+      initialParams: {},
+      queryKey: ["reviews", String(productDetail?.productId)],
+      enabled: !!productDetail?.productId,
+      staleTime: 1000 * 60 * 5,
+    }
+  );
 
-  console.log(reviews);
-
-  // Render stars based on rating
   const renderStars = () => {
     const stars = [];
 
@@ -68,9 +69,30 @@ const Rating: React.FC<RatingProps> = ({ onViewAllPress, id }) => {
     return stars;
   };
 
+  const onViewAllPress = () => {
+    if (!productDetail?.averageRating) {
+      toast.info("Chưa có đánh giá nào");
+      return;
+    }
+
+    navigation.smartNavigate("AllProductReview", {
+      productId: productDetail?.productId,
+    });
+  };
+
+  if (!productDetail || !reviews || reviews?.length === 0) return null;
+
   return (
     <View className="mt-2 w-full bg-white rounded-3xl">
-      <AllMedia />
+      {/* <AllMedia
+        media={reviews?.flatMap((review) =>
+          review.gallery.map((media) => ({
+            type: getMediaTypes(media),
+            uri: media,
+            id: media,
+          }))
+        )}
+      /> */}
       <View className="p-2 border-b border-gray-100">
         {/* Header Section */}
         <View className="flex-row justify-between items-center w-full">
@@ -103,7 +125,7 @@ const Rating: React.FC<RatingProps> = ({ onViewAllPress, id }) => {
         </View>
 
         {/* Filters */}
-        <ScrollView
+        {/* <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           className="mt-4 mb-2"
@@ -121,7 +143,7 @@ const Rating: React.FC<RatingProps> = ({ onViewAllPress, id }) => {
                 selectedFilter === "all" ? "text-[#159747]" : "text-[#676767]"
               }`}
             >
-              Tất cả đánh giá ({reviews?.total || 0})
+              Tất cả đánh giá ({productDetail?.reviewCount || 0})
             </Text>
           </TouchableOpacity>
 
@@ -143,12 +165,12 @@ const Rating: React.FC<RatingProps> = ({ onViewAllPress, id }) => {
               Đánh giá sản phẩm có hình ảnh (2)
             </Text>
           </TouchableOpacity>
-        </ScrollView>
+        </ScrollView> */}
       </View>
 
       {/* Review List */}
       <View>
-        {reviews?.data?.map((review, index) => (
+        {reviews?.map((review, index) => (
           <ReviewItem
             key={index}
             reviewer={{
@@ -157,9 +179,14 @@ const Rating: React.FC<RatingProps> = ({ onViewAllPress, id }) => {
             }}
             rating={review.rating}
             quality={review.quality}
-            date={review.createdAt}
+            date={formatDate(review.createdAt)}
             productVariant={review.variation.name}
             likes={review.totalLikes}
+            comment={review.comment}
+            media={review.gallery.map((media) => ({
+              type: getMediaTypes(media),
+              uri: media,
+            }))}
           />
         ))}
       </View>

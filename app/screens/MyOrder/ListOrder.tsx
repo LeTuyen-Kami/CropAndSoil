@@ -6,6 +6,7 @@ import { usePagination } from "~/hooks/usePagination";
 import { orderService } from "~/services/api/order.service";
 import { formatPrice } from "~/utils";
 import Empty from "~/components/common/Empty";
+import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 
 const ListOrder = ({ status }: { status?: string }) => {
   const {
@@ -25,6 +26,12 @@ const ListOrder = ({ status }: { status?: string }) => {
     },
   });
 
+  const navigation = useSmartNavigation();
+
+  const onViewDetails = (orderId: number) => {
+    navigation.navigate("DetailOrder", { orderId });
+  };
+
   return (
     <View className="flex-1 mt-3">
       <FlashList
@@ -42,12 +49,12 @@ const ListOrder = ({ status }: { status?: string }) => {
               quantity: item.quantity,
               originalPrice: formatPrice(item.variation.regularPrice),
               discountedPrice: formatPrice(item.variation.salePrice),
-              imageUri: item.variation.thumbnail,
+              imageUri: item.variation.thumbnail || item?.product?.thumbnail,
             }))}
             totalPrice={formatPrice(item.orderTotal)}
             quantity={item.items.length}
             onCancelOrder={() => {}}
-            onViewDetails={() => {}}
+            onViewDetails={() => onViewDetails(item.id)}
           />
         )}
         refreshControl={

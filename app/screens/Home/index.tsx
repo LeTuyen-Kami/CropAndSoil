@@ -1,9 +1,9 @@
 import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import React, { useEffect, useState } from "react";
-import { FlatList, TouchableOpacity, View } from "react-native";
+import { FlatList, RefreshControl, TouchableOpacity, View } from "react-native";
 import { imagePaths } from "~/assets/imagePath";
 import Carousel from "~/components/common/Carusel";
 import Category from "~/components/common/Category";
@@ -16,14 +16,23 @@ import { calculateDiscount, checkCanRender, screen } from "~/utils";
 import ContainerList from "./ContainerList";
 import Header from "./Header";
 import HeaderSearch from "./HeaderSearch";
+import { useAtom } from "jotai";
+import { authAtom } from "~/store/atoms";
+import { flashSaleService } from "~/services/api/flashsale.service";
 
 const FlashSale = () => {
   const navigation = useSmartNavigation();
 
   const { data } = useQuery({
     queryKey: ["flashSale", "home"],
-    queryFn: () => productService.getRecommendedProducts(),
+    queryFn: () =>
+      flashSaleService.getFlashSale({
+        skip: 0,
+        take: 10,
+      }),
     staleTime: 1000 * 60 * 5,
+    select: (data) => data.data,
+    refetchInterval: 1000 * 60 * 5,
   });
 
   if (!checkCanRender(data)) return null;
@@ -49,16 +58,22 @@ const FlashSale = () => {
               horizontal
               renderItem={({ item }) => (
                 <ProductItem
-                  name={item.name}
-                  price={item.salePrice}
-                  originalPrice={item.regularPrice}
-                  discount={calculateDiscount(item)}
-                  soldCount={item.totalSales}
-                  rating={item.averageRating}
-                  location={item?.shop?.shopWarehouseLocation?.province?.name}
-                  id={item.id}
-                  image={item.thumbnail}
-                  className="flex-1"
+                  onPress={() =>
+                    navigation.push("FlashSaleProduct", { id: item?.id })
+                  }
+                  key={item.id}
+                  name={item?.flashSaleProduct?.name}
+                  price={item?.salePrice}
+                  originalPrice={item?.flashSaleVariation?.regularPrice}
+                  discount={item?.discountPercent}
+                  soldCount={item?.bought}
+                  totalCount={item?.campaignStock}
+                  image={
+                    item?.flashSaleVariation?.thumbnail ||
+                    item?.flashSaleProduct?.thumbnail
+                  }
+                  onSale={true}
+                  id={item?.id}
                 />
               )}
               ItemSeparatorComponent={() => <View className="w-2" />}
@@ -73,17 +88,23 @@ const FlashSale = () => {
 };
 
 const TopDeal = () => {
+  const smartNavigation = useSmartNavigation();
   const { data } = useQuery({
     queryKey: ["topDeal", "home"],
-    queryFn: () => productService.getRecommendedProducts(),
+    queryFn: () =>
+      productService.getTopDealProducts({
+        skip: 0,
+        take: 10,
+      }),
     staleTime: 1000 * 60 * 5,
+    select: (data) => data.data,
   });
 
   if (!checkCanRender(data)) return null;
 
   return (
     <View className="bg-primary-100">
-      <View className="mt-10">
+      <View className="mt-4">
         <ContainerList
           bgColor="bg-primary-50"
           title="TOP DEAL - SIÊU RẺ"
@@ -113,7 +134,10 @@ const TopDeal = () => {
             ))}
           </View>
           <View className="flex justify-center items-center mt-6">
-            <TouchableOpacity className="bg-[#FCBA26] rounded-full px-8 py-2">
+            <TouchableOpacity
+              onPress={() => smartNavigation.navigate("S")}
+              className="bg-[#FCBA26] rounded-full px-8 py-2"
+            >
               <Text className="text-xs text-white">Xem thêm</Text>
             </TouchableOpacity>
           </View>
@@ -138,10 +162,16 @@ const Banner = () => {
 const BestSeller = () => {
   const { data } = useQuery({
     queryKey: ["bestSeller", "home"],
-    queryFn: () => productService.getRecommendedProducts(),
+    queryFn: () =>
+      productService.searchProducts({
+        sortBy: "bestSelling",
+        sortDirection: "desc",
+        skip: 0,
+        take: 10,
+      }),
     staleTime: 1000 * 60 * 5,
+    select: (data) => data.data,
   });
-
   if (!checkCanRender(data)) return null;
 
   return (
@@ -181,6 +211,9 @@ const BestSeller = () => {
 
 export const HomeScreen: React.FC = () => {
   const [flashlistData, setFlashlistData] = useState<any[]>([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const auth = useAtom(authAtom);
+  const queryClient = useQueryClient();
 
   const navigation = useNavigation();
   const onPressMessages = () => {
@@ -189,6 +222,16 @@ export const HomeScreen: React.FC = () => {
 
   const onPressQuestionCircle = () => {
     console.log("question circle");
+  };
+
+  const onRefresh = async () => {
+    setIsRefreshing(true);
+    await queryClient.invalidateQueries({
+      predicate: (query) =>
+        query.queryKey.includes("home") ||
+        query.queryKey.includes("categories"),
+    });
+    setIsRefreshing(false);
   };
 
   useEffect(() => {
@@ -253,6 +296,13 @@ export const HomeScreen: React.FC = () => {
       />
 
       <FlashList
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={onRefresh}
+            tintColor={"white"}
+          />
+        }
         data={flashlistData}
         renderItem={renderItem}
         keyExtractor={(item) => item.type}

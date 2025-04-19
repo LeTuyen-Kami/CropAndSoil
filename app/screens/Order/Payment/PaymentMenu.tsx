@@ -19,10 +19,6 @@ const PaymentMenu = ({
   voucher,
   calculatedData,
 }: PaymentMenuProps) => {
-  const savedAmount = useMemo(() => {
-    return (calculatedData?.subtotal || 0) - (calculatedData?.total || 0);
-  }, [calculatedData]);
-
   return (
     <View className="bg-white rounded-t-xl border-t border-[#F0F0F0] border-l border-r">
       {/* Voucher Selection Section */}
@@ -66,7 +62,8 @@ const PaymentMenu = ({
                     Giảm ₫
                     {convertToK(
                       calculatedData?.marketplaceProductVoucherDiscountTotal
-                    )}k
+                    )}
+                    k
                   </Text>
                 )}
               </React.Fragment>
@@ -95,9 +92,9 @@ const PaymentMenu = ({
                 color="#FCBA27"
               />
             </View>
-            {!!savedAmount && (
+            {!!calculatedData?.saveMoney && (
               <Text className="text-[10px] text-[#12B76A]">
-                Tiết kiệm {formatPrice(savedAmount)}
+                Tiết kiệm {formatPrice(calculatedData?.saveMoney || 0)}
               </Text>
             )}
           </View>

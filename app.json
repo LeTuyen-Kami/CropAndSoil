@@ -16,7 +16,8 @@
       },
       "infoPlist": {
         "UIBackgroundModes": ["remote-notification"]
-      }
+      },
+      "buildNumber": "1"
     },
     "android": {
       "adaptiveIcon": {

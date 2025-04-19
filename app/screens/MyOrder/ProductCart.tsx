@@ -102,7 +102,10 @@ const ProductCart = ({
             contentFit="contain"
             style={{ tintColor: "#383B45" }}
           />
-          <Text className="text-[#383B45] text-sm font-medium leading-[20px]">
+          <Text
+            className="text-[#383B45] text-sm font-medium leading-[20px]"
+            numberOfLines={1}
+          >
             {shopName}
           </Text>
         </View>

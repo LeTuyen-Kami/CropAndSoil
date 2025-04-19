@@ -19,7 +19,7 @@ const RatingFilter = ({
   selectedItem,
 }: RatingFilterProps) => {
   return (
-    <View className="my-2">
+    <View className="py-2 mb-2 bg-white">
       <ScrollView
         horizontal
         contentContainerClassName="gap-2 ml-2"

@@ -1,40 +1,38 @@
+import { useIsFocused, useNavigation } from "@react-navigation/native";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useAtom } from "jotai";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ScrollView, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Header from "~/components/common/Header";
+import ModalBottom from "~/components/common/ModalBottom";
+import { toggleLoading } from "~/components/common/ScreenLoading";
+import ScreenWrapper from "~/components/common/ScreenWrapper";
+import { toast } from "~/components/common/Toast";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
 import useDisclosure from "~/hooks/useDisclosure";
+import { RootStackScreenProps } from "~/navigation/types";
+import ModalSelectShopVoucher from "~/screens/VoucherSelect/ModalSelectShopVoucher";
+import {
+  ICalculateResponse,
+  IOrderCalculateRequest,
+  orderService,
+} from "~/services/api/order.service";
+import { paymentService } from "~/services/api/payment.service";
+import { IVoucher } from "~/services/api/shop.service";
+import { userService } from "~/services/api/user.service";
+import { selectedVoucherAtom } from "~/store/atoms";
+import { getErrorMessage } from "~/utils";
+import { storeAtom } from "../atom";
 import AddressItem from "./AddressItem";
 import DetailPayment from "./DetailPayment";
+import ModalFailed from "./ModalFailed";
 import ModalSuccess from "./ModalSuccess";
 import PaymentMenu from "./PaymentMenu";
 import PaymentMethod from "./PaymentMethod";
 import PaymentStore from "./PaymentStore";
-import ModalFailed from "./ModalFailed";
-import ScreenWrapper from "~/components/common/ScreenWrapper";
-import { useAtom, useSetAtom } from "jotai";
-import { storeAtom } from "../atom";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { formatPrice, getErrorMessage } from "~/utils";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { paymentService } from "~/services/api/payment.service";
-import {
-  IOrderCalculateRequest,
-  ICalculateResponse,
-} from "~/services/api/order.service";
-import { orderService } from "~/services/api/order.service";
-import { userService } from "~/services/api/user.service";
-import { useIsFocused } from "@react-navigation/native";
-import { toggleLoading } from "~/components/common/ScreenLoading";
-import { toast } from "~/components/common/Toast";
-import ModalBottom from "~/components/common/ModalBottom";
-import { Input } from "~/components/ui/input";
-import { Button } from "~/components/ui/button";
-import { Image } from "expo-image";
-import { useNavigation } from "@react-navigation/native";
-import { RootStackRouteProp, RootStackScreenProps } from "~/navigation/types";
-import { selectedVoucherAtom } from "~/store/atoms";
-import ModalSelectShopVoucher from "~/screens/VoucherSelect/ModalSelectShopVoucher";
-import { IVoucher } from "~/services/api/shop.service";
 const Payment = () => {
   const navigation = useNavigation<RootStackScreenProps<"Payment">>();
   const [voucherShopId, setVoucherShopId] = useState<string>();
@@ -58,7 +56,7 @@ const Payment = () => {
   const { data: address, refetch: refetchAddress } = useQuery({
     queryKey: ["payment-address"],
     queryFn: () => userService.getAddress({ skip: 0, take: 1 }),
-    select: (data) => data.data?.[0] || null,
+    select: (data) => data?.data?.[0] || null,
     enabled: false,
   });
 
@@ -236,7 +234,11 @@ const Payment = () => {
       voucher: null,
       canSelect: true,
     });
-    navigation.navigate("VoucherSelect");
+    navigation.navigate("VoucherSelect", {
+      productIds: selectedStore?.flatMap((store) =>
+        store.items.map((item) => Number(item.productId))
+      ),
+    });
   };
 
   const handlePressContinueOrder = () => {

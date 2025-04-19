@@ -16,7 +16,9 @@ import Animated, {
 import { imagePaths } from "~/assets/imagePath";
 import Gallery from "~/components/common/Galery";
 import useDisclosure from "~/hooks/useDisclosure";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Feather } from "@expo/vector-icons";
+import { useSmartNavigation } from "~/hooks/useSmartNavigation";
+import { Video, ResizeMode } from "expo-av";
 
 type ReviewMedia = {
   type: "image" | "video";
@@ -68,6 +70,7 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
   const { isOpen, onOpen, onClose, openValue } = useDisclosure({
     initialOpenValue: 0,
   });
+  const navigation = useSmartNavigation();
   const [sallerCollapsed, setSallerCollapsed] = useState(true);
   const rotate = useSharedValue(0);
 
@@ -99,6 +102,12 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
     };
   });
 
+  const onPressProduct = () => {
+    if (product) {
+      navigation.smartNavigate("DetailProduct", { id: product.id });
+    }
+  };
+
   return (
     <View className="p-3 border-b border-gray-100">
       <View className="flex-row">
@@ -108,6 +117,8 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
             source={reviewer.avatar}
             style={{ width: "100%", height: "100%" }}
             contentFit="cover"
+            placeholder={imagePaths.icAvatar}
+            placeholderContentFit="cover"
           />
         </View>
 
@@ -115,28 +126,23 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
         <View className="flex-1">
           {/* Reviewer Name */}
           <Text className="text-[#000000] text-sm">{reviewer.name}</Text>
-
           {/* Star Rating */}
           <View className="flex-row items-center mt-1">{renderStars()}</View>
-
           {/* Quality */}
           <Text className="mt-1 text-sm text-[#AEAEAE]">
             Chất lượng sản phẩm:{" "}
             <Text className="text-sm text-[#575964]">{quality}</Text>
           </Text>
-
           {/* comment */}
           {comment && (
             <Text className="mt-1 text-sm text-[#676767]">{comment}</Text>
           )}
-
           {/* Date and Product Variant */}
           <View className="flex-row items-center mt-1">
             <Text className="text-[#AEAEAE] text-sm">
               {date} | {`Phân loại: ${productVariant}`}
             </Text>
           </View>
-
           {/* Review Media */}
           {media && media.length > 0 && (
             <View className="mt-2">
@@ -150,26 +156,49 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
                     onPress={() => onOpen(index)}
                     className="relative mr-2"
                   >
-                    <ExpoImage
-                      source={item.uri}
-                      style={{ width: 80, height: 80, borderRadius: 5 }}
-                      contentFit="cover"
-                    />
-                    {item.type === "video" && (
-                      <View className="absolute right-0 bottom-0 left-0 flex-row justify-center items-center px-2 h-5 bg-black bg-opacity-60 rounded-b-md">
-                        <Text className="text-xs text-white">
-                          {item.duration}
-                        </Text>
-                      </View>
+                    {item.type === "image" ? (
+                      <ExpoImage
+                        source={item.uri}
+                        style={{ width: 80, height: 80, borderRadius: 5 }}
+                        contentFit="cover"
+                      />
+                    ) : (
+                      <>
+                        <Video
+                          source={{ uri: item.uri }}
+                          style={{ width: 80, height: 80, borderRadius: 5 }}
+                          resizeMode={ResizeMode.COVER}
+                          useNativeControls={false}
+                        />
+                        <View
+                          style={{
+                            position: "absolute",
+                            width: "100%",
+                            height: "100%",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            backgroundColor: "rgba(0,0,0,0.2)",
+                            borderRadius: 5,
+                          }}
+                        >
+                          <Feather name="play" size={20} color="white" />
+                        </View>
+                        {item.duration && (
+                          <View className="absolute right-0 bottom-0 left-0 flex-row justify-center items-center px-2 h-5 bg-black bg-opacity-60 rounded-b-md">
+                            <Text className="text-xs text-white">
+                              {item.duration}
+                            </Text>
+                          </View>
+                        )}
+                      </>
                     )}
                   </Pressable>
                 )}
               />
             </View>
           )}
-
           {/* Like Button */}
-          {!isLikeButtonInBottom && (
+          {/* {!isLikeButtonInBottom && (
             <View className="flex-row items-center mt-1.5">
               <TouchableOpacity
                 className="flex-row items-center"
@@ -184,8 +213,7 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
                 <Text className="text-[#AEAEAE] text-sm">{likes}</Text>
               </TouchableOpacity>
             </View>
-          )}
-
+          )} */}
           {/* Seller Response */}
           {sellerResponse && (
             <Pressable onPress={handleSallerCollapsed}>
@@ -227,28 +255,28 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
             </Pressable>
           )}
           {/* product */}
-
           {product && (
-            <View className="flex-row my-2 rounded-lg border border-[#F0F0F0]">
+            <TouchableOpacity
+              className="flex-row my-2 rounded-lg border border-[#F0F0F0]"
+              onPress={onPressProduct}
+            >
               <View className="p-2.5 bg-white rounded-l-lg">
                 <Image
-                  source={"https://picsum.photos/200/300"}
+                  source={product.image}
                   style={{ width: 40, height: 40, borderRadius: 5 }}
                   contentFit="cover"
                 />
               </View>
-              <View className="flex-1 justify-center items-center bg-[#F0F0F0] pl-1.5">
+              <View className="flex-1 py-2 bg-[#F0F0F0] pl-1.5">
                 <Text
                   numberOfLines={2}
                   className="text-[#383B45] text-xs leading-tight"
                 >
-                  lorem ipsum dolor sit amet consectetur adipisicing elit.
-                  Quisquam, quos. Lorem ipsum dolor sit amet consectetur
+                  {product.name}
                 </Text>
               </View>
-            </View>
+            </TouchableOpacity>
           )}
-
           {isLikeButtonInBottom && (
             <View className="flex-row items-center justify-between mt-1.5">
               <TouchableOpacity
@@ -256,13 +284,13 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
                 hitSlop={20}
                 onPress={onPressLike}
               >
-                <AntDesign
+                {/* <AntDesign
                   name="like1"
                   size={20}
                   color="#AEAEAE"
                   style={{ marginRight: 4 }}
                 />
-                <Text className="text-[#AEAEAE] text-sm">{likes}</Text>
+                <Text className="text-[#AEAEAE] text-sm">{likes}</Text> */}
               </TouchableOpacity>
               <TouchableOpacity
                 className="flex-row gap-2 items-center"

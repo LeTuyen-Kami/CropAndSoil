@@ -27,6 +27,8 @@ export interface IVoucherRequest extends PaginationRequests {
   search?: string;
   shopId?: number;
   voucherType?: "shipping" | "product";
+  isAvailable?: boolean;
+  productIds?: string; //comma separated
 }
 
 class VoucherService {
@@ -55,12 +57,26 @@ class VoucherService {
     });
   }
 
-  async applyVoucher(voucherId: string) {
-    return typedAxios.get<IVoucher>(`/cart/apply-voucher/${voucherId}`);
+  async applyVoucher(code: string) {
+    return typedAxios.post<IVoucher>(`/cart/apply-voucher`, {
+      code,
+    });
   }
 
-  async removeVoucher(voucherId: string) {
-    return typedAxios.delete(`/cart/remove-voucher/${voucherId}`);
+  async findByCode(code: string) {
+    return typedAxios.get<IVoucher>(`/vouchers/find-by-code`, {
+      params: {
+        code,
+      },
+    });
+  }
+
+  async removeVoucher(code: string) {
+    return typedAxios.delete(`/cart/remove-voucher`, {
+      data: {
+        code,
+      },
+    });
   }
 }
 

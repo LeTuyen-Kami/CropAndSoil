@@ -1,11 +1,9 @@
-import { FlashList } from "@shopify/flash-list";
-import { View, ScrollView, TouchableOpacity } from "react-native";
+import { View } from "react-native";
 import Header from "~/components/common/Header";
 import ScreenWrapper from "~/components/common/ScreenWrapper";
 import Tabs from "~/components/common/Tabs";
-import { Text } from "~/components/ui/text";
-import { cn } from "~/lib/utils";
 import ListRated from "./ListRated";
+import ListUnrated from "./ListUnrated";
 
 const MyRating = () => {
   return (
@@ -26,11 +24,11 @@ const MyRating = () => {
           items={[
             {
               title: "Chưa đánh giá",
-              content: <Text>Chưa đánh giá</Text>,
+              content: <ListUnrated />,
             },
             {
               title: "Đã đánh giá",
-              content: <ListRated data={[...Array(10)]} />,
+              content: <ListRated />,
             },
           ]}
         />

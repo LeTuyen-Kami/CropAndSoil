@@ -14,7 +14,7 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SystemBars } from "react-native-edge-to-edge";
 import ModalConfirm from "~/components/common/ModalConfirm";
-SplashScreen.preventAutoHideAsync();
+// SplashScreen.preventAutoHideAsync();
 
 cssInterop(Image, {
   className: "style",
