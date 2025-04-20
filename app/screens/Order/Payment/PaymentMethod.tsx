@@ -4,6 +4,7 @@ import { Image } from "expo-image";
 import { useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import { imagePaths } from "~/assets/imagePath";
+import { toast } from "~/components/common/Toast";
 import { Text } from "~/components/ui/text";
 import { IPaymentMethod } from "~/services/api/payment.service";
 import { checkCanRender } from "~/utils";
@@ -22,6 +23,11 @@ const PaymentMethod = ({
 
   // Handle payment method selection
   const handleSelectPaymentMethod = (id: string) => {
+    if (id !== "code") {
+      toast.error("Phương thức thanh toán này tạm không sử dụng được");
+      return;
+    }
+
     onSelectPaymentMethod(id);
   };
 

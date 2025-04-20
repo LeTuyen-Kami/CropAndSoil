@@ -32,6 +32,9 @@ export const useSmartNavigation = () => {
     smartGoBack: () => {
       navigation.goBack(); // thường không cần auth, nhưng để đây cho đầy đủ
     },
+    reset: (params: any) => {
+      navigation.reset(params);
+    },
 
     smartPop: (count = 1) => {
       navigation.pop(count);

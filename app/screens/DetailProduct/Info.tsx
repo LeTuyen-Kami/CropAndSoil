@@ -1,37 +1,25 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { Image } from "expo-image";
-import { imagePaths } from "~/assets/imagePath";
-import React, { useMemo, useState } from "react";
-import ProductTypeChip from "~/components/common/ProductTypeChip";
 import { AntDesign } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import { deepEqual } from "fast-equals";
-import { IProduct, productService } from "~/services/api/product.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { formatPrice } from "~/utils";
-import { wishlistService } from "~/services/api/wishlist.service";
-import { toast } from "~/components/common/Toast";
-import { authAtom } from "~/store/atoms";
+import { Image } from "expo-image";
+import { deepEqual } from "fast-equals";
 import { useAtomValue } from "jotai";
+import React from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { imagePaths } from "~/assets/imagePath";
+import ProductTypeChip from "~/components/common/ProductTypeChip";
+import { toast } from "~/components/common/Toast";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
+import { IProduct, productService } from "~/services/api/product.service";
 import { shopService } from "~/services/api/shop.service";
-import FlashSaleBadge from "~/components/common/FlashSaleBadge";
+import { wishlistService } from "~/services/api/wishlist.service";
+import { authAtom } from "~/store/atoms";
+import { formatPrice } from "~/utils";
 
 const BrandBadge = () => {
   return (
     <View className="flex flex-row gap-1 items-center px-[10] py-[2] bg-[#FEF2D4] rounded-[5]">
       <Image source={imagePaths.icProdcutFlashSale} className="size-[18]" />
       <Image source={imagePaths.icTopDeal} className="w-[112] h-[11]" />
-    </View>
-  );
-};
-
-const TopDealBadge = () => {
-  return (
-    <View style={styles.topDealBadge}>
-      <View style={styles.topDealBadgeContent}>
-        <Text style={styles.topDealText}>TOP DEAL - SIÊU RẺ</Text>
-      </View>
     </View>
   );
 };
@@ -127,11 +115,63 @@ const Atribute = ({
   );
 };
 
+const InfoSkeleton = () => {
+  return (
+    <View style={styles.container}>
+      {/* Brand info skeleton */}
+      <View className="h-[18px] w-[120px] bg-gray-400/20 rounded-md animate-pulse" />
+
+      <View style={styles.brandInfoContent}>
+        <View style={styles.badgesContainer}>
+          <View className="h-[22px] w-[120px] bg-gray-400/20 rounded-[5px] animate-pulse" />
+        </View>
+        <View className="h-[14px] w-[80px] bg-gray-400/20 rounded-md animate-pulse" />
+      </View>
+
+      {/* Product title skeleton */}
+      <View className="h-[20px] w-full bg-gray-400/20 rounded-md animate-pulse" />
+
+      {/* Price skeleton */}
+      <View style={styles.priceContainer}>
+        <View style={styles.priceContent}>
+          <View className="h-[28px] w-[100px] bg-gray-400/20 rounded-md animate-pulse" />
+        </View>
+        <View className="h-[20px] w-[40px] bg-gray-400/20 rounded-md animate-pulse" />
+      </View>
+
+      {/* Promotion skeleton */}
+      <View className="h-[28px] w-full bg-gray-400/20 rounded-[24px] animate-pulse" />
+
+      {/* Attributes skeleton */}
+      <View style={styles.typeContainer}>
+        <View className="h-[20px] w-[100px] bg-gray-400/20 rounded-md animate-pulse" />
+        <View style={styles.typeContent}>
+          <View className="h-[32px] w-[80px] bg-gray-400/20 rounded-[16px] animate-pulse" />
+          <View className="h-[32px] w-[100px] bg-gray-400/20 rounded-[16px] animate-pulse" />
+          <View className="h-[32px] w-[90px] bg-gray-400/20 rounded-[16px] animate-pulse" />
+        </View>
+      </View>
+
+      <View style={styles.typeContainer}>
+        <View className="h-[20px] w-[120px] bg-gray-400/20 rounded-md animate-pulse" />
+        <View style={styles.typeContent}>
+          <View className="h-[32px] w-[70px] bg-gray-400/20 rounded-[16px] animate-pulse" />
+          <View className="h-[32px] w-[80px] bg-gray-400/20 rounded-[16px] animate-pulse" />
+        </View>
+      </View>
+    </View>
+  );
+};
+
 const Info = ({ id }: { id: string | number }) => {
   const queryClient = useQueryClient();
   const auth = useAtomValue(authAtom);
   const navigation = useSmartNavigation();
-  const { data: productDetail, refetch } = useQuery({
+  const {
+    data: productDetail,
+    refetch,
+    isLoading,
+  } = useQuery({
     queryKey: ["product-detail", id],
     queryFn: () => productService.getProductDetail(id),
     staleTime: 1000 * 60 * 5,
@@ -190,6 +230,10 @@ const Info = ({ id }: { id: string | number }) => {
       mutationLikeProduct.mutate();
     }
   };
+
+  if (isLoading) {
+    return <InfoSkeleton />;
+  }
 
   return (
     <View style={styles.container}>

@@ -170,6 +170,7 @@ export interface IProductResquest extends PaginationRequests {
   ids: string; // comma separated
   sortBy: "salePrice" | "createdAt" | "bestSelling";
   sortDirection: "asc" | "desc";
+  shopId: string;
 }
 
 class ProductService {

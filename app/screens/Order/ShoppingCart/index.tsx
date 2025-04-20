@@ -88,6 +88,14 @@ const ShoppingCart = () => {
 
   useEffect(() => {
     if (paymentMethods && address && stores.length > 0) {
+      const selectedStore = stores.filter((store) =>
+        store.items?.some((item) => item.isSelected)
+      );
+
+      if (selectedStore.length === 0) {
+        return;
+      }
+
       mutationCalculateOrder.mutate(
         {
           paymentMethodKey: paymentMethods[0].key,

@@ -95,6 +95,11 @@ const ProductItem = ({
               className="absolute -top-1.5 left-0.5 size-[18px]"
               contentFit="contain"
             />
+            <View className="absolute top-0 right-0 bottom-0 left-0 justify-center items-center">
+              <Text className="text-[8px] text-white tracking-tight">
+                CHỈ CÒN 2
+              </Text>
+            </View>
           </View>
         </View>
       </View>

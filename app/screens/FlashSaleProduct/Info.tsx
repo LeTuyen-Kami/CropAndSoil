@@ -29,16 +29,6 @@ const BrandBadge = () => {
   );
 };
 
-const TopDealBadge = () => {
-  return (
-    <View style={styles.topDealBadge}>
-      <View style={styles.topDealBadgeContent}>
-        <Text style={styles.topDealText}>TOP DEAL - SIÊU RẺ</Text>
-      </View>
-    </View>
-  );
-};
-
 const AuthenticBadge = () => {
   return (
     <View style={styles.authenticBadge}>
@@ -71,6 +61,54 @@ const SalesCount = ({
           color={isLiked ? "#E01739" : "#AEAEAE"}
         />
       </TouchableOpacity>
+    </View>
+  );
+};
+
+const InfoSkeleton = () => {
+  return (
+    <View style={styles.container}>
+      {/* Brand info skeleton */}
+      <View className="h-[18px] w-[120px] bg-gray-400/20 rounded-md animate-pulse" />
+
+      <View style={styles.brandInfoContent}>
+        <View style={styles.badgesContainer}>
+          <View className="h-[22px] w-[120px] bg-gray-400/20 rounded-[5px] animate-pulse" />
+        </View>
+        <View className="h-[14px] w-[80px] bg-gray-400/20 rounded-md animate-pulse" />
+      </View>
+
+      {/* Product title skeleton */}
+      <View className="h-[20px] w-full bg-gray-400/20 rounded-md animate-pulse" />
+
+      {/* Price skeleton */}
+      <View style={styles.priceContainer}>
+        <View style={styles.priceContent}>
+          <View className="h-[28px] w-[100px] bg-gray-400/20 rounded-md animate-pulse" />
+        </View>
+        <View className="h-[20px] w-[40px] bg-gray-400/20 rounded-md animate-pulse" />
+      </View>
+
+      {/* Promotion skeleton */}
+      <View className="h-[28px] w-full bg-gray-400/20 rounded-[24px] animate-pulse" />
+
+      {/* Attributes skeleton */}
+      <View style={styles.typeContainer}>
+        <View className="h-[20px] w-[100px] bg-gray-400/20 rounded-md animate-pulse" />
+        <View style={styles.typeContent}>
+          <View className="h-[32px] w-[80px] bg-gray-400/20 rounded-[16px] animate-pulse" />
+          <View className="h-[32px] w-[100px] bg-gray-400/20 rounded-[16px] animate-pulse" />
+          <View className="h-[32px] w-[90px] bg-gray-400/20 rounded-[16px] animate-pulse" />
+        </View>
+      </View>
+
+      <View style={styles.typeContainer}>
+        <View className="h-[20px] w-[120px] bg-gray-400/20 rounded-md animate-pulse" />
+        <View style={styles.typeContent}>
+          <View className="h-[32px] w-[70px] bg-gray-400/20 rounded-[16px] animate-pulse" />
+          <View className="h-[32px] w-[80px] bg-gray-400/20 rounded-[16px] animate-pulse" />
+        </View>
+      </View>
     </View>
   );
 };
@@ -136,7 +174,11 @@ const Info = ({ id }: { id: string | number }) => {
   const queryClient = useQueryClient();
   const auth = useAtomValue(authAtom);
   const navigation = useSmartNavigation();
-  const { data: productDetail, refetch } = useQuery({
+  const {
+    data: productDetail,
+    refetch,
+    isLoading,
+  } = useQuery({
     queryKey: ["flash-sale-product-detail", id],
     queryFn: () => flashSaleService.getFlashItemDetail(id),
     staleTime: 1000 * 60 * 5,
@@ -204,6 +246,10 @@ const Info = ({ id }: { id: string | number }) => {
       mutationLikeProduct.mutate();
     }
   };
+
+  if (isLoading) {
+    return <InfoSkeleton />;
+  }
 
   return (
     <View style={styles.container}>

@@ -30,7 +30,6 @@ const tabs = [
 
 const Tabs = () => {
   const [activeIndex, setActiveIndex] = useAtom(activeIndexAtom);
-  console.log("activeIndex", activeIndex);
 
   const pagerRef = useRef<PagerView>(null);
   const route = useRoute<RootStackRouteProp<"Shop">>();
@@ -40,15 +39,11 @@ const Tabs = () => {
   };
 
   const handlePageChange = (index: number) => {
-    console.log("handlePageChange", index);
-
     setActiveIndex(index);
   };
 
   useEffect(() => {
     return () => {
-      console.log("unmount");
-
       setActiveIndex(0);
     };
   }, []);

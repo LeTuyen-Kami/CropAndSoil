@@ -27,13 +27,10 @@ export default function useFCMNavigation(
     if (!msg?.data?.id) return;
     const { id, ...params } = msg.data;
     if (navigationRef.isReady()) {
-      navigationRef.navigate("MainTabs", {
-        screen: "Notifications",
-        params: {
-          screen: "DetailNotification",
-          params: { id },
-        },
-      });
+      navigationRef.navigate("Notifications");
+      setTimeout(() => {
+        navigationRef.navigate("DetailNotification", { id });
+      }, 100);
     }
   };
 

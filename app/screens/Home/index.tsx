@@ -135,7 +135,18 @@ const TopDeal = () => {
           </View>
           <View className="flex justify-center items-center mt-6">
             <TouchableOpacity
-              onPress={() => smartNavigation.navigate("S")}
+              onPress={() => {
+                // smartNavigation.reset({
+                //   index: 1,
+                //   routes: [
+                //     { name: "MainTabs", params: { screen: "Profile" } },
+                //     {
+                //       name: "MyOrder",
+                //       params: { tabIndex: 0 },
+                //     },
+                //   ],
+                // });
+              }}
               className="bg-[#FCBA26] rounded-full px-8 py-2"
             >
               <Text className="text-xs text-white">Xem thêm</Text>

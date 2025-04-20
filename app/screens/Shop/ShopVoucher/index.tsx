@@ -164,7 +164,17 @@ const ShopVoucher = () => {
 
   const { data: topProducts } = useQuery({
     queryKey: ["shopTopProducts"],
-    queryFn: () => productService.getRecommendedProducts(),
+    queryFn: () =>
+      productService.searchProducts({
+        shopId: shopId?.toString(),
+        sortBy: "bestSelling",
+        sortDirection: "desc",
+        skip: 0,
+        take: 10,
+      }),
+    enabled: !!shopId,
+    staleTime: 1000 * 60 * 5,
+    select: (data) => data.data,
   });
 
   const { data: privateProducts } = useQuery({

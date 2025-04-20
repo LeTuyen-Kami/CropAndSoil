@@ -97,12 +97,14 @@ const Footer = ({
             {!!calculatedData?.total && (
               <View className="flex-row items-center">
                 <Text className="text-sm font-bold text-[#FCBA27] mr-2">
-                  {formatPrice(calculatedData?.total || 0)}
+                  {selectedCount > 0
+                    ? formatPrice(calculatedData?.total || 0)
+                    : formatPrice(0)}
                 </Text>
                 <Feather name="chevron-up" size={16} color="#FCBA27" />
               </View>
             )}
-            {!!calculatedData?.saveMoney && (
+            {!!calculatedData?.saveMoney && selectedCount > 0 && (
               <Text className="text-[10px] text-[#12B76A]">
                 Tiết kiệm {formatPrice(calculatedData?.saveMoney || 0)}
               </Text>
@@ -113,12 +115,13 @@ const Footer = ({
         )}
 
         <TouchableOpacity
-          className="bg-[#FCBA27] px-[22px] py-[10px] rounded-full"
+          className="bg-[#FCBA27] px-[22px] py-[10px] rounded-full disabled:opacity-50"
           activeOpacity={0.8}
           onPress={handlePayment}
+          disabled={selectedCount === 0}
         >
           <Text className="text-sm font-medium text-white">
-            Mua hàng ({selectedCount})
+            Mua hàng {selectedCount > 0 ? `(${selectedCount})` : ""}
           </Text>
         </TouchableOpacity>
       </View>

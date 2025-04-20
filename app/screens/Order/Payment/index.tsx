@@ -271,17 +271,12 @@ const Payment = () => {
   const handlePressViewOrder = () => {
     onCloseSuccess();
     navigation.reset({
-      index: 0,
+      index: 1,
       routes: [
+        { name: "MainTabs", params: { screen: "Profile" } },
         {
-          name: "MainTabs",
-          params: {
-            screen: "Profile",
-            params: {
-              screen: "DetailOrder",
-              params: { id: checkoutData?.payload.orders[0].id },
-            },
-          },
+          name: "DetailOrder",
+          params: { id: checkoutData?.payload.orders[0].id },
         },
       ],
     });
