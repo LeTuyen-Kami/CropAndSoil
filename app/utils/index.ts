@@ -285,3 +285,15 @@ export const maskVNDPriceBeforeSale = (
 
   return finalMasked;
 };
+
+export const formatDuration = (duration: number) => {
+  // Convert milliseconds to seconds if needed
+  const totalSeconds = Math.floor(duration / 1000);
+
+  // Calculate minutes and seconds
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  // Format as MM:SS with leading zeros for seconds
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+};

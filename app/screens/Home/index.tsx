@@ -2,8 +2,14 @@ import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import React, { useEffect, useState } from "react";
-import { FlatList, RefreshControl, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  FlatList,
+  RefreshControl,
+  TouchableOpacity,
+  View,
+  ActivityIndicator,
+} from "react-native";
 import { imagePaths } from "~/assets/imagePath";
 import Carousel from "~/components/common/Carusel";
 import Category from "~/components/common/Category";
@@ -11,19 +17,38 @@ import ProductItem from "~/components/common/ProductItem";
 import ScreenWrapper from "~/components/common/ScreenWrapper";
 import { Text } from "~/components/ui/text";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
-import { productService } from "~/services/api/product.service";
-import { calculateDiscount, checkCanRender, screen } from "~/utils";
+import {
+  IProduct,
+  IProductResquest,
+  productService,
+} from "~/services/api/product.service";
+import {
+  calculateDiscount,
+  checkCanRender,
+  screen,
+  preHandleFlashListData,
+  chunkArray,
+  applyTyoe,
+} from "~/utils";
 import ContainerList from "./ContainerList";
 import Header from "./Header";
 import HeaderSearch from "./HeaderSearch";
 import { useAtom } from "jotai";
 import { authAtom } from "~/store/atoms";
 import { flashSaleService } from "~/services/api/flashsale.service";
+import FlashSaleSkeleton from "~/components/common/FlashSaleSkeleton";
+import FlashSaleEmpty from "~/components/common/FlashSaleEmpty";
+import TopDealSkeleton from "~/components/common/TopDealSkeleton";
+import TopDealEmpty from "~/components/common/TopDealEmpty";
+import BestSellerSkeleton from "~/components/common/BestSellerSkeleton";
+import BestSellerEmpty from "~/components/common/BestSellerEmpty";
+import { usePagination } from "~/hooks/usePagination";
+import { COLORS } from "~/constants/theme";
 
 const FlashSale = () => {
   const navigation = useSmartNavigation();
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["flashSale", "home"],
     queryFn: () =>
       flashSaleService.getFlashSale({
@@ -35,7 +60,13 @@ const FlashSale = () => {
     refetchInterval: 1000 * 60 * 5,
   });
 
-  if (!checkCanRender(data)) return null;
+  if (isLoading) {
+    return <FlashSaleSkeleton />;
+  }
+
+  if (!data || data.length === 0) {
+    return <FlashSaleEmpty />;
+  }
 
   return (
     <View>
@@ -89,7 +120,7 @@ const FlashSale = () => {
 
 const TopDeal = () => {
   const smartNavigation = useSmartNavigation();
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["topDeal", "home"],
     queryFn: () =>
       productService.getTopDealProducts({
@@ -100,7 +131,13 @@ const TopDeal = () => {
     select: (data) => data.data,
   });
 
-  if (!checkCanRender(data)) return null;
+  if (isLoading) {
+    return <TopDealSkeleton />;
+  }
+
+  if (!checkCanRender(data) || data?.length === 0) {
+    return <TopDealEmpty />;
+  }
 
   return (
     <View className="bg-primary-100">
@@ -133,25 +170,6 @@ const TopDeal = () => {
               />
             ))}
           </View>
-          <View className="flex justify-center items-center mt-6">
-            <TouchableOpacity
-              onPress={() => {
-                // smartNavigation.reset({
-                //   index: 1,
-                //   routes: [
-                //     { name: "MainTabs", params: { screen: "Profile" } },
-                //     {
-                //       name: "MyOrder",
-                //       params: { tabIndex: 0 },
-                //     },
-                //   ],
-                // });
-              }}
-              className="bg-[#FCBA26] rounded-full px-8 py-2"
-            >
-              <Text className="text-xs text-white">Xem thêm</Text>
-            </TouchableOpacity>
-          </View>
         </ContainerList>
       </View>
     </View>
@@ -171,7 +189,7 @@ const Banner = () => {
 };
 
 const BestSeller = () => {
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["bestSeller", "home"],
     queryFn: () =>
       productService.searchProducts({
@@ -183,7 +201,14 @@ const BestSeller = () => {
     staleTime: 1000 * 60 * 5,
     select: (data) => data.data,
   });
-  if (!checkCanRender(data)) return null;
+
+  if (isLoading) {
+    return <BestSellerSkeleton />;
+  }
+
+  if (!checkCanRender(data) || data?.length === 0) {
+    return <BestSellerEmpty />;
+  }
 
   return (
     <View className="bg-primary-50">
@@ -220,11 +245,104 @@ const BestSeller = () => {
   );
 };
 
+// Các constant để định nghĩa các loại item cho FlashList
+const ITEM_TYPES = {
+  CAROUSEL: "carousel",
+  CATEGORY: "category",
+  FLASH_SALE: "flashSale",
+  TOP_DEAL: "topDeal",
+  BANNER: "banner",
+  BEST_SELLER_HEADER: "bestSellerHeader",
+  BEST_SELLER_PRODUCT: "bestSellerProduct",
+  BEST_SELLER_FOOTER: "bestSellerFooter",
+  BEST_SELLER_EMPTY: "bestSellerEmpty",
+  BEST_SELLER_LOADING: "bestSellerLoading",
+};
+
+// BestSellerHeader component
+const BestSellerHeader = () => {
+  return (
+    <View className="bg-[#eee] pt-6">
+      <View className="relative bg-white px-5 pb-4 pt-5 flex-row items-center rounded-t-[40px]">
+        <Image source={imagePaths.fire} style={{ width: 40, height: 40 }} />
+        <Text className="ml-2 text-xl font-bold text-black uppercase">
+          SẢN PHẨM BÁN CHẠY
+        </Text>
+      </View>
+    </View>
+  );
+};
+
+// BestSellerFooter component
+const BestSellerFooter = ({ loading }: { loading: boolean }) => {
+  return (
+    <View
+      className="pb-4 bg-white"
+      style={{ paddingBottom: loading ? 160 : 80 }}
+    >
+      {loading ? (
+        <View className="flex-row justify-center items-center py-4">
+          <ActivityIndicator size="small" color={COLORS.primary} />
+        </View>
+      ) : (
+        <View className="h-16" />
+      )}
+    </View>
+  );
+};
+
+// BestSellerProductItem component
+const BestSellerProductItem = ({ products }: { products: IProduct[] }) => {
+  return (
+    <View className="flex-row flex-wrap gap-2 px-2 pb-2 bg-white">
+      {products.map((product, index) => (
+        <ProductItem
+          width={(screen.width - 24) / 2}
+          key={product.id || index}
+          name={product.name}
+          price={product.salePrice}
+          originalPrice={product.regularPrice}
+          discount={calculateDiscount(product)}
+          rating={product.averageRating}
+          soldCount={product.totalSales}
+          location={product?.shop?.shopWarehouseLocation?.province?.name}
+          id={product.id}
+          image={product.thumbnail}
+          className="flex-grow"
+        />
+      ))}
+    </View>
+  );
+};
+
 export const HomeScreen: React.FC = () => {
-  const [flashlistData, setFlashlistData] = useState<any[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const auth = useAtom(authAtom);
   const queryClient = useQueryClient();
+
+  // Sử dụng usePagination cho bestseller
+  const {
+    data: bestSellerData,
+    hasNextPage: hasBestSellerNextPage,
+    fetchNextPage: fetchBestSellerNextPage,
+    isLoading: isBestSellerLoading,
+    isFetching: isBestSellerFetching,
+    refresh: refreshBestSeller,
+  } = usePagination<
+    IProduct,
+    Pick<IProductResquest, "sortBy" | "sortDirection">
+  >(productService.searchProducts as any, {
+    initialPagination: {
+      skip: 0,
+      take: 10,
+    },
+    initialParams: {
+      sortBy: "bestSelling",
+      sortDirection: "desc",
+    },
+    queryKey: ["bestSeller-pagination", "home"],
+  });
 
   const navigation = useNavigation();
   const onPressMessages = () => {
@@ -237,66 +355,129 @@ export const HomeScreen: React.FC = () => {
 
   const onRefresh = async () => {
     setIsRefreshing(true);
-    await queryClient.invalidateQueries({
-      predicate: (query) =>
-        query.queryKey.includes("home") ||
-        query.queryKey.includes("categories"),
-    });
+    await Promise.all([
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          query.queryKey.includes("home") ||
+          query.queryKey.includes("categories"),
+      }),
+      refreshBestSeller(),
+    ]);
     setIsRefreshing(false);
   };
 
-  useEffect(() => {
-    setFlashlistData([
-      { type: "carousel" },
-      { type: "category" },
-      { type: "flashSale" },
-      { type: "topDeal" },
-      { type: "banner" },
-      { type: "bestSeller" },
-    ]);
-  }, []);
+  // Chuyển đổi dữ liệu BestSeller thành các item cho FlashList
+  const processBestSellerData = useMemo(() => {
+    if (
+      isBestSellerLoading &&
+      (!bestSellerData || bestSellerData.length === 0)
+    ) {
+      return [
+        { id: "bestSellerLoading", type: ITEM_TYPES.BEST_SELLER_LOADING },
+      ];
+    }
+
+    if (!checkCanRender(bestSellerData) || bestSellerData?.length === 0) {
+      return [{ id: "bestSellerEmpty", type: ITEM_TYPES.BEST_SELLER_EMPTY }];
+    }
+
+    // Tạo các chunk gồm 2 sản phẩm mỗi chunk
+    const chunkedProducts = chunkArray(bestSellerData, 2);
+
+    // Tạo các item cho FlashList từ chunked products
+    const bestSellerItems = chunkedProducts.map((products, index) => ({
+      id: `bestSellerProduct-${index}`,
+      type: ITEM_TYPES.BEST_SELLER_PRODUCT,
+      products,
+    }));
+
+    // Thêm header và footer
+    return [
+      { id: "bestSellerHeader", type: ITEM_TYPES.BEST_SELLER_HEADER },
+      ...bestSellerItems,
+      {
+        id: "bestSellerFooter",
+        type: ITEM_TYPES.BEST_SELLER_FOOTER,
+        loading: hasBestSellerNextPage && isBestSellerFetching,
+      },
+    ];
+  }, [
+    bestSellerData,
+    isBestSellerLoading,
+    hasBestSellerNextPage,
+    isBestSellerFetching,
+  ]);
+
+  const flashlistData = useMemo(() => {
+    const baseItems = [
+      { type: ITEM_TYPES.CAROUSEL, id: "carousel" },
+      { type: ITEM_TYPES.CATEGORY, id: "category" },
+      { type: ITEM_TYPES.FLASH_SALE, id: "flashSale" },
+      { type: ITEM_TYPES.TOP_DEAL, id: "topDeal" },
+      { type: ITEM_TYPES.BANNER, id: "banner" },
+    ];
+
+    return [...baseItems, ...processBestSellerData];
+  }, [processBestSellerData]);
+
+  const handleEndReached = async () => {
+    if (hasBestSellerNextPage && !isBestSellerFetching && !loadingMore) {
+      setLoadingMore(true);
+      await fetchBestSellerNextPage();
+      setLoadingMore(false);
+    }
+  };
 
   const renderItem = ({ item }: { item: any }) => {
-    if (item.type === "carousel") {
-      return (
-        <Carousel
-          data={[...Array(10)]}
-          autoPlay={true}
-          autoPlayInterval={5000}
-          loop={true}
-          renderItem={({ index }) => (
-            <View>
-              <Image
-                source={"https://picsum.photos/200/300"}
-                style={{ width: "100%", height: "100%" }}
-              />
-            </View>
-          )}
-        />
-      );
-    }
+    switch (item.type) {
+      case ITEM_TYPES.CAROUSEL:
+        return (
+          <Carousel
+            data={[...Array(10)]}
+            autoPlay={true}
+            autoPlayInterval={5000}
+            loop={true}
+            renderItem={({ index }) => (
+              <View>
+                <Image
+                  source={"https://picsum.photos/200/300"}
+                  style={{ width: "100%", height: "100%" }}
+                />
+              </View>
+            )}
+          />
+        );
 
-    if (item.type === "category") {
-      return <Category className="px-2 pt-2" />;
-    }
+      case ITEM_TYPES.CATEGORY:
+        return <Category className="px-2 pt-2" />;
 
-    if (item.type === "flashSale") {
-      return <FlashSale />;
-    }
+      case ITEM_TYPES.FLASH_SALE:
+        return <FlashSale />;
 
-    if (item.type === "topDeal") {
-      return <TopDeal />;
-    }
+      case ITEM_TYPES.TOP_DEAL:
+        return <TopDeal />;
 
-    if (item.type === "banner") {
-      return <Banner />;
-    }
+      case ITEM_TYPES.BANNER:
+        return <Banner />;
 
-    if (item.type === "bestSeller") {
-      return <BestSeller />;
-    }
+      case ITEM_TYPES.BEST_SELLER_HEADER:
+        return <BestSellerHeader />;
 
-    return null;
+      case ITEM_TYPES.BEST_SELLER_PRODUCT:
+        return <BestSellerProductItem products={item.products} />;
+
+      case ITEM_TYPES.BEST_SELLER_FOOTER:
+        return <BestSellerFooter loading={item.loading} />;
+
+      case ITEM_TYPES.BEST_SELLER_LOADING:
+        return <BestSellerSkeleton />;
+
+      case ITEM_TYPES.BEST_SELLER_EMPTY:
+        return <BestSellerEmpty />;
+
+      default:
+        return null;
+    }
   };
 
   return (
@@ -316,10 +497,12 @@ export const HomeScreen: React.FC = () => {
         }
         data={flashlistData}
         renderItem={renderItem}
-        keyExtractor={(item) => item.type}
+        keyExtractor={(item) => item.id}
         estimatedItemSize={200}
         getItemType={(item) => item.type}
         ListHeaderComponent={<HeaderSearch />}
+        onEndReached={handleEndReached}
+        onEndReachedThreshold={0.5}
       />
     </ScreenWrapper>
   );

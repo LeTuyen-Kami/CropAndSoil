@@ -48,6 +48,28 @@ const Item = ({ title, image, itemBgColor, textColor, onPress }: ItemProps) => {
   );
 };
 
+const CategoryItemSkeleton = () => {
+  return (
+    <View className="w-[71] flex-col gap-2 items-center">
+      <View className="rounded-full size-[60] animate-pulse bg-gray-400/20" />
+      <View className="w-16 h-3 rounded-md animate-pulse bg-gray-400/20" />
+      <View className="w-14 h-3 rounded-md animate-pulse bg-gray-400/20" />
+    </View>
+  );
+};
+
+const CategorySkeleton = () => {
+  return (
+    <View className="flex-row">
+      {Array.from({ length: 5 }).map((_, index) => (
+        <View key={index} className="mx-1.5">
+          <CategoryItemSkeleton />
+        </View>
+      ))}
+    </View>
+  );
+};
+
 interface CategoryProps {
   getCategoriesApi?: (
     payload: PaginationRequests
@@ -67,16 +89,27 @@ const Category = ({
 }: CategoryProps) => {
   const navigation = useNavigation<RootStackScreenProps<"MainTabs">>();
 
-  const { data, fetchNextPage, hasNextPage } = usePagination(getCategoriesApi, {
-    queryKey: queryKey,
-    initialPagination: { skip: 0, take: 10 },
-  });
+  const { data, fetchNextPage, hasNextPage, isLoading } = usePagination(
+    getCategoriesApi,
+    {
+      queryKey: queryKey,
+      initialPagination: { skip: 0, take: 10 },
+    }
+  );
 
   const handlePressCategory = (category: ICategory) => {
     navigation.navigate("SearchAdvance", {
       searchText: category.name,
     });
   };
+
+  if (isLoading) {
+    return (
+      <View className={cn("py-1 min-h-[90px]", className)}>
+        <CategorySkeleton />
+      </View>
+    );
+  }
 
   return (
     <View className={cn("min-h-[90px]", className)}>

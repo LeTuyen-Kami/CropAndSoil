@@ -19,6 +19,7 @@ import useDisclosure from "~/hooks/useDisclosure";
 import { AntDesign, Feather } from "@expo/vector-icons";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 import { Video, ResizeMode } from "expo-av";
+import RenderVideo from "./RenderVideo";
 
 type ReviewMedia = {
   type: "image" | "video";
@@ -163,34 +164,9 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
                         contentFit="cover"
                       />
                     ) : (
-                      <>
-                        <Video
-                          source={{ uri: item.uri }}
-                          style={{ width: 80, height: 80, borderRadius: 5 }}
-                          resizeMode={ResizeMode.COVER}
-                          useNativeControls={false}
-                        />
-                        <View
-                          style={{
-                            position: "absolute",
-                            width: "100%",
-                            height: "100%",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            backgroundColor: "rgba(0,0,0,0.2)",
-                            borderRadius: 5,
-                          }}
-                        >
-                          <Feather name="play" size={20} color="white" />
-                        </View>
-                        {item.duration && (
-                          <View className="absolute right-0 bottom-0 left-0 flex-row justify-center items-center px-2 h-5 bg-black bg-opacity-60 rounded-b-md">
-                            <Text className="text-xs text-white">
-                              {item.duration}
-                            </Text>
-                          </View>
-                        )}
-                      </>
+                      <View className="w-20 h-20 bg-gray-200 rounded-md">
+                        <RenderVideo uri={item.uri} />
+                      </View>
                     )}
                   </Pressable>
                 )}

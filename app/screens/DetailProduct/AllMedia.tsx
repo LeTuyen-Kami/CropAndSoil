@@ -6,6 +6,7 @@ import useDisclosure from "~/hooks/useDisclosure";
 import Gallery from "~/components/common/Galery";
 import { Video, ResizeMode } from "expo-av";
 import { Feather } from "@expo/vector-icons";
+import RenderVideo from "~/components/common/RenderVideo";
 
 type MediaItem = {
   type: string;
@@ -65,27 +66,7 @@ const AllMedia = ({ media }: { media?: MediaItem[] }) => {
                   contentFit="cover"
                 />
               ) : (
-                <>
-                  <Video
-                    source={{ uri: item.uri }}
-                    style={{ width: "100%", height: "100%", borderRadius: 10 }}
-                    resizeMode={ResizeMode.COVER}
-                    useNativeControls={false}
-                  />
-                  <View
-                    style={{
-                      position: "absolute",
-                      width: "100%",
-                      height: "100%",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      backgroundColor: "rgba(0,0,0,0.2)",
-                      borderRadius: 10,
-                    }}
-                  >
-                    <Feather name="play" size={20} color="white" />
-                  </View>
-                </>
+                <RenderVideo uri={item.uri} />
               )}
             </View>
           </TouchableOpacity>

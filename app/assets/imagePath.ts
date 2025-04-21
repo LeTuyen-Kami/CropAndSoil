@@ -131,6 +131,10 @@ import icSort from "~/assets/icons/sort_vertical_icon.png";
 import icTimer from "~/assets/icons/icon_timer.png";
 import icAvatar from "~/assets/icons/avatar.png";
 import flashSaleBadge from "~/assets/images/flashsale_badge.png";
+
+import icCamera from "~/assets/icons/camera_icon.png";
+import icVideo from "~/assets/icons/video_camera_icon.png";
+
 export const imagePaths = {
   //images
   logo: logo,
@@ -264,4 +268,7 @@ export const imagePaths = {
 
   icAvatar: icAvatar,
   flashSaleBadge: flashSaleBadge,
+
+  icCamera: icCamera,
+  icVideo: icVideo,
 };

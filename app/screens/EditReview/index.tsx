@@ -31,10 +31,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRoute } from "@react-navigation/native";
 import { RootStackRouteProp } from "~/navigation/types";
 import { orderService } from "~/services/api/order.service";
-import { getErrorMessage, getMediaTypes } from "~/utils";
+import { getErrorMessage, getMediaTypes, screen } from "~/utils";
 import { useAtomValue } from "jotai";
 import { authAtom } from "~/store/atoms";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
+import { imagePaths } from "~/assets/imagePath";
+import RenderVideo from "~/components/common/RenderVideo";
 
 // Define types for the images/videos
 type MediaAsset = {
@@ -69,6 +71,8 @@ const EditReview = () => {
   const [showPackagingModal, setShowPackagingModal] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState<MediaAsset | null>(null);
   const [showFullscreenPreview, setShowFullscreenPreview] = useState(false);
+  const [showMediaTypeModal, setShowMediaTypeModal] = useState(false);
+  const [showVideoTypeModal, setShowVideoTypeModal] = useState(false);
   const navigation = useSmartNavigation();
   const auth = useAtomValue(authAtom);
   const videoRef = useRef<Video>(null);
@@ -498,9 +502,21 @@ const EditReview = () => {
           {/* Media Upload Section */}
           <View className="flex-row flex-wrap gap-2 mb-4">
             {mediaAssets.map((asset, index) => (
-              <View key={index} className="w-[88px] h-[88px] relative">
+              <View
+                key={index}
+                className="relative"
+                style={{
+                  width: (screen.width - 8 * 5) / 4,
+                  height: (screen.width - 8 * 5) / 4,
+                }}
+              >
                 <TouchableOpacity
-                  style={{ width: "100%", height: "100%", borderRadius: 6 }}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: 6,
+                    overflow: "hidden",
+                  }}
                   onPress={() => handleOpenPreview(asset)}
                 >
                   {asset.type === "image" ? (
@@ -510,86 +526,55 @@ const EditReview = () => {
                       contentFit="cover"
                     />
                   ) : (
-                    <>
-                      <Video
-                        source={{ uri: asset.uri }}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          borderRadius: 6,
-                        }}
-                        resizeMode={ResizeMode.COVER}
-                        useNativeControls={false}
-                      />
-                      <View
-                        style={{
-                          position: "absolute",
-                          width: "100%",
-                          height: "100%",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          backgroundColor: "rgba(0,0,0,0.2)",
-                          borderRadius: 6,
-                        }}
-                      >
-                        <Feather name="play" size={24} color="white" />
-                      </View>
-                    </>
+                    <RenderVideo uri={asset.uri} />
                   )}
                 </TouchableOpacity>
                 <TouchableOpacity
                   className="absolute top-1 right-1 bg-black/40 w-[14px] h-[14px] rounded-lg flex items-center justify-center border border-white/40"
                   onPress={() => removeMediaAsset(index)}
+                  hitSlop={10}
                 >
                   <AntDesign name="close" size={10} color="white" />
                 </TouchableOpacity>
               </View>
             ))}
 
-            {/* Image Upload Button */}
+            {/* Combined Image Upload Button */}
             <TouchableOpacity
-              className="w-[88px] h-[88px] border border-dashed border-gray-400 rounded-md flex items-center justify-center"
-              onPress={() => handlePickImage(false)}
+              className="flex justify-center items-center rounded-md border border-gray-400 border-dashed"
+              style={{
+                width: (screen.width - 8 * 5) / 4,
+                height: (screen.width - 8 * 5) / 4,
+              }}
+              onPress={() => setShowMediaTypeModal(true)}
             >
               <View className="items-center">
-                <Feather name="camera" size={24} color="#AEAEAE" />
-                <Text className="text-[#AEAEAE] text-xs font-medium mt-1">
-                  Chụp ảnh
-                </Text>
+                <Image
+                  source={imagePaths.icCamera}
+                  style={{ width: 24, height: 24 }}
+                />
                 <Text className="text-[#AEAEAE] text-xs mt-1">
-                  {imageCount}/{MAX_IMAGES}
+                  {imageCount > 0 ? `${imageCount}/${MAX_IMAGES}` : "Ảnh"}
                 </Text>
               </View>
             </TouchableOpacity>
 
-            {/* Gallery Upload Button */}
+            {/* Combined Video Upload Button */}
             <TouchableOpacity
-              className="w-[88px] h-[88px] border border-dashed border-gray-400 rounded-md flex items-center justify-center"
-              onPress={() => handleTakePhoto()}
+              className="flex justify-center items-center rounded-md border border-gray-400 border-dashed"
+              style={{
+                width: (screen.width - 8 * 5) / 4,
+                height: (screen.width - 8 * 5) / 4,
+              }}
+              onPress={() => setShowVideoTypeModal(true)}
             >
               <View className="items-center">
-                <Feather name="image" size={24} color="#AEAEAE" />
+                <Image
+                  source={imagePaths.icVideo}
+                  style={{ width: 24, height: 24 }}
+                />
                 <Text className="text-[#AEAEAE] text-xs font-medium mt-1">
-                  Thư viện
-                </Text>
-                <Text className="text-[#AEAEAE] text-xs mt-1">
-                  {imageCount}/{MAX_IMAGES}
-                </Text>
-              </View>
-            </TouchableOpacity>
-
-            {/* Video Upload Button */}
-            <TouchableOpacity
-              className="w-[88px] h-[88px] border border-dashed border-gray-400 rounded-md flex items-center justify-center"
-              onPress={() => handlePickImage(true)}
-            >
-              <View className="items-center">
-                <Feather name="video" size={24} color="#AEAEAE" />
-                <Text className="text-[#AEAEAE] text-xs font-medium mt-1">
-                  Video
-                </Text>
-                <Text className="text-[#AEAEAE] text-xs mt-1">
-                  {videoCount}/{MAX_VIDEOS}
+                  {videoCount > 0 ? `${videoCount}/${MAX_VIDEOS}` : "Video"}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -732,6 +717,92 @@ const EditReview = () => {
               </Text>
             </TouchableOpacity>
           ))}
+        </View>
+      </ModalBottom>
+
+      {/* Image Selection Modal */}
+      <ModalBottom
+        isOpen={showMediaTypeModal}
+        onClose={() => setShowMediaTypeModal(false)}
+      >
+        <View className="p-4">
+          <Text className="mb-4 text-lg font-medium">Thêm hình ảnh</Text>
+
+          <TouchableOpacity
+            className="flex-row items-center py-3 border-b border-gray-100"
+            onPress={() => {
+              handlePickImage(false);
+              setShowMediaTypeModal(false);
+            }}
+          >
+            <Feather
+              name="camera"
+              size={20}
+              color="#383B45"
+              style={{ marginRight: 12 }}
+            />
+            <Text className="text-base text-[#383B45]">Chụp ảnh</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className="flex-row items-center py-3 border-b border-gray-100"
+            onPress={() => {
+              handleTakePhoto();
+              setShowMediaTypeModal(false);
+            }}
+          >
+            <Feather
+              name="image"
+              size={20}
+              color="#383B45"
+              style={{ marginRight: 12 }}
+            />
+            <Text className="text-base text-[#383B45]">Chọn từ thư viện</Text>
+          </TouchableOpacity>
+        </View>
+      </ModalBottom>
+
+      {/* Video Selection Modal */}
+      <ModalBottom
+        isOpen={showVideoTypeModal}
+        onClose={() => setShowVideoTypeModal(false)}
+      >
+        <View className="p-4">
+          <Text className="mb-4 text-lg font-medium">Thêm video</Text>
+
+          <TouchableOpacity
+            className="flex-row items-center py-3 border-b border-gray-100"
+            onPress={() => {
+              handlePickImage(true);
+              setShowVideoTypeModal(false);
+            }}
+          >
+            <Feather
+              name="video"
+              size={20}
+              color="#383B45"
+              style={{ marginRight: 12 }}
+            />
+            <Text className="text-base text-[#383B45]">Quay video</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className="flex-row items-center py-3 border-b border-gray-100"
+            onPress={() => {
+              // TODO: Add function to pick video from gallery
+              // For now, reusing the same function
+              handlePickImage(true);
+              setShowVideoTypeModal(false);
+            }}
+          >
+            <Feather
+              name="film"
+              size={20}
+              color="#383B45"
+              style={{ marginRight: 12 }}
+            />
+            <Text className="text-base text-[#383B45]">Chọn từ thư viện</Text>
+          </TouchableOpacity>
         </View>
       </ModalBottom>
     </ScreenWrapper>
