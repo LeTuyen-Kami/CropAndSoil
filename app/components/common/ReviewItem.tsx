@@ -20,6 +20,7 @@ import { AntDesign, Feather } from "@expo/vector-icons";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 import { Video, ResizeMode } from "expo-av";
 import RenderVideo from "./RenderVideo";
+import { deepEqual } from "fast-equals";
 
 type ReviewMedia = {
   type: "image" | "video";
@@ -162,6 +163,7 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
                         source={item.uri}
                         style={{ width: 80, height: 80, borderRadius: 5 }}
                         contentFit="cover"
+                        shouldRasterizeIOS={true}
                       />
                     ) : (
                       <View className="w-20 h-20 bg-gray-200 rounded-md">
@@ -170,6 +172,14 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
                     )}
                   </Pressable>
                 )}
+                getItemLayout={(data, index) => ({
+                  length: 80,
+                  offset: 80 * index,
+                  index,
+                })}
+                initialNumToRender={4}
+                maxToRenderPerBatch={4}
+                windowSize={3}
               />
             </View>
           )}
@@ -300,4 +310,6 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
   );
 };
 
-export default memo(ReviewItem);
+export default memo(ReviewItem, (prevProps, nextProps) => {
+  return deepEqual(prevProps, nextProps);
+});

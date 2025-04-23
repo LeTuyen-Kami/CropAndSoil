@@ -10,7 +10,7 @@ import { usePagination } from "~/hooks/usePagination";
 import { IReview, reviewService } from "~/services/api/review.service";
 import { RefreshControl } from "react-native-gesture-handler";
 import { COLORS } from "~/constants/theme";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { formatDate, getMediaTypes } from "~/utils";
 import { Image } from "expo-image";
 import { imagePaths } from "~/assets/imagePath";
@@ -70,6 +70,59 @@ const ListRated = () => {
     updateParams({ rating: item.value });
   };
 
+  const renderItem = useCallback(
+    ({ item }: { item: IReview }) => {
+      return (
+        <View className="bg-white rounded-2xl">
+          <TouchableOpacity
+            className="flex-row gap-2 items-center px-3 pt-3"
+            onPress={() => {
+              navigation.navigate("Shop", { id: item.shop.id });
+            }}
+          >
+            <Image
+              source={imagePaths.icShop}
+              className="size-5"
+              contentFit="cover"
+              style={{
+                tintColor: "#393B45",
+              }}
+            />
+            <Text className="text-sm text-[#393B45]  font-medium">
+              {item.shop.shopName}
+            </Text>
+          </TouchableOpacity>
+          <ReviewItem
+            isLikeButtonInBottom
+            onPressEdit={() => onPressEdit(item)}
+            onPressLike={() => onPressLike(item.id)}
+            reviewer={{
+              name: item.authorName,
+              avatar: item.authorAvatar,
+            }}
+            sellerResponse={item?.replies?.[0]?.comment}
+            rating={item.rating}
+            media={item?.gallery?.map((media) => ({
+              type: getMediaTypes(media),
+              uri: media,
+            }))}
+            quality={item.quality}
+            date={formatDate(item.createdAt)}
+            productVariant={item.variation.name}
+            likes={item.totalLikes}
+            product={{
+              id: item.productId.toString(),
+              name: item?.product?.name,
+              image: item?.product?.thumbnail,
+            }}
+            comment={item.comment}
+          />
+        </View>
+      );
+    },
+    [navigation]
+  );
+
   return (
     <View className="flex-1 bg-[#eee]">
       <RatingFilter
@@ -79,58 +132,12 @@ const ListRated = () => {
       />
       <FlashList
         data={reviews}
-        renderItem={({ item }) => (
-          <View className="bg-white rounded-2xl">
-            <TouchableOpacity
-              className="flex-row gap-2 items-center px-3 pt-3"
-              onPress={() => {
-                navigation.navigate("Shop", { id: item.shop.id });
-              }}
-            >
-              <Image
-                source={imagePaths.icShop}
-                className="size-5"
-                contentFit="cover"
-                style={{
-                  tintColor: "#393B45",
-                }}
-              />
-              <Text className="text-sm text-[#393B45]  font-medium">
-                {item.shop.shopName}
-              </Text>
-            </TouchableOpacity>
-            <ReviewItem
-              isLikeButtonInBottom
-              onPressEdit={() => onPressEdit(item)}
-              onPressLike={() => onPressLike(item.id)}
-              reviewer={{
-                name: item.authorName,
-                avatar: item.authorAvatar,
-              }}
-              sellerResponse={item?.replies?.[0]?.comment}
-              rating={item.rating}
-              media={item?.gallery?.map((media) => ({
-                type: getMediaTypes(media),
-                uri: media,
-              }))}
-              quality={item.quality}
-              date={formatDate(item.createdAt)}
-              productVariant={item.variation.name}
-              likes={item.totalLikes}
-              product={{
-                id: item.productId.toString(),
-                name: item?.product?.name,
-                image: item?.product?.thumbnail,
-              }}
-              comment={item.comment}
-            />
-          </View>
-        )}
+        renderItem={renderItem}
         onEndReached={fetchNextPage}
         refreshControl={
           <RefreshControl refreshing={isRefresh} onRefresh={refresh} />
         }
-        estimatedItemSize={100}
+        estimatedItemSize={500}
         ItemSeparatorComponent={() => <View className="h-2" />}
         ListEmptyComponent={() => (
           <Empty title="Không có đánh giá nào" isLoading={isLoading} />

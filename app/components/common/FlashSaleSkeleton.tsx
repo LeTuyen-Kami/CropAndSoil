@@ -34,7 +34,7 @@ const ProductSkeleton = () => {
   );
 };
 
-const FlashSaleSkeleton = ({ count = 5 }: FlashSaleSkeletonProps) => {
+const FlashSaleSkeleton = ({ count = 3 }: FlashSaleSkeletonProps) => {
   return (
     <View>
       <View className="relative mt-10">

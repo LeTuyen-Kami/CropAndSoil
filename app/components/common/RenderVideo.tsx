@@ -11,30 +11,20 @@ interface RenderVideoProps {
 }
 
 const RenderVideo = ({ uri }: RenderVideoProps) => {
-  const videoRef = useRef<Video>(null);
   const [duration, setDuration] = useState<number>(0);
-  useEffect(() => {
-    const getDuration = async () => {
-      const status = await videoRef.current?.getStatusAsync();
-      if (status?.isLoaded) {
-        setDuration(status.durationMillis || 0);
-      }
-    };
-
-    // Delay một tí để video load xong đã
-    setTimeout(() => {
-      getDuration();
-    }, 1000);
-  }, []);
 
   return (
     <View className="overflow-hidden w-full h-full rounded-md">
       <Video
-        ref={videoRef}
         source={{ uri }}
         resizeMode={ResizeMode.COVER}
         shouldPlay={false}
         style={{ width: "100%", height: "100%" }}
+        onLoad={(status) => {
+          if (status.isLoaded) {
+            setDuration(status.durationMillis || 0);
+          }
+        }}
       />
       {duration > 0 && (
         <View className="absolute right-0 bottom-0 left-0 flex-row justify-between items-center p-1 bg-black/40">

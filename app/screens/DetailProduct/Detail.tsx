@@ -8,12 +8,13 @@ import WebView, { WebViewMessageEvent } from "react-native-webview";
 import { imagePaths } from "~/assets/imagePath";
 import WebViewContent from "~/components/common/WebViewContent";
 import { Text } from "~/components/ui/text";
+import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 import { RootStackScreenProps } from "~/navigation/types";
 import { productService } from "~/services/api/product.service";
 
 const Detail = ({ id }: { id: string | number }) => {
   const [expanded, setExpanded] = useState(false);
-  const navigation = useNavigation<RootStackScreenProps<"DetailProduct">>();
+  const navigation = useSmartNavigation();
 
   const { data: productDescription } = useQuery({
     queryKey: ["productDetail", id],
@@ -32,7 +33,7 @@ const Detail = ({ id }: { id: string | number }) => {
   const handlePressAllProduct = () => {
     if (!productDescription?.shop?.id) return;
 
-    navigation.navigate("Shop", {
+    navigation.smartNavigate("Shop", {
       id: String(productDescription?.shop?.id),
       tabIndex: 2,
     });
@@ -80,7 +81,10 @@ const Detail = ({ id }: { id: string | number }) => {
 
         {expanded && (
           <View className="px-5">
-            <WebViewContent html={productDescription?.description || ""} />
+            <WebViewContent
+              html={productDescription?.description || ""}
+              canScroll={false}
+            />
           </View>
         )}
       </View>

@@ -55,7 +55,6 @@ const SettingItem = ({
 };
 
 const Settings = () => {
-  const appVersion = Constants.manifest?.version || "1.0.0";
   const navigation = useSmartNavigation();
   const { bottom } = useSafeAreaInsets();
 
@@ -68,6 +67,7 @@ const Settings = () => {
       onSuccess: () => {
         toast.success("Đăng xuất thành công");
         signOut();
+        navigation.smartGoBack();
       },
     });
   };

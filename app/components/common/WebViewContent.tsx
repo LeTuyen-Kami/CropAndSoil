@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { WebView, WebViewMessageEvent } from "react-native-webview";
+import {
+  WebView,
+  WebViewMessageEvent,
+  WebViewNavigation,
+} from "react-native-webview";
 
 const WebViewContent = ({
   html,
@@ -12,6 +16,15 @@ const WebViewContent = ({
 
   const onWebViewMessage = (event: WebViewMessageEvent) => {
     setWebViewHeight(Number(event.nativeEvent.data));
+  };
+
+  const onShouldStartLoadWithRequest = (event: WebViewNavigation) => {
+    // Allow initial HTML load
+    if (event.navigationType === "other") {
+      return true;
+    }
+    // Block all other navigation attempts
+    return false;
   };
 
   return (
@@ -69,6 +82,13 @@ const WebViewContent = ({
             th {
               background-color: #f8f8f8;
             }
+
+            video {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+              border-radius: 8px;
+            }
           </style>
         </head>
         <body>
@@ -77,6 +97,15 @@ const WebViewContent = ({
             // Send height to React Native
             window.onload = function() {
               window.ReactNativeWebView.postMessage(document.body.scrollHeight);
+              
+              // Prevent clicks on links from navigating
+              document.addEventListener('click', function(e) {
+                const link = e.target.closest('a');
+                if (link) {
+                  e.preventDefault();
+                  return false;
+                }
+              });
             };
           </script>
         </body>
@@ -85,6 +114,7 @@ const WebViewContent = ({
       }}
       style={{ width: "100%", height: webViewHeight + 20 }}
       onMessage={onWebViewMessage}
+      onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
       scrollEnabled={false}
       showsVerticalScrollIndicator={false}
       originWhitelist={["*"]}

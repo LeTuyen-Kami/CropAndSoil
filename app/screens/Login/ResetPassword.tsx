@@ -151,7 +151,10 @@ const ResetPassword = () => {
       {
         onSuccess: (data) => {
           toast.success("Đặt lại mật khẩu thành công");
-          navigation.goBack();
+          navigation.reset({
+            index: 0,
+            routes: [{ name: "MainTabs" }],
+          });
         },
         onError: (error) => {
           toast.error(getErrorMessage(error, "Lỗi khi đặt lại mật khẩu"));
@@ -204,8 +207,8 @@ const ResetPassword = () => {
           {step === "phone"
             ? "Vui lòng nhập SĐT của bạn để nhận mã xác thực từ SMS."
             : step === "code"
-            ? "Vui lòng nhập mã xác thực được gửi tới SĐT của bạn."
-            : "Vui lòng đặt mật khẩu mới cho tài khoản của bạn."}
+              ? "Vui lòng nhập mã xác thực được gửi tới SĐT của bạn."
+              : "Vui lòng đặt mật khẩu mới cho tài khoản của bạn."}
         </Text>
       </View>
 

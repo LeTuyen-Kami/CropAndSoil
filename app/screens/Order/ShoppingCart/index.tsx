@@ -152,15 +152,15 @@ const ShoppingCart = () => {
         isSelected: shop.items.every((item) => item.isChecked),
         items: shop.items.map((item) => ({
           id: item.id.toString(),
-          productId: item.product.id.toString(),
-          name: item.product.name,
-          image: item.variation?.thumbnail || item.product.thumbnail,
+          productId: item?.product?.id.toString(),
+          name: item?.product?.name || "",
+          image: item?.variation?.thumbnail || item?.product?.thumbnail,
           price: item.unitPrice,
-          originalPrice: item.product.regularPrice,
-          type: item.variation?.name || "",
+          originalPrice: item?.product?.regularPrice,
+          type: item?.variation?.name || "",
           variation: {
-            name: item.variation?.name || "",
-            id: item.variation?.id,
+            name: item?.variation?.name || "",
+            id: item?.variation?.id,
           },
           quantity: item.quantity,
           isSelected: item.isChecked,
@@ -306,14 +306,20 @@ const ShoppingCart = () => {
   }, []);
 
   const handleRemoveAll = useCallback(() => {
+    const allCartItems = stores.flatMap((store) =>
+      store.items.map((item) => Number(item.id))
+    );
+
+    if (allCartItems.length === 0) {
+      toast.error("Hiện tại giỏ hàng không có sản phẩm");
+      return;
+    }
+
     showModalConfirm({
       title: "Xóa tất cả sản phẩm",
       message: "Bạn có muốn xóa tất cả sản phẩm khỏi giỏ hàng không?",
       onConfirm: () => {
         toggleLoading(true);
-        const allCartItems = stores.flatMap((store) =>
-          store.items.map((item) => Number(item.id))
-        );
         mutationRemoveCartItem.mutate(allCartItems, {
           onSuccess: () => {
             refetch();
@@ -325,7 +331,7 @@ const ShoppingCart = () => {
         });
       },
     });
-  }, []);
+  }, [stores]);
 
   const allItemsSelected =
     stores.length > 0 && stores.every((store) => store.isSelected);

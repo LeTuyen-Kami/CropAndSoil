@@ -18,7 +18,7 @@ import {
 import { shopService } from "~/services/api/shop.service";
 import { wishlistService } from "~/services/api/wishlist.service";
 import { authAtom } from "~/store/atoms";
-import { formatPrice } from "~/utils";
+import { formatPrice, maskVNDPriceBeforeSale } from "~/utils";
 
 const BrandBadge = () => {
   return (
@@ -293,18 +293,27 @@ const Info = ({ id }: { id: string | number }) => {
       <View style={styles.priceContainer}>
         <View style={styles.priceContent}>
           <Text style={styles.discountedPrice}>
-            {formatPrice(
-              productDetail?.flashSaleVariation?.[0]?.salePrice ||
-                productDetail?.flashSaleVariation?.[0]?.regularPrice
-            )}
+            {auth?.isLoggedIn
+              ? formatPrice(
+                  productDetail?.flashSaleVariation?.[0]?.salePrice ||
+                    productDetail?.flashSaleVariation?.[0]?.regularPrice
+                )
+              : maskVNDPriceBeforeSale(
+                  productDetail?.flashSaleVariation?.[0]?.salePrice ||
+                    productDetail?.flashSaleVariation?.[0]?.regularPrice
+                )}
           </Text>
           {productDetail?.flashSaleVariation?.[0]?.salePrice &&
             productDetail?.flashSaleVariation?.[0]?.salePrice <
               productDetail?.flashSaleVariation?.[0]?.regularPrice && (
               <Text style={styles.originalPrice}>
-                {formatPrice(
-                  productDetail?.flashSaleVariation?.[0]?.regularPrice
-                )}
+                {auth?.isLoggedIn
+                  ? formatPrice(
+                      productDetail?.flashSaleVariation?.[0]?.regularPrice
+                    )
+                  : maskVNDPriceBeforeSale(
+                      productDetail?.flashSaleVariation?.[0]?.regularPrice
+                    )}
               </Text>
             )}
         </View>

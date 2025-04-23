@@ -265,9 +265,11 @@ export const isNowBetween = (start?: string, end?: string) => {
 };
 
 export const maskVNDPriceBeforeSale = (
-  price: number,
+  price?: number,
   visibleDigits = 1
 ): string => {
+  if (!price) return "0 ₫";
+
   const priceStr = price.toString();
   const masked = priceStr
     .split("")

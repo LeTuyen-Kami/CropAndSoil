@@ -13,7 +13,7 @@ import { IProduct, productService } from "~/services/api/product.service";
 import { shopService } from "~/services/api/shop.service";
 import { wishlistService } from "~/services/api/wishlist.service";
 import { authAtom } from "~/store/atoms";
-import { formatPrice } from "~/utils";
+import { formatPrice, maskVNDPriceBeforeSale } from "~/utils";
 
 const BrandBadge = () => {
   return (
@@ -263,14 +263,20 @@ const Info = ({ id }: { id: string | number }) => {
       <View style={styles.priceContainer}>
         <View style={styles.priceContent}>
           <Text style={styles.discountedPrice}>
-            {formatPrice(
-              productDetail?.salePrice || productDetail?.regularPrice
-            )}
+            {auth?.isLoggedIn
+              ? formatPrice(
+                  productDetail?.salePrice || productDetail?.regularPrice
+                )
+              : maskVNDPriceBeforeSale(
+                  productDetail?.salePrice || productDetail?.regularPrice
+                )}
           </Text>
           {productDetail?.regularPrice &&
             productDetail?.regularPrice > productDetail?.salePrice && (
               <Text style={styles.originalPrice}>
-                {formatPrice(productDetail?.regularPrice)}
+                {auth?.isLoggedIn
+                  ? formatPrice(productDetail?.regularPrice)
+                  : maskVNDPriceBeforeSale(productDetail?.regularPrice)}
               </Text>
             )}
         </View>

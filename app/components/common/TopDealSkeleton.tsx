@@ -41,7 +41,7 @@ const ProductGridSkeleton = () => {
   );
 };
 
-const TopDealSkeleton = ({ count = 4 }: TopDealSkeletonProps) => {
+const TopDealSkeleton = ({ count = 2 }: TopDealSkeletonProps) => {
   return (
     <View className="bg-primary-100">
       <View className="mt-4">

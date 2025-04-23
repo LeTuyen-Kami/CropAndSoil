@@ -23,6 +23,7 @@ import useGetShopId from "../useGetShopId";
 import { IProduct, productService } from "~/services/api/product.service";
 import { useQuery } from "@tanstack/react-query";
 import { deepEqual } from "fast-equals";
+import { toast } from "~/components/common/Toast";
 
 const TopProduct = ({ items }: { items: IProduct[] | undefined }) => {
   if (!checkCanRender(items)) return null;
@@ -87,6 +88,10 @@ const PrivateVoucher = ({ items }: { items: IProduct[] | undefined }) => {
 
 const RenderTwoVoucher = memo(
   ({ items }: { items: IVoucher[] }) => {
+    const onPress = (id: string) => {
+      toast.success("Đã lưu voucher");
+    };
+
     return (
       <View className="flex-row flex-wrap gap-x-2 gap-y-2 px-2 pb-2 bg-white">
         {items?.map((item) => (
@@ -97,6 +102,7 @@ const RenderTwoVoucher = memo(
             minimumAmount={convertToK(item.minimumAmount)}
             maximumReduction={convertToK(item.maximumReduction)}
             expiryDate={formatDate(item.expiryDate)}
+            onPressSave={() => onPress(item.id.toString())}
           />
         ))}
       </View>

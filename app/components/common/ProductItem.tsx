@@ -1,12 +1,15 @@
 import { useNavigation } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { deepEqual } from "fast-equals";
+import { useAtomValue } from "jotai";
 import React from "react";
 import { DimensionValue, TouchableOpacity, View } from "react-native";
 import { imagePaths } from "~/assets/imagePath";
 import { Text } from "~/components/ui/text";
 import { cn } from "~/lib/utils";
 import { RootStackScreenProps } from "~/navigation/types";
+import { authAtom } from "~/store/atoms";
+import { maskVNDPriceBeforeSale } from "~/utils";
 
 export interface ProductItemProps {
   image?: string;
@@ -48,6 +51,8 @@ const ProductItem = ({
   overrideSalePrice,
 }: ProductItemProps) => {
   const navigation = useNavigation<RootStackScreenProps<"DetailProduct">>();
+
+  const auth = useAtomValue(authAtom);
 
   const hasDiscount = !!discount && discount > 0;
   const hasSoldCount =
@@ -102,11 +107,15 @@ const ProductItem = ({
             <Text className="text-sm font-bold leading-tight text-error-500">
               {!!overrideSalePrice
                 ? overrideSalePrice
-                : formatPrice(price || originalPrice || 0)}
+                : auth?.isLoggedIn
+                  ? formatPrice(price || originalPrice || 0)
+                  : maskVNDPriceBeforeSale(price || originalPrice || 0)}
             </Text>
             {onSale && originalPrice && (
               <Text className="text-xs tracking-tight line-through text-neutral-400">
-                {formatPrice(originalPrice)}
+                {auth?.isLoggedIn
+                  ? formatPrice(originalPrice)
+                  : maskVNDPriceBeforeSale(originalPrice)}
               </Text>
             )}
           </View>

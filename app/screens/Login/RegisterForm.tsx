@@ -126,7 +126,10 @@ const RegisterForm = () => {
               token: data.token,
               isLoggedIn: true,
             }));
-            navigation.goBack();
+            navigation.reset({
+              index: 0,
+              routes: [{ name: "MainTabs" }],
+            });
           },
           onError: (error) => {
             toast.error(

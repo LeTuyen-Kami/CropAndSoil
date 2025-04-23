@@ -54,7 +54,7 @@ const ProductGridSkeleton = () => {
   );
 };
 
-const BestSellerSkeleton = ({ count = 6 }: BestSellerSkeletonProps) => {
+const BestSellerSkeleton = ({ count = 2 }: BestSellerSkeletonProps) => {
   return (
     <View className="bg-primary-50">
       <View className="mt-2">

@@ -8,6 +8,7 @@ import { formatDate } from "~/utils";
 import { formatCurrency } from "~/utils/format";
 import { COLORS } from "~/constants/theme";
 import { Text } from "~/components/ui/text";
+import { toast } from "~/components/common/Toast";
 
 const ShopPromotion = () => {
   const shopId = useGetShopId();
@@ -22,6 +23,10 @@ const ShopPromotion = () => {
       },
     }
   );
+
+  const onPress = (id: string) => {
+    toast.success("Đã lưu voucher");
+  };
 
   if (!data || !data.length) {
     return null;
@@ -41,6 +46,7 @@ const ShopPromotion = () => {
               item.maximumReduction || 0
             )}`}
             expiryDate={formatDate(item.expiryDate)}
+            onPress={() => onPress(item.id.toString())}
           />
         )}
         horizontal
@@ -56,6 +62,14 @@ const ShopPromotion = () => {
             </View>
           ) : null
         }
+        initialNumToRender={4}
+        maxToRenderPerBatch={4}
+        windowSize={3}
+        getItemLayout={(data, index) => ({
+          length: screen.width / 2.5 - 16,
+          offset: (screen.width / 2.5 - 16) * index,
+          index,
+        })}
       />
     </View>
   );
