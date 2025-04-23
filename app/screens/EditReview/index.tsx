@@ -1,42 +1,40 @@
+import { AntDesign, Feather, Ionicons } from "@expo/vector-icons";
+import { useRoute } from "@react-navigation/native";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ResizeMode, Video } from "expo-av";
+import Checkbox from "expo-checkbox";
+import * as FileSystem from "expo-file-system";
+import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
+import { useAtomValue } from "jotai";
+import React, { useEffect, useRef, useState } from "react";
 import {
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-  View,
+  ActivityIndicator,
   Dimensions,
   Modal,
   StatusBar,
-  ActivityIndicator,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { Text } from "~/components/ui/text";
-import Header from "~/components/common/Header";
-import ScreenWrapper from "~/components/common/ScreenWrapper";
-import { AntDesign, Feather, Ionicons } from "@expo/vector-icons";
-import React, { useState, useEffect, useRef } from "react";
-import { Image } from "expo-image";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system";
-import { toast } from "~/components/common/Toast";
-import ModalBottom from "~/components/common/ModalBottom";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
-import Checkbox from "expo-checkbox";
-import { Video, ResizeMode } from "expo-av";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { imagePaths } from "~/assets/imagePath";
+import Header from "~/components/common/Header";
+import ModalBottom from "~/components/common/ModalBottom";
+import RenderVideo from "~/components/common/RenderVideo";
+import ScreenWrapper from "~/components/common/ScreenWrapper";
+import { toast } from "~/components/common/Toast";
+import { Text } from "~/components/ui/text";
+import { useSmartNavigation } from "~/hooks/useSmartNavigation";
+import { RootStackRouteProp } from "~/navigation/types";
 import {
   ICreateReviewRequest,
   IUpdateReviewRequest,
   reviewService,
 } from "~/services/api/review.service";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRoute } from "@react-navigation/native";
-import { RootStackRouteProp } from "~/navigation/types";
-import { orderService } from "~/services/api/order.service";
-import { getErrorMessage, getMediaTypes, screen } from "~/utils";
-import { useAtomValue } from "jotai";
 import { authAtom } from "~/store/atoms";
-import { useSmartNavigation } from "~/hooks/useSmartNavigation";
-import { imagePaths } from "~/assets/imagePath";
-import RenderVideo from "~/components/common/RenderVideo";
+import { getErrorMessage, screen } from "~/utils";
 
 // Define types for the images/videos
 type MediaAsset = {
@@ -44,6 +42,7 @@ type MediaAsset = {
   type: "image" | "video";
   size?: number;
   fromServer?: boolean;
+  src?: string;
 };
 
 // Define rating options
@@ -424,14 +423,14 @@ const EditReview = () => {
 
           {selectedMedia.type === "image" ? (
             <Image
-              source={{ uri: selectedMedia.uri }}
+              source={{ uri: selectedMedia.src || selectedMedia.uri }}
               style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT * 0.8 }}
               contentFit="contain"
             />
           ) : (
             <Video
               ref={videoRef}
-              source={{ uri: selectedMedia.uri }}
+              source={{ uri: selectedMedia.src || selectedMedia.uri }}
               style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT * 0.8 }}
               useNativeControls
               resizeMode={ResizeMode.CONTAIN}
@@ -452,8 +451,9 @@ const EditReview = () => {
       setRating(review.rating);
       setMediaAssets(
         review.gallery.map((media) => ({
-          uri: media,
-          type: getMediaTypes(media),
+          uri: media.thumbnail,
+          src: media.src,
+          type: media.type === "video" ? "video" : "image",
           fromServer: true,
         }))
       );

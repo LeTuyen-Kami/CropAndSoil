@@ -21,7 +21,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/ic_launcher.png"
+        "foregroundImage": "./assets/icon.png"
       },
       "googleServicesFile": "./assets/google-services.json",
       "package": "com.dgvdigital.CropAndSoil",

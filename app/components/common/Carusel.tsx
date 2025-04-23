@@ -9,6 +9,7 @@ import { useSharedValue } from "react-native-reanimated";
 import { useRef } from "react";
 import { screen } from "~/utils";
 import { Image } from "expo-image";
+import { cn } from "~/lib/utils";
 
 // Use type intersection instead of extending the interface
 
@@ -27,6 +28,7 @@ type CarouselProps<T extends { id: string }> = {
   autoPlay?: boolean;
   autoPlayInterval?: number;
   mode?: "horizontal-stack" | "vertical-stack" | "parallax";
+  className?: string;
 };
 
 const Carousel = <T extends { id: string }>({
@@ -37,6 +39,7 @@ const Carousel = <T extends { id: string }>({
   loop = false,
   autoPlay = false,
   autoPlayInterval = 1000,
+  className,
 }: CarouselProps<T>) => {
   const ref = useRef<ICarouselInstance>(null);
   const progress = useSharedValue<number>(0);
@@ -49,7 +52,7 @@ const Carousel = <T extends { id: string }>({
   };
 
   return (
-    <View className="mt-6">
+    <View className={cn("mt-6", className)}>
       <ECarousel
         ref={ref}
         width={width}

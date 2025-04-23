@@ -196,6 +196,9 @@ const Gallery = ({
                 data={images}
                 horizontal
                 pagingEnabled
+                initialNumToRender={4}
+                maxToRenderPerBatch={4}
+                windowSize={3}
                 showsHorizontalScrollIndicator={false}
                 initialScrollIndex={initialIndex}
                 onViewableItemsChanged={onViewableItemsChanged}

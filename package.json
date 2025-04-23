@@ -39,6 +39,7 @@
     "expo-splash-screen": "~0.29.24",
     "expo-status-bar": "~2.0.1",
     "expo-video-thumbnails": "~9.0.3",
+    "expo-web-browser": "~14.0.2",
     "fast-equals": "^5.2.2",
     "jotai": "^2.12.1",
     "lottie-react-native": "7.1.0",

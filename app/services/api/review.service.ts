@@ -235,6 +235,17 @@ export interface Reply {
   replies: any[];
 }
 
+export interface IGallery {
+  id: string;
+  type: string;
+  mimeType: string;
+  thumbnail: string;
+  width: number;
+  height: number;
+  fileSize: number;
+  src: string;
+}
+
 export interface IReview {
   id: number;
   authorName: string;
@@ -245,7 +256,7 @@ export interface IReview {
   comment: string;
   totalLikes: number;
   totalReplies: number;
-  gallery: any[];
+  gallery: IGallery[];
   shop: Shop;
   productId: number;
   product: Product;

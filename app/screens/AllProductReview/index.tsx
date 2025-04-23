@@ -1,25 +1,25 @@
 import { FlashList } from "@shopify/flash-list";
-import {
-  View,
-  ActivityIndicator,
-  TouchableOpacity,
-  RefreshControl,
-} from "react-native";
 import { Image } from "expo-image";
-import { Text } from "~/components/ui/text";
-import Header from "~/components/common/Header";
-import ScreenWrapper from "~/components/common/ScreenWrapper";
 import { useState } from "react";
-import { COLORS } from "~/constants/theme";
-import Empty from "~/components/common/Empty";
-import { cn } from "~/lib/utils";
+import {
+  ActivityIndicator,
+  RefreshControl,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { usePagination } from "~/hooks/usePagination";
-import { IReview, reviewService } from "~/services/api/review.service";
-import { formatDate, getMediaTypes } from "~/utils";
-import ReviewItem from "~/components/common/ReviewItem";
 import { imagePaths } from "~/assets/imagePath";
+import Empty from "~/components/common/Empty";
+import Header from "~/components/common/Header";
+import ReviewItem from "~/components/common/ReviewItem";
+import ScreenWrapper from "~/components/common/ScreenWrapper";
+import { Text } from "~/components/ui/text";
+import { COLORS } from "~/constants/theme";
+import { usePagination } from "~/hooks/usePagination";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
+import { cn } from "~/lib/utils";
+import { IReview, reviewService } from "~/services/api/review.service";
+import { formatDate } from "~/utils";
 
 interface FilterItem {
   id: string;
@@ -172,8 +172,9 @@ const AllProductReview = ({ route }: { route?: { params?: RouteParams } }) => {
                 sellerResponse={item?.replies?.[0]?.comment}
                 rating={item.rating}
                 media={item?.gallery?.map((media) => ({
-                  type: getMediaTypes(media),
-                  uri: media,
+                  type: media.type === "video" ? "video" : "image",
+                  uri: media.thumbnail,
+                  src: media.src,
                 }))}
                 quality={item.quality}
                 date={formatDate(item.createdAt)}

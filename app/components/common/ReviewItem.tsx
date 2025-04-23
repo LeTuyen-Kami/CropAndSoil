@@ -27,6 +27,7 @@ type ReviewMedia = {
   uri: string;
   duration?: string;
   thumbnail?: string;
+  src?: string;
 };
 
 type ReviewProduct = {
@@ -158,7 +159,7 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
                     onPress={() => onOpen(index)}
                     className="relative mr-2"
                   >
-                    {item.type === "image" ? (
+                    {item.type !== "video" ? (
                       <ExpoImage
                         source={item.uri}
                         style={{ width: 80, height: 80, borderRadius: 5 }}
@@ -300,7 +301,7 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
           media?.map((item) => ({
             url: item.uri,
             type: item.type,
-            thumbnail: item.thumbnail,
+            thumbnail: item.src,
           })) ?? []
         }
         onClose={onClose}

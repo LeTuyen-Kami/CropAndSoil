@@ -3,16 +3,15 @@ import { useQuery } from "@tanstack/react-query";
 import { Image as ExpoImage } from "expo-image";
 import { deepEqual } from "fast-equals";
 import React, { useState } from "react";
-import { ScrollView, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import { imagePaths } from "~/assets/imagePath";
 import ReviewItem from "~/components/common/ReviewItem";
+import { toast } from "~/components/common/Toast";
 import { Text } from "~/components/ui/text";
+import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 import { flashSaleService } from "~/services/api/flashsale.service";
 import { reviewService } from "~/services/api/review.service";
-import AllMedia from "./AllMedia";
-import { formatDate, getMediaTypes } from "~/utils";
-import { toast } from "~/components/common/Toast";
-import { useSmartNavigation } from "~/hooks/useSmartNavigation";
+import { formatDate } from "~/utils";
 type RatingProps = {
   id: string | number;
 };
@@ -172,8 +171,9 @@ const Rating: React.FC<RatingProps> = ({ id }) => {
             likes={review.totalLikes}
             comment={review.comment}
             media={review.gallery.map((media) => ({
-              type: getMediaTypes(media),
-              uri: media,
+              type: media.type === "video" ? "video" : "image",
+              uri: media.thumbnail,
+              src: media.src,
             }))}
           />
         ))}

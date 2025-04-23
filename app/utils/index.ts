@@ -230,11 +230,12 @@ export const priceToNumber = (formattedPrice: string): number => {
   return Number(normalized);
 };
 
-export const getMediaTypes = (media: string) => {
+export const getMediaTypes = (media?: string) => {
+  if (!media) return "image";
+
   const extension = media.split(".").pop();
 
   if (!extension) return "image";
-
   if (
     extension?.includes("jpg") ||
     extension?.includes("jpeg") ||

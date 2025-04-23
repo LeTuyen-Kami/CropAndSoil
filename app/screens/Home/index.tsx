@@ -1,49 +1,42 @@
 import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import React, { useEffect, useMemo, useState } from "react";
+import * as WebBrowser from "expo-web-browser";
+import { useAtom } from "jotai";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  FlatList,
-  RefreshControl,
-  TouchableOpacity,
-  View,
   ActivityIndicator,
+  FlatList,
+  Pressable,
+  RefreshControl,
+  View,
 } from "react-native";
 import { imagePaths } from "~/assets/imagePath";
+import BestSellerEmpty from "~/components/common/BestSellerEmpty";
+import BestSellerSkeleton from "~/components/common/BestSellerSkeleton";
+import CarouselEmpty from "~/components/common/CarouselEmpty";
+import CarouselSkeleton from "~/components/common/CarouselSkeleton";
 import Carousel from "~/components/common/Carusel";
 import Category from "~/components/common/Category";
+import FlashSaleEmpty from "~/components/common/FlashSaleEmpty";
+import FlashSaleSkeleton from "~/components/common/FlashSaleSkeleton";
 import ProductItem from "~/components/common/ProductItem";
 import ScreenWrapper from "~/components/common/ScreenWrapper";
+import TopDealEmpty from "~/components/common/TopDealEmpty";
+import TopDealSkeleton from "~/components/common/TopDealSkeleton";
 import { Text } from "~/components/ui/text";
+import { COLORS } from "~/constants/theme";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
-import {
-  IProduct,
-  IProductResquest,
-  productService,
-} from "~/services/api/product.service";
-import {
-  calculateDiscount,
-  checkCanRender,
-  screen,
-  preHandleFlashListData,
-  chunkArray,
-  applyTyoe,
-} from "~/utils";
+import { flashSaleService } from "~/services/api/flashsale.service";
+import { homeService, ILocalRepeater } from "~/services/api/home.service";
+import { IProduct, productService } from "~/services/api/product.service";
+import { authAtom } from "~/store/atoms";
+import { calculateDiscount, checkCanRender, chunkArray, screen } from "~/utils";
 import ContainerList from "./ContainerList";
 import Header from "./Header";
 import HeaderSearch from "./HeaderSearch";
-import { useAtom } from "jotai";
-import { authAtom } from "~/store/atoms";
-import { flashSaleService } from "~/services/api/flashsale.service";
-import FlashSaleSkeleton from "~/components/common/FlashSaleSkeleton";
-import FlashSaleEmpty from "~/components/common/FlashSaleEmpty";
-import TopDealSkeleton from "~/components/common/TopDealSkeleton";
-import TopDealEmpty from "~/components/common/TopDealEmpty";
-import BestSellerSkeleton from "~/components/common/BestSellerSkeleton";
-import BestSellerEmpty from "~/components/common/BestSellerEmpty";
-import { usePagination } from "~/hooks/usePagination";
-import { COLORS } from "~/constants/theme";
+import { Button } from "~/components/ui/button";
 
 const FlashSale = () => {
   const navigation = useSmartNavigation();
@@ -118,130 +111,30 @@ const FlashSale = () => {
   );
 };
 
-const TopDeal = () => {
-  const smartNavigation = useSmartNavigation();
-  const { data, isLoading } = useQuery({
-    queryKey: ["topDeal", "home"],
-    queryFn: () =>
-      productService.getTopDealProducts({
-        skip: 0,
-        take: 10,
-      }),
-    staleTime: 1000 * 60 * 5,
-    select: (data) => data.data,
-  });
-
-  if (isLoading) {
-    return <TopDealSkeleton />;
-  }
-
-  if (!checkCanRender(data) || data?.length === 0) {
-    return <TopDealEmpty />;
-  }
-
+const Banner = ({
+  banner,
+}: {
+  banner: {
+    id: string;
+    image: string;
+    url: string;
+  };
+}) => {
   return (
-    <View className="bg-primary-100">
-      <View className="mt-4">
-        <ContainerList
-          bgColor="bg-primary-50"
-          title="TOP DEAL - SIÊU RẺ"
-          icon={
-            <Image
-              source={imagePaths.selling}
-              style={{ width: 40, height: 40 }}
-            />
-          }
-        >
-          <View className="flex flex-row flex-wrap gap-2">
-            {data!.map((item, index) => (
-              <ProductItem
-                width={(screen.width - 24) / 2}
-                key={index}
-                name={item.name}
-                price={item.salePrice}
-                originalPrice={item.regularPrice}
-                discount={calculateDiscount(item)}
-                rating={item.averageRating}
-                soldCount={item.totalSales}
-                location={item?.shop?.shopWarehouseLocation?.province?.name}
-                id={item.id}
-                image={item.thumbnail}
-                className="flex-grow"
-              />
-            ))}
-          </View>
-        </ContainerList>
-      </View>
-    </View>
-  );
-};
-
-const Banner = () => {
-  return (
-    <View className="w-full aspect-[3/2]">
+    <Pressable
+      onPress={() => {
+        if (banner.url) {
+          WebBrowser.openBrowserAsync(banner.url);
+        }
+      }}
+      className="w-full aspect-[7/2]"
+    >
       <Image
-        source={imagePaths.homeBanner}
+        source={{ uri: banner.image }}
         style={{ width: "100%", height: "100%" }}
-        contentFit="cover"
+        contentFit="contain"
       />
-    </View>
-  );
-};
-
-const BestSeller = () => {
-  const { data, isLoading } = useQuery({
-    queryKey: ["bestSeller", "home"],
-    queryFn: () =>
-      productService.searchProducts({
-        sortBy: "bestSelling",
-        sortDirection: "desc",
-        skip: 0,
-        take: 10,
-      }),
-    staleTime: 1000 * 60 * 5,
-    select: (data) => data.data,
-  });
-
-  if (isLoading) {
-    return <BestSellerSkeleton />;
-  }
-
-  if (!checkCanRender(data) || data?.length === 0) {
-    return <BestSellerEmpty />;
-  }
-
-  return (
-    <View className="bg-primary-50">
-      <View className="mt-2">
-        <ContainerList
-          className="pb-20"
-          linearColor={["#FEFEFE", "#EEE"]}
-          title="SẢN PHẨM BÁN CHẠY"
-          icon={
-            <Image source={imagePaths.fire} style={{ width: 40, height: 40 }} />
-          }
-        >
-          <View className="flex flex-row flex-wrap gap-2">
-            {data!.map((item, index) => (
-              <ProductItem
-                width={(screen.width - 24) / 2}
-                key={index}
-                name={item.name}
-                price={item.salePrice}
-                originalPrice={item.regularPrice}
-                discount={calculateDiscount(item)}
-                rating={item.averageRating}
-                soldCount={item.totalSales}
-                location={item?.shop?.shopWarehouseLocation?.province?.name}
-                id={item.id}
-                image={item.thumbnail}
-                className="flex-grow"
-              />
-            ))}
-          </View>
-        </ContainerList>
-      </View>
-    </View>
+    </Pressable>
   );
 };
 
@@ -252,21 +145,19 @@ const ITEM_TYPES = {
   FLASH_SALE: "flashSale",
   TOP_DEAL: "topDeal",
   BANNER: "banner",
-  BEST_SELLER_HEADER: "bestSellerHeader",
-  BEST_SELLER_PRODUCT: "bestSellerProduct",
-  BEST_SELLER_FOOTER: "bestSellerFooter",
-  BEST_SELLER_EMPTY: "bestSellerEmpty",
-  BEST_SELLER_LOADING: "bestSellerLoading",
+  SECTION_HEADER: "sectionHeader",
+  SECTION_PRODUCTS: "sectionProducts",
+  SECTION_FOOTER: "sectionFooter",
 };
 
 // BestSellerHeader component
-const BestSellerHeader = () => {
+const SectionHeader = ({ title, image }: { title: string; image: string }) => {
   return (
-    <View className="bg-[#eee] pt-6">
+    <View className="pt-6 bg-primary-100">
       <View className="relative bg-white px-5 pb-4 pt-5 flex-row items-center rounded-t-[40px]">
-        <Image source={imagePaths.fire} style={{ width: 40, height: 40 }} />
+        <Image source={image} style={{ width: 40, height: 40 }} />
         <Text className="ml-2 text-xl font-bold text-black uppercase">
-          SẢN PHẨM BÁN CHẠY
+          {title}
         </Text>
       </View>
     </View>
@@ -274,25 +165,31 @@ const BestSellerHeader = () => {
 };
 
 // BestSellerFooter component
-const BestSellerFooter = ({ loading }: { loading: boolean }) => {
+const SectionFooter = ({ url, title }: { url: string; title: string }) => {
+  if (!url) {
+    return null;
+  }
+
   return (
-    <View
-      className="pb-4 bg-white"
-      style={{ paddingBottom: loading ? 160 : 80 }}
-    >
-      {loading ? (
-        <View className="flex-row justify-center items-center py-4">
-          <ActivityIndicator size="small" color={COLORS.primary} />
-        </View>
-      ) : (
-        <View className="h-16" />
-      )}
+    <View className="bg-primary-100">
+      <View className="px-3 py-4 bg-white rounded-b-2xl">
+        <Button
+          variant={"outline"}
+          onPress={() => {
+            if (url) {
+              WebBrowser.openBrowserAsync(url);
+            }
+          }}
+        >
+          <Text>{title}</Text>
+        </Button>
+      </View>
     </View>
   );
 };
 
 // BestSellerProductItem component
-const BestSellerProductItem = ({ products }: { products: IProduct[] }) => {
+const SectionProducts = ({ products }: { products: IProduct[] }) => {
   return (
     <View className="flex-row flex-wrap gap-2 px-2 pb-2 bg-white">
       {products.map((product, index) => (
@@ -315,33 +212,124 @@ const BestSellerProductItem = ({ products }: { products: IProduct[] }) => {
   );
 };
 
+const HomeCarousel = () => {
+  const { data, isLoading } = useQuery({
+    queryKey: ["homeCarousel", "home"],
+    queryFn: () => homeService.getHome(),
+    staleTime: 1000 * 60 * 5,
+    select: (data) => data.sliders,
+  });
+
+  if (isLoading) {
+    return <CarouselSkeleton />;
+  }
+
+  if (!checkCanRender(data) || data?.length === 0) {
+    return <CarouselEmpty />;
+  }
+
+  return (
+    <Carousel
+      data={
+        data?.map((item, index) => ({
+          id: index.toString(),
+          image: item.image,
+          url: item.url,
+        })) ?? []
+      }
+      autoPlay={true}
+      autoPlayInterval={5000}
+      loop={true}
+      renderItem={({ item }) => (
+        <Pressable
+          onPress={() => {
+            if (item.url) {
+              WebBrowser.openBrowserAsync(item.url);
+            }
+          }}
+        >
+          <Image
+            source={{ uri: item.image }}
+            style={{ width: "100%", height: "100%" }}
+          />
+        </Pressable>
+      )}
+    />
+  );
+};
+
+const Banners = ({
+  banners,
+}: {
+  banners: {
+    id: string;
+    image: string;
+    url: string;
+  }[];
+}) => {
+  if (!checkCanRender(banners) || banners?.length === 0) {
+    return null;
+  }
+
+  if (banners.length === 1) {
+    return <Banner banner={banners[0]} />;
+  }
+
+  return (
+    <View className="bg-primary-100">
+      <Carousel
+        data={banners.map((item) => ({
+          id: item.id,
+          image: item.image,
+          url: item.url,
+        }))}
+        width={screen.width}
+        height={(screen.width * 2) / 7}
+        renderItem={({ item }) => <Banner banner={item} />}
+        autoPlay={true}
+        autoPlayInterval={5000}
+        loop={true}
+      />
+    </View>
+  );
+};
+
+interface IFlashListData {
+  type: string;
+  id: string;
+  products?: IProduct[];
+  headerTitle?: string;
+  headerImage?: string;
+  footerUrl?: string;
+  footerTitle?: string;
+  banners?: {
+    id: string;
+    image: string;
+    url: string;
+  }[];
+}
+
 export const HomeScreen: React.FC = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const auth = useAtom(authAtom);
   const queryClient = useQueryClient();
 
-  // Sử dụng usePagination cho bestseller
-  const {
-    data: bestSellerData,
-    hasNextPage: hasBestSellerNextPage,
-    fetchNextPage: fetchBestSellerNextPage,
-    isLoading: isBestSellerLoading,
-    isFetching: isBestSellerFetching,
-    refresh: refreshBestSeller,
-  } = usePagination<
-    IProduct,
-    Pick<IProductResquest, "sortBy" | "sortDirection">
-  >(productService.searchProducts as any, {
-    initialPagination: {
-      skip: 0,
-      take: 10,
-    },
-    initialParams: {
-      sortBy: "bestSelling",
-      sortDirection: "desc",
-    },
-    queryKey: ["bestSeller-pagination", "home"],
+  const { data: homeData } = useQuery({
+    queryKey: ["home"],
+    queryFn: () => homeService.getHome(),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const [repeaterData, setRepeaterData] = useState<ILocalRepeater[]>([]);
+
+  const mutationGetProducts = useMutation({
+    mutationFn: (ids: string[]) =>
+      productService.searchProducts({
+        ids: ids.join(","),
+        skip: 0,
+        take: 100,
+      }),
   });
 
   const navigation = useNavigation();
@@ -361,124 +349,169 @@ export const HomeScreen: React.FC = () => {
           query.queryKey.includes("home") ||
           query.queryKey.includes("categories"),
       }),
-      refreshBestSeller(),
     ]);
     setIsRefreshing(false);
   };
 
   // Chuyển đổi dữ liệu BestSeller thành các item cho FlashList
-  const processBestSellerData = useMemo(() => {
-    if (
-      isBestSellerLoading &&
-      (!bestSellerData || bestSellerData.length === 0)
-    ) {
-      return [
-        { id: "bestSellerLoading", type: ITEM_TYPES.BEST_SELLER_LOADING },
-      ];
-    }
-
-    if (!checkCanRender(bestSellerData) || bestSellerData?.length === 0) {
-      return [{ id: "bestSellerEmpty", type: ITEM_TYPES.BEST_SELLER_EMPTY }];
-    }
-
-    // Tạo các chunk gồm 2 sản phẩm mỗi chunk
-    const chunkedProducts = chunkArray(bestSellerData, 2);
-
-    // Tạo các item cho FlashList từ chunked products
-    const bestSellerItems = chunkedProducts.map((products, index) => ({
-      id: `bestSellerProduct-${index}`,
-      type: ITEM_TYPES.BEST_SELLER_PRODUCT,
-      products,
-    }));
-
-    // Thêm header và footer
-    return [
-      { id: "bestSellerHeader", type: ITEM_TYPES.BEST_SELLER_HEADER },
-      ...bestSellerItems,
+  const processData = useCallback(
+    (
+      data: IProduct[] | undefined,
       {
-        id: "bestSellerFooter",
-        type: ITEM_TYPES.BEST_SELLER_FOOTER,
-        loading: hasBestSellerNextPage && isBestSellerFetching,
-      },
-    ];
-  }, [
-    bestSellerData,
-    isBestSellerLoading,
-    hasBestSellerNextPage,
-    isBestSellerFetching,
-  ]);
+        headerTitle,
+        headerImage,
+        id,
+        footerUrl,
+        footerTitle,
+      }: {
+        headerTitle: string;
+        headerImage: string;
+        id: string;
+        footerUrl: string;
+        footerTitle: string;
+      }
+    ) => {
+      if (!checkCanRender(data)) {
+        return [];
+      }
+
+      // Tạo các chunk gồm 2 sản phẩm mỗi chunk
+      const chunkedProducts = chunkArray(data!, 2);
+
+      // Tạo các item cho FlashList từ chunked products
+      const bestSellerItems = chunkedProducts.map((products, index) => ({
+        id: `product-${id}-${index}`,
+        type: ITEM_TYPES.SECTION_PRODUCTS,
+        products,
+      }));
+
+      // Thêm header và footer
+      return [
+        {
+          id: "header" + id,
+          type: ITEM_TYPES.SECTION_HEADER,
+          headerTitle: headerTitle,
+          headerImage: headerImage,
+        },
+        ...bestSellerItems,
+        {
+          id: "footer" + id,
+          type: ITEM_TYPES.SECTION_FOOTER,
+          footerUrl: footerUrl,
+          footerTitle: footerTitle,
+        },
+      ];
+    },
+    []
+  );
 
   const flashlistData = useMemo(() => {
-    const baseItems = [
+    const baseItems: IFlashListData[] = [
       { type: ITEM_TYPES.CAROUSEL, id: "carousel" },
       { type: ITEM_TYPES.CATEGORY, id: "category" },
       { type: ITEM_TYPES.FLASH_SALE, id: "flashSale" },
-      { type: ITEM_TYPES.TOP_DEAL, id: "topDeal" },
-      { type: ITEM_TYPES.BANNER, id: "banner" },
     ];
 
-    return [...baseItems, ...processBestSellerData];
-  }, [processBestSellerData]);
+    if (repeaterData.length > 0) {
+      repeaterData.forEach((item) => {
+        if (item?.banners && item?.banners?.length > 0) {
+          baseItems.push({
+            type: ITEM_TYPES.BANNER,
+            id: item.id,
+            banners:
+              item.banners?.map((banner, index) => ({
+                id: index.toString(),
+                image: banner.image,
+                url: banner.url,
+              })) ?? [],
+          });
+        }
 
-  const handleEndReached = async () => {
-    if (hasBestSellerNextPage && !isBestSellerFetching && !loadingMore) {
-      setLoadingMore(true);
-      await fetchBestSellerNextPage();
-      setLoadingMore(false);
+        const processedData = processData(item.products, {
+          headerTitle: item.heading,
+          headerImage: item.icon,
+          id: item.id,
+          footerUrl: item.button.url,
+          footerTitle: item.button.title,
+        });
+        baseItems.push(...processedData);
+      });
     }
-  };
+    return [...baseItems];
+  }, [repeaterData]);
 
-  const renderItem = ({ item }: { item: any }) => {
-    switch (item.type) {
-      case ITEM_TYPES.CAROUSEL:
-        return (
-          <Carousel
-            data={[...Array(10)]}
-            autoPlay={true}
-            autoPlayInterval={5000}
-            loop={true}
-            renderItem={({ index }) => (
-              <View>
-                <Image
-                  source={"https://picsum.photos/200/300"}
-                  style={{ width: "100%", height: "100%" }}
-                />
-              </View>
-            )}
-          />
-        );
+  console.log(flashlistData);
 
-      case ITEM_TYPES.CATEGORY:
-        return <Category className="px-2 pt-2" />;
+  const renderItem = useCallback(
+    ({ item }: { item: IFlashListData }) => {
+      switch (item.type) {
+        case ITEM_TYPES.CAROUSEL:
+          return <HomeCarousel />;
 
-      case ITEM_TYPES.FLASH_SALE:
-        return <FlashSale />;
+        case ITEM_TYPES.CATEGORY:
+          return <Category className="px-2 pt-2" />;
 
-      case ITEM_TYPES.TOP_DEAL:
-        return <TopDeal />;
+        case ITEM_TYPES.FLASH_SALE:
+          return <FlashSale />;
 
-      case ITEM_TYPES.BANNER:
-        return <Banner />;
+        case ITEM_TYPES.BANNER:
+          return <Banners banners={item.banners ?? []} />;
 
-      case ITEM_TYPES.BEST_SELLER_HEADER:
-        return <BestSellerHeader />;
+        case ITEM_TYPES.SECTION_HEADER:
+          return (
+            <SectionHeader
+              title={item.headerTitle ?? ""}
+              image={item.headerImage ?? ""}
+            />
+          );
 
-      case ITEM_TYPES.BEST_SELLER_PRODUCT:
-        return <BestSellerProductItem products={item.products} />;
+        case ITEM_TYPES.SECTION_PRODUCTS:
+          return <SectionProducts products={item.products ?? []} />;
 
-      case ITEM_TYPES.BEST_SELLER_FOOTER:
-        return <BestSellerFooter loading={item.loading} />;
+        case ITEM_TYPES.SECTION_FOOTER:
+          return (
+            <SectionFooter
+              url={item.footerUrl ?? ""}
+              title={item.footerTitle ?? ""}
+            />
+          );
 
-      case ITEM_TYPES.BEST_SELLER_LOADING:
-        return <BestSellerSkeleton />;
+        default:
+          return null;
+      }
+    },
+    [loadingMore]
+  );
 
-      case ITEM_TYPES.BEST_SELLER_EMPTY:
-        return <BestSellerEmpty />;
+  useEffect(() => {
+    if (homeData) {
+      const handledRepeaters = homeData.repeaters.map((item, index) => {
+        const currentIndex = index;
 
-      default:
-        return null;
+        productService
+          .searchProducts({
+            ids: item?.productIds?.join(","),
+            skip: 0,
+            take: 100,
+          })
+          .then((data) => {
+            setRepeaterData((prev) => {
+              const newData = [...prev];
+              newData[currentIndex].products = data.data;
+              return newData;
+            });
+          });
+
+        return {
+          ...item,
+          id: index.toString(),
+          products: [],
+        };
+      });
+
+      setRepeaterData(handledRepeaters);
     }
-  };
+  }, [homeData]);
 
   return (
     <ScreenWrapper hasGradient={true}>
@@ -501,8 +534,8 @@ export const HomeScreen: React.FC = () => {
         estimatedItemSize={200}
         getItemType={(item) => item.type}
         ListHeaderComponent={<HeaderSearch />}
-        onEndReached={handleEndReached}
         onEndReachedThreshold={0.5}
+        ListFooterComponent={<View className="h-[200px] bg-primary-100" />}
       />
     </ScreenWrapper>
   );

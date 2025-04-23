@@ -1,19 +1,19 @@
-import { FlashList } from "@shopify/flash-list";
-import { ActivityIndicator, TouchableOpacity, View } from "react-native";
-import { Text } from "~/components/ui/text";
-import RatingFilter from "./RatedFilter";
-import ReviewItem, { ReviewItemProps } from "~/components/common/ReviewItem";
-import Empty from "~/components/common/Empty";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
+import { FlashList } from "@shopify/flash-list";
+import { Image } from "expo-image";
+import { useCallback, useState } from "react";
+import { ActivityIndicator, TouchableOpacity, View } from "react-native";
+import { RefreshControl } from "react-native-gesture-handler";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { imagePaths } from "~/assets/imagePath";
+import Empty from "~/components/common/Empty";
+import ReviewItem from "~/components/common/ReviewItem";
+import { Text } from "~/components/ui/text";
+import { COLORS } from "~/constants/theme";
 import { usePagination } from "~/hooks/usePagination";
 import { IReview, reviewService } from "~/services/api/review.service";
-import { RefreshControl } from "react-native-gesture-handler";
-import { COLORS } from "~/constants/theme";
-import { useCallback, useState } from "react";
-import { formatDate, getMediaTypes } from "~/utils";
-import { Image } from "expo-image";
-import { imagePaths } from "~/assets/imagePath";
+import { formatDate } from "~/utils";
+import RatingFilter from "./RatedFilter";
 
 const ITEMS = [
   { id: "1", name: "Tất cả", value: "" },
@@ -103,8 +103,9 @@ const ListRated = () => {
             sellerResponse={item?.replies?.[0]?.comment}
             rating={item.rating}
             media={item?.gallery?.map((media) => ({
-              type: getMediaTypes(media),
-              uri: media,
+              type: media.type === "video" ? "video" : "image",
+              uri: media.thumbnail,
+              src: media.src,
             }))}
             quality={item.quality}
             date={formatDate(item.createdAt)}

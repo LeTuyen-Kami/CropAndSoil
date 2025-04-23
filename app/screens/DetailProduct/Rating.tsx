@@ -12,7 +12,7 @@ import { usePagination } from "~/hooks/usePagination";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 import { productService } from "~/services/api/product.service";
 import { reviewService } from "~/services/api/review.service";
-import { formatDate, getMediaTypes } from "~/utils";
+import { formatDate } from "~/utils";
 type RatingProps = {
   id: string | number;
 };
@@ -184,8 +184,9 @@ const Rating: React.FC<RatingProps> = ({ id }) => {
             likes={review.totalLikes}
             comment={review.comment}
             media={review.gallery.map((media) => ({
-              type: getMediaTypes(media),
-              uri: media,
+              type: media.type === "video" ? "video" : "image",
+              uri: media.thumbnail,
+              src: media.src,
             }))}
           />
         ))}
