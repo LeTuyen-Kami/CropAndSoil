@@ -24,6 +24,8 @@ export default function useFCMNavigation(
   const messaging = getMessaging(app);
 
   const handle = async (msg: FirebaseMessagingTypes.RemoteMessage | null) => {
+    console.log("msg", msg);
+
     if (!msg?.data?.id) return;
     const { id, ...params } = msg.data;
     if (navigationRef.isReady()) {

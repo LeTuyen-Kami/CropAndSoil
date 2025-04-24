@@ -1,5 +1,5 @@
 import { Image } from "expo-image";
-import { FlatList, ScrollView, View } from "react-native";
+import { FlatList, Pressable, ScrollView, View } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import ProductItem from "~/components/common/ProductItem";
 import { calculateDiscount, checkCanRender, screen } from "~/utils";
@@ -9,13 +9,21 @@ import { useQuery } from "@tanstack/react-query";
 import { authAtom } from "~/store/atoms";
 import { useAtomValue } from "jotai";
 import { productService } from "~/services/api/product.service";
-
+import { homeService } from "~/services/api/home.service";
+import * as WebBrowser from "expo-web-browser";
 const PrivateOffer = () => {
   const auth = useAtomValue(authAtom);
 
   const { data } = useQuery({
     queryKey: ["private-offer"],
     queryFn: () => searchService.searchSuggestions(""),
+    enabled: auth?.isLoggedIn,
+  });
+
+  const { data: homeData } = useQuery({
+    queryKey: ["home"],
+    queryFn: () => homeService.getHome(),
+    staleTime: 1000 * 60,
     enabled: auth?.isLoggedIn,
   });
 
@@ -39,9 +47,13 @@ const PrivateOffer = () => {
       <SectionTitle title="Ưu đãi dành riêng cho bạn" />
       <Carousel
         autoPlayInterval={2000}
-        data={[...Array(10)].map((_, index) => ({
-          id: index.toString(),
-        }))}
+        data={
+          homeData?.sliders?.map((item, index) => ({
+            id: index.toString(),
+            image: item.image,
+            url: item.url,
+          })) ?? []
+        }
         height={(screen.width - 40) / 2}
         loop={true}
         pagingEnabled={true}
@@ -55,8 +67,13 @@ const PrivateOffer = () => {
           parallaxScrollingScale: 1,
           parallaxScrollingOffset: 40,
         }}
-        renderItem={({ index }) => (
-          <View
+        renderItem={({ item }) => (
+          <Pressable
+            onPress={() => {
+              if (item.url) {
+                WebBrowser.openBrowserAsync(item.url);
+              }
+            }}
             style={{
               flex: 1,
               marginHorizontal: 26,
@@ -65,11 +82,11 @@ const PrivateOffer = () => {
           >
             <Image
               source={{
-                uri: "https://picsum.photos/200/300",
+                uri: item.image,
               }}
               style={{ width: "100%", height: "100%", borderRadius: 12 }}
             />
-          </View>
+          </Pressable>
         )}
       />
       <FlatList

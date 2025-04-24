@@ -166,7 +166,7 @@ export interface IProductResquest extends PaginationRequests {
   maxPrice: number;
   locations: string; // comma separated
   averageRatingFrom: number;
-  categoryIds: string; // comma separated
+  categoryId: string;
   ids: string; // comma separated
   sortBy: "salePrice" | "createdAt" | "bestSelling";
   sortDirection: "asc" | "desc";

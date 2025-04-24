@@ -1,12 +1,13 @@
-import { ScrollView, View } from "react-native";
-import { Text } from "~/components/ui/text";
-import Vouchers from "./Vouchers";
-import VoucherContainer, {
-  VoucherBottom,
-  VoucherHeader,
-} from "./VoucherContainer";
-import VoucherItem from "./VoucherItem";
+import { FlashList } from "@shopify/flash-list";
+import { useQuery } from "@tanstack/react-query";
+import { deepEqual } from "fast-equals";
+import { memo, useCallback, useMemo, useState } from "react";
+import { View } from "react-native";
 import ProductItem from "~/components/common/ProductItem";
+import { toast } from "~/components/common/Toast";
+import { usePagination } from "~/hooks/usePagination";
+import { IProduct, productService } from "~/services/api/product.service";
+import { IVoucher, shopService } from "~/services/api/shop.service";
 import {
   checkCanRender,
   convertToK,
@@ -14,77 +15,10 @@ import {
   getItemWidth,
   preHandleFlashListData,
 } from "~/utils";
-import Deal from "./Deal";
-import { FlashList } from "@shopify/flash-list";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { IVoucher, shopService } from "~/services/api/shop.service";
-import { usePagination } from "~/hooks/usePagination";
 import useGetShopId from "../useGetShopId";
-import { IProduct, productService } from "~/services/api/product.service";
-import { useQuery } from "@tanstack/react-query";
-import { deepEqual } from "fast-equals";
-import { toast } from "~/components/common/Toast";
-
-const TopProduct = ({ items }: { items: IProduct[] | undefined }) => {
-  if (!checkCanRender(items)) return null;
-
-  const itemWidth = useMemo(() => {
-    return getItemWidth({
-      containerPadding: 16,
-      itemGap: 8,
-    });
-  }, []);
-
-  return (
-    <VoucherContainer title="Top sản phẩm bán chạy!">
-      {items?.map((item) => (
-        <ProductItem
-          key={item.id}
-          width={itemWidth.itemWidth}
-          name={item.name}
-          price={item.salePrice}
-          originalPrice={item.regularPrice}
-          rating={item.averageRating}
-          soldCount={item.totalSales}
-          location={item.shop?.shopWarehouseLocation?.province?.name}
-          id={item.id}
-          image={item.thumbnail}
-          height={"100%"}
-        />
-      ))}
-    </VoucherContainer>
-  );
-};
-
-const PrivateVoucher = ({ items }: { items: IProduct[] | undefined }) => {
-  if (!checkCanRender(items)) return null;
-
-  const itemWidth = useMemo(() => {
-    return getItemWidth({
-      containerPadding: 16,
-      itemGap: 8,
-    });
-  }, []);
-  return (
-    <VoucherContainer title="Cho riêng bạn">
-      {items?.map((item) => (
-        <ProductItem
-          key={item.id}
-          width={itemWidth.itemWidth}
-          name={item.name}
-          price={item.salePrice}
-          originalPrice={item.regularPrice}
-          rating={item.averageRating}
-          soldCount={item.totalSales}
-          location={item.shop?.shopWarehouseLocation?.province?.name}
-          id={item.id}
-          image={item.thumbnail}
-          height={"100%"}
-        />
-      ))}
-    </VoucherContainer>
-  );
-};
+import Deal from "./Deal";
+import { VoucherBottom, VoucherHeader } from "./VoucherContainer";
+import VoucherItem from "./VoucherItem";
 
 const RenderTwoVoucher = memo(
   ({ items }: { items: IVoucher[] }) => {
@@ -97,7 +31,7 @@ const RenderTwoVoucher = memo(
         {items?.map((item) => (
           <VoucherItem
             key={item.id}
-            description={item.description}
+            description={item.title}
             amount={(item.amount || 0)?.toLocaleString()}
             minimumAmount={convertToK(item.minimumAmount)}
             maximumReduction={convertToK(item.maximumReduction)}
@@ -152,6 +86,11 @@ const ShopVoucher = () => {
   const shopId = useGetShopId();
   const [expandedDeal, setExpandedDeal] = useState(false);
 
+  const { data: shop } = useQuery({
+    queryKey: ["shop", shopId],
+    queryFn: () => shopService.getShopDetail(shopId),
+  });
+
   const { data, hasNextPage, fetchNextPage } = usePagination(
     shopService.getListVoucher,
     {
@@ -173,13 +112,11 @@ const ShopVoucher = () => {
     queryFn: () =>
       productService.searchProducts({
         shopId: shopId?.toString(),
-        sortBy: "bestSelling",
-        sortDirection: "desc",
+        ids: shop?.bestSelling?.productIds.join(","),
         skip: 0,
-        take: 10,
+        take: 100,
       }),
-    enabled: !!shopId,
-    staleTime: 1000 * 60 * 5,
+    enabled: !!shopId && !!shop?.bestSelling?.productIds?.length,
     select: (data) => data.data,
   });
 
@@ -213,14 +150,6 @@ const ShopVoucher = () => {
           onPress={() => setExpandedDeal((prev) => !prev)}
         />
       );
-    }
-
-    if (item.type === "topProduct") {
-      return <TopProduct items={item.items} />;
-    }
-
-    if (item.type === "privateVoucher") {
-      return <PrivateVoucher items={item.items} />;
     }
 
     return null;
@@ -277,11 +206,11 @@ const ShopVoucher = () => {
 
     return [
       ...createClusterData(handledData, "Voucher của Shop"),
-      {
-        type: "deal",
-        items: recommendedProducts,
-        expanded: expandedDeal,
-      },
+      // {
+      //   type: "deal",
+      //   items: recommendedProducts,
+      //   expanded: expandedDeal,
+      // },
       ...createClusterData(handleProductData, "Top sản phẩm bán chạy!"),
       ...createClusterData(handlePrivateProductData, "Cho riêng bạn"),
     ];
@@ -294,21 +223,6 @@ const ShopVoucher = () => {
         renderItem={renderItem}
         estimatedItemSize={500}
         getItemType={(item) => item.type}
-        overrideItemLayout={(layout, item) => {
-          if (item.type === "deal" && "items" in item) {
-            layout.size = expandedDeal
-              ? (item?.items?.length || 1) * 200
-              : Math.min(400, (item?.items?.length || 1) * 200);
-          }
-
-          if (item.type === "voucherHeader") {
-            layout.size = 50;
-          }
-
-          if (item.type === "voucher") {
-            layout.size = 200;
-          }
-        }}
         ListFooterComponent={<View className="h-10" />}
       />
     </View>

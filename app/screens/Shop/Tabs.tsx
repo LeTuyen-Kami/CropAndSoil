@@ -35,7 +35,6 @@ const Tabs = () => {
   const route = useRoute<RootStackRouteProp<"Shop">>();
   const onPressTab = (index: number) => {
     setActiveIndex(index);
-    pagerRef.current?.setPage(index);
   };
 
   const handlePageChange = (index: number) => {
@@ -55,6 +54,10 @@ const Tabs = () => {
       }
     }, 1000);
   }, [route.params?.tabIndex]);
+
+  useEffect(() => {
+    pagerRef.current?.setPage(activeIndex);
+  }, [activeIndex]);
 
   return (
     <View className="flex-col flex-1 -mt-16">

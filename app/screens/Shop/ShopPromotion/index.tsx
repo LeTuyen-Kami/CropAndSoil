@@ -4,7 +4,7 @@ import ShopPromotionItem from "./Item";
 import useGetShopId from "../useGetShopId";
 import { shopService } from "~/services/api/shop.service";
 import { usePagination } from "~/hooks/usePagination";
-import { formatDate } from "~/utils";
+import { formatDate, screen } from "~/utils";
 import { formatCurrency } from "~/utils/format";
 import { COLORS } from "~/constants/theme";
 import { Text } from "~/components/ui/text";

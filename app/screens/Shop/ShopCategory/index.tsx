@@ -46,11 +46,6 @@ const Item = ({ title, image, count }: ItemProps) => {
 
 const ShopCategory = () => {
   const shopId = useGetShopId();
-  // const { data: categoryByShopId } = useQuery({
-  //   queryKey: ["categoryByShopId", shopId],
-  //   queryFn: () => categoryService.getCategoryByShopId(shopId),
-  //   enabled: !!shopId,
-  // });
 
   const {
     data,
@@ -66,6 +61,7 @@ const ShopCategory = () => {
     initialParams: {
       shopId: shopId,
     },
+    staleTime: 5000,
   });
 
   return (

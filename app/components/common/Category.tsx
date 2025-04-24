@@ -70,6 +70,65 @@ const CategorySkeleton = () => {
   );
 };
 
+interface PureCategoryProps {
+  data: ICategory[];
+  itemBgColor?: string;
+  textColor?: string;
+  className?: string;
+  onPress: (category: ICategory) => void;
+  hasNextPage?: boolean;
+  fetchNextPage?: () => void;
+  isLoading?: boolean;
+}
+
+export const PureCategory = ({
+  data,
+  itemBgColor,
+  textColor,
+  className,
+  onPress,
+  hasNextPage,
+  fetchNextPage,
+  isLoading,
+}: PureCategoryProps) => {
+  if (isLoading) {
+    return (
+      <View className={cn("py-1 min-h-[90px]", className)}>
+        <CategorySkeleton />
+      </View>
+    );
+  }
+
+  return (
+    <View className={cn("min-h-[90px]", className)}>
+      <FlatList
+        data={data}
+        renderItem={({ item }) => (
+          <Item
+            title={item.name}
+            image={item.thumbnail}
+            itemBgColor={itemBgColor}
+            textColor={textColor}
+            onPress={() => onPress(item)}
+          />
+        )}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        ItemSeparatorComponent={() => <View className="w-3" />}
+        onEndReached={fetchNextPage || undefined}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={() =>
+          hasNextPage ? (
+            <View className="justify-center items-center h-[60px] w-[40px]">
+              <ActivityIndicator size="small" color="white" />
+            </View>
+          ) : null
+        }
+      />
+    </View>
+  );
+};
+
 interface CategoryProps {
   getCategoriesApi?: (
     payload: PaginationRequests
@@ -94,6 +153,7 @@ const Category = ({
     {
       queryKey: queryKey,
       initialPagination: { skip: 0, take: 10 },
+      staleTime: 5000,
     }
   );
 
@@ -103,41 +163,17 @@ const Category = ({
     });
   };
 
-  if (isLoading) {
-    return (
-      <View className={cn("py-1 min-h-[90px]", className)}>
-        <CategorySkeleton />
-      </View>
-    );
-  }
-
   return (
-    <View className={cn("min-h-[90px]", className)}>
-      <FlatList
-        data={data}
-        renderItem={({ item }) => (
-          <Item
-            title={item.name}
-            image={item.thumbnail}
-            itemBgColor={itemBgColor}
-            textColor={textColor}
-            onPress={() => handlePressCategory(item)}
-          />
-        )}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        ItemSeparatorComponent={() => <View className="w-3" />}
-        onEndReached={fetchNextPage}
-        onEndReachedThreshold={0.5}
-        ListFooterComponent={() =>
-          hasNextPage ? (
-            <View className="justify-center items-center h-[60px] w-[40px]">
-              <ActivityIndicator size="small" color="white" />
-            </View>
-          ) : null
-        }
-      />
-    </View>
+    <PureCategory
+      data={data}
+      itemBgColor={itemBgColor}
+      textColor={textColor}
+      onPress={handlePressCategory}
+      hasNextPage={hasNextPage}
+      fetchNextPage={fetchNextPage}
+      isLoading={isLoading}
+      className={className}
+    />
   );
 };
 

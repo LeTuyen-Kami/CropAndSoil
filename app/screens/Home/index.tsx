@@ -1,20 +1,12 @@
 import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import * as WebBrowser from "expo-web-browser";
-import { useAtom } from "jotai";
+import { useAtomValue } from "jotai";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  FlatList,
-  Pressable,
-  RefreshControl,
-  View,
-} from "react-native";
+import { FlatList, Pressable, RefreshControl, View } from "react-native";
 import { imagePaths } from "~/assets/imagePath";
-import BestSellerEmpty from "~/components/common/BestSellerEmpty";
-import BestSellerSkeleton from "~/components/common/BestSellerSkeleton";
 import CarouselEmpty from "~/components/common/CarouselEmpty";
 import CarouselSkeleton from "~/components/common/CarouselSkeleton";
 import Carousel from "~/components/common/Carusel";
@@ -23,20 +15,19 @@ import FlashSaleEmpty from "~/components/common/FlashSaleEmpty";
 import FlashSaleSkeleton from "~/components/common/FlashSaleSkeleton";
 import ProductItem from "~/components/common/ProductItem";
 import ScreenWrapper from "~/components/common/ScreenWrapper";
-import TopDealEmpty from "~/components/common/TopDealEmpty";
-import TopDealSkeleton from "~/components/common/TopDealSkeleton";
+import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
-import { COLORS } from "~/constants/theme";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
+import { commonService } from "~/services/api/common.service";
 import { flashSaleService } from "~/services/api/flashsale.service";
 import { homeService, ILocalRepeater } from "~/services/api/home.service";
 import { IProduct, productService } from "~/services/api/product.service";
+import { searchService } from "~/services/api/search.services";
 import { authAtom } from "~/store/atoms";
 import { calculateDiscount, checkCanRender, chunkArray, screen } from "~/utils";
 import ContainerList from "./ContainerList";
 import Header from "./Header";
 import HeaderSearch from "./HeaderSearch";
-import { Button } from "~/components/ui/button";
 
 const FlashSale = () => {
   const navigation = useSmartNavigation();
@@ -166,23 +157,26 @@ const SectionHeader = ({ title, image }: { title: string; image: string }) => {
 
 // BestSellerFooter component
 const SectionFooter = ({ url, title }: { url: string; title: string }) => {
-  if (!url) {
-    return null;
-  }
-
   return (
     <View className="bg-primary-100">
-      <View className="px-3 py-4 bg-white rounded-b-2xl">
-        <Button
-          variant={"outline"}
-          onPress={() => {
-            if (url) {
-              WebBrowser.openBrowserAsync(url);
-            }
-          }}
-        >
-          <Text>{title}</Text>
-        </Button>
+      <View
+        className="px-3 bg-white rounded-b-2xl"
+        style={{
+          paddingVertical: url ? 16 : 8,
+        }}
+      >
+        {!!url && (
+          <Button
+            variant={"outline"}
+            onPress={() => {
+              if (url) {
+                WebBrowser.openBrowserAsync(url);
+              }
+            }}
+          >
+            <Text>{title}</Text>
+          </Button>
+        )}
       </View>
     </View>
   );
@@ -312,25 +306,16 @@ interface IFlashListData {
 export const HomeScreen: React.FC = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-  const auth = useAtom(authAtom);
+  const auth = useAtomValue(authAtom);
   const queryClient = useQueryClient();
 
   const { data: homeData } = useQuery({
     queryKey: ["home"],
     queryFn: () => homeService.getHome(),
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60,
   });
 
   const [repeaterData, setRepeaterData] = useState<ILocalRepeater[]>([]);
-
-  const mutationGetProducts = useMutation({
-    mutationFn: (ids: string[]) =>
-      productService.searchProducts({
-        ids: ids.join(","),
-        skip: 0,
-        take: 100,
-      }),
-  });
 
   const navigation = useNavigation();
   const onPressMessages = () => {
@@ -427,20 +412,20 @@ export const HomeScreen: React.FC = () => {
           });
         }
 
-        const processedData = processData(item.products, {
-          headerTitle: item.heading,
-          headerImage: item.icon,
-          id: item.id,
-          footerUrl: item.button.url,
-          footerTitle: item.button.title,
-        });
-        baseItems.push(...processedData);
+        if (item?.products && item?.products?.length > 0) {
+          const processedData = processData(item.products, {
+            headerTitle: item.heading,
+            headerImage: item.icon,
+            id: item.id,
+            footerUrl: item.button.url,
+            footerTitle: item.button.title,
+          });
+          baseItems.push(...processedData);
+        }
       });
     }
     return [...baseItems];
   }, [repeaterData]);
-
-  console.log(flashlistData);
 
   const renderItem = useCallback(
     ({ item }: { item: IFlashListData }) => {
@@ -512,6 +497,20 @@ export const HomeScreen: React.FC = () => {
       setRepeaterData(handledRepeaters);
     }
   }, [homeData]);
+
+  useEffect(() => {
+    if (auth?.isLoggedIn) {
+      queryClient.prefetchQuery({
+        queryKey: ["private-offer"],
+        queryFn: () => searchService.searchSuggestions(""),
+      });
+
+      queryClient.prefetchQuery({
+        queryKey: ["recently-viewed-products"],
+        queryFn: () => commonService.getRecentlyViewedProducts(),
+      });
+    }
+  }, [auth]);
 
   return (
     <ScreenWrapper hasGradient={true}>

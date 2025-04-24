@@ -285,42 +285,58 @@ const VoucherSelectScreen = () => {
   const flashListData = useMemo(() => {
     if (!shippingVouchers && !productVouchers) return [];
 
-    return [
-      {
-        type: "shippingHeader",
-        title: "Ưu đãi phí vận chuyển",
-      },
-      ...(shippingVouchers?.data || [])?.map((voucher) => ({
-        type: "shipping",
-        item: voucher,
-      })),
-      {
-        type: "shippingFooter",
-      },
-      {
-        type: "voucherHeader",
-        title: "Voucher Cropee",
-      },
-      ...(productVouchers?.data || [])?.map((voucher) => ({
-        type: "voucher",
-        item: voucher,
-      })),
-      {
-        type: "voucherFooter",
-      },
-      {
-        type: "unavailableHeader",
-        title: "Voucher không khả dụng",
-      },
-      ...(unavailableVouchers?.data || [])?.map((voucher) => ({
-        type: "unavailable",
-        item: voucher,
-      })),
-      {
-        type: "unavailableFooter",
-        title: "Không áp dụng với một số sản phẩm",
-      },
-    ];
+    const shipping =
+      !!shippingVouchers && shippingVouchers?.data?.length > 0
+        ? [
+            {
+              type: "shippingHeader",
+              title: "Ưu đãi phí vận chuyển",
+            },
+            ...(shippingVouchers?.data || [])?.map((voucher) => ({
+              type: "shipping",
+              item: voucher,
+            })),
+            {
+              type: "shippingFooter",
+            },
+          ]
+        : [];
+    const unavailable =
+      !!unavailableVouchers && unavailableVouchers?.data?.length > 0
+        ? [
+            {
+              type: "unavailableHeader",
+              title: "Voucher không khả dụng",
+            },
+            ...(unavailableVouchers?.data || [])?.map((voucher) => ({
+              type: "unavailable",
+              item: voucher,
+            })),
+            {
+              type: "unavailableFooter",
+              title: "Không áp dụng với một số sản phẩm",
+            },
+          ]
+        : [];
+
+    const product =
+      !!productVouchers && productVouchers?.data?.length > 0
+        ? [
+            {
+              type: "voucherHeader",
+              title: "Voucher Cropee",
+            },
+            ...(productVouchers?.data || [])?.map((voucher) => ({
+              type: "voucher",
+              item: voucher,
+            })),
+            {
+              type: "voucherFooter",
+            },
+          ]
+        : [];
+
+    return [...shipping, ...product, ...unavailable];
   }, [shippingVouchers, productVouchers, unavailableVouchers]);
 
   return (

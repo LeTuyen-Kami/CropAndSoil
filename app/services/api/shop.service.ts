@@ -29,6 +29,17 @@ export interface ShopWarehouseLocation {
   addressLine: string;
 }
 
+export interface BestSelling {
+  banner: string;
+  productIds: any[];
+}
+
+export interface Repeater {
+  heading: string;
+  banner: string;
+  categoryId: number;
+}
+
 export interface IShop {
   id: number;
   shopName: string;
@@ -39,11 +50,17 @@ export interface IShop {
   totalProducts: number;
   totalReviews: number;
   totalFollowers: number;
+  totalFollowing: number;
   lastOnlineAt: string;
   createdAt: string;
   replyRate: string;
   replyIn: string;
   shopWarehouseLocation: ShopWarehouseLocation;
+  suggestionProductIds: number[];
+  hotDealProductIds: number[];
+  categoryIds: any[];
+  bestSelling: BestSelling;
+  repeaters: Repeater[];
 }
 
 export interface IListShopRequest extends PaginationRequests {

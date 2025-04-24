@@ -135,7 +135,7 @@ const ShopProduct = () => {
     queryKey: ["products", (id || "")?.toString()],
     enabled: !!id,
     initialParams: {
-      shopId: id,
+      shopId: id?.toString(),
       sortBy: undefined as "salePrice" | "createdAt" | undefined,
       sortDirection: undefined as "asc" | "desc" | undefined,
     },

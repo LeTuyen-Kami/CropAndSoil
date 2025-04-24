@@ -7,62 +7,104 @@ import { Image } from "expo-image";
 import ListProduct from "./ListProduct";
 import Category from "~/components/common/Category";
 import { FlashList } from "@shopify/flash-list";
-import { useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import useGetShopId from "../useGetShopId";
-import { productService } from "~/services/api/product.service";
+import { IProduct, productService } from "~/services/api/product.service";
 import { useQuery } from "@tanstack/react-query";
 import { checkCanRender } from "~/utils";
 import { categoryService } from "~/services/api/category.service";
+import { shopService } from "~/services/api/shop.service";
+import { deepEqual } from "fast-equals";
+import Empty from "~/components/common/Empty";
+import { activeIndexAtom } from "../atom";
+import { useSetAtom } from "jotai";
 
-const SuggestForYouSection = () => {
-  const { data: suggestForYou } = useQuery({
-    queryKey: ["suggestForYou", "shop"],
-    queryFn: () => productService.getRecommendedProducts(),
-    staleTime: 1000 * 60 * 5,
-  });
-
-  if (!checkCanRender(suggestForYou)) return null;
-
-  return (
-    <ShopScreenContainer title="Gợi ý cho bạn" onPress={() => {}}>
-      <ListProduct data={suggestForYou!} />
-    </ShopScreenContainer>
-  );
+type ProductIdsSection = {
+  shopId: string;
+  queryKey: string;
+  title: string;
+  dataProvider: "productIds";
+  productIds: number[];
 };
 
-const PromotionSection = () => {
-  const { data: promotion } = useQuery({
-    queryKey: ["promotion", "shop"],
-    queryFn: () => productService.getRecommendedProducts(),
-    staleTime: 1000 * 60 * 5,
-  });
-
-  if (!checkCanRender(promotion)) return null;
-
-  return (
-    <ShopScreenContainer
-      onPress={() => {}}
-      componentTitle={
-        <View className="flex-row gap-2 items-center">
-          <Image
-            source={imagePaths.icFire}
-            className="size-5"
-            contentFit="contain"
-          />
-          <Text className="text-sm font-bold">ƯU ĐÃI KHỦNG</Text>
-        </View>
-      }
-    >
-      <ListProduct data={promotion!} />
-    </ShopScreenContainer>
-  );
+type CategoryIdSection = {
+  shopId: string;
+  queryKey: string;
+  title: string;
+  dataProvider: "categoryId";
+  categoryId: number;
 };
+
+type ISection = ProductIdsSection | CategoryIdSection;
+
+const ProductSection = memo(
+  (props: ISection) => {
+    const { shopId, queryKey, title, dataProvider } = props;
+
+    const setActiveIndex = useSetAtom(activeIndexAtom);
+
+    const { data } = useQuery({
+      queryKey: [
+        queryKey,
+        "shop",
+        dataProvider === "productIds"
+          ? (props as ProductIdsSection).productIds?.join(",")
+          : (props as CategoryIdSection).categoryId?.toString(),
+      ],
+      queryFn: () =>
+        productService.searchProducts({
+          ids:
+            dataProvider === "productIds"
+              ? (props as ProductIdsSection).productIds?.join(",")
+              : undefined,
+          categoryId:
+            dataProvider === "categoryId"
+              ? (props as CategoryIdSection).categoryId?.toString()
+              : undefined,
+          skip: 0,
+          take: 100,
+          shopId: shopId,
+        }),
+      select: (data) => data.data,
+      enabled:
+        dataProvider === "productIds"
+          ? !!(props as ProductIdsSection).productIds?.length
+          : !(
+              (props as CategoryIdSection).categoryId === null ||
+              (props as CategoryIdSection).categoryId === undefined
+            ),
+    });
+
+    if (!checkCanRender(data)) return null;
+
+    return (
+      <ShopScreenContainer
+        title={title}
+        onPress={() => {
+          setActiveIndex(2);
+        }}
+      >
+        <ListProduct data={data!} />
+      </ShopScreenContainer>
+    );
+  },
+  (prevProps, nextProps) => {
+    return deepEqual(prevProps, nextProps);
+  }
+);
 
 const CategorySection = () => {
   const shopId = useGetShopId();
 
+  const setActiveIndex = useSetAtom(activeIndexAtom);
+
   return (
-    <ShopScreenContainer title="Danh mục của Shop" onPress={() => {}}>
+    <ShopScreenContainer
+      title="Danh mục của Shop"
+      onPress={() => {
+        setActiveIndex(3);
+      }}
+    >
       <Category
         itemBgColor="#FFF5DF"
         textColor="#676767"
@@ -79,12 +121,12 @@ const CategorySection = () => {
   );
 };
 
-const BannerSection = () => {
+const BannerSection = ({ banner }: { banner: string }) => {
   return (
     <View className="px-2 mb-2">
       <TouchableOpacity>
         <Image
-          source={imagePaths.shopBackground}
+          source={banner}
           className="w-full aspect-[2/1] rounded-2xl"
           contentFit="cover"
         />
@@ -93,148 +135,98 @@ const BannerSection = () => {
   );
 };
 
-const BestSellerSection = () => {
-  const { data: bestSeller } = useQuery({
-    queryKey: ["bestSeller", "shop"],
-    queryFn: () => productService.getRecommendedProducts(),
-    staleTime: 1000 * 60 * 5,
-  });
-
-  if (!checkCanRender(bestSeller)) return null;
-
-  return (
-    <ShopScreenContainer title="Sản phẩm bán chạy" onPress={() => {}}>
-      <ListProduct data={bestSeller!} />
-    </ShopScreenContainer>
-  );
-};
-
-const GardeningToolsSection = () => {
-  const { data: gardeningTools } = useQuery({
-    queryKey: ["gardeningTools", "shop"],
-    queryFn: () => productService.getRecommendedProducts(),
-    staleTime: 1000 * 60 * 5,
-  });
-
-  if (!checkCanRender(gardeningTools)) return null;
-
-  return (
-    <ShopScreenContainer title="Dụng cụ làm vườn" onPress={() => {}}>
-      <ListProduct data={gardeningTools!} />
-    </ShopScreenContainer>
-  );
-};
-
-const FertilizerSection = () => {
-  const { data: fertilizer } = useQuery({
-    queryKey: ["fertilizer", "shop"],
-    queryFn: () => productService.getRecommendedProducts(),
-    staleTime: 1000 * 60 * 5,
-  });
-
-  if (!checkCanRender(fertilizer)) return null;
-
-  return (
-    <ShopScreenContainer title="Phân bón, bảo vệ cây trồng" onPress={() => {}}>
-      <ListProduct data={fertilizer!} />
-    </ShopScreenContainer>
-  );
-};
-
-const SoilSection = () => {
-  const { data: soil } = useQuery({
-    queryKey: ["soil", "shop"],
-    queryFn: () => productService.getRecommendedProducts(),
-    staleTime: 1000 * 60 * 5,
-  });
-
-  if (!checkCanRender(soil)) return null;
-
-  return (
-    <ShopScreenContainer title="Đất trồng giá thể" onPress={() => {}}>
-      <ListProduct data={soil!} />
-    </ShopScreenContainer>
-  );
-};
-
-const SeedSection = () => {
-  const { data: seed } = useQuery({
-    queryKey: ["seed", "shop"],
-    queryFn: () => productService.getRecommendedProducts(),
-    staleTime: 1000 * 60 * 5,
-  });
-
-  if (!checkCanRender(seed)) return null;
-
-  return (
-    <ShopScreenContainer title="Hạt giống chất lượng" onPress={() => {}}>
-      <ListProduct data={seed!} />
-    </ShopScreenContainer>
-  );
-};
-
 const ShopScreen = () => {
   const shopId = useGetShopId();
-  const [flashListData, setFlashListData] = useState<any[]>([]);
 
-  const renderItem = ({ item }: { item: any }) => {
-    if (item.type === "promotion") {
-      return <ShopPromotion />;
+  const { data: shop } = useQuery({
+    queryKey: ["shop", shopId],
+    queryFn: () => shopService.getShopDetail(shopId),
+  });
+
+  const renderItem = useCallback(
+    ({ item }: { item: any }) => {
+      if (item.type === "promotion") {
+        return <ShopPromotion />;
+      }
+
+      if (item.type === "suggestForYou") {
+        return (
+          <ProductSection
+            dataProvider="productIds"
+            productIds={shop?.suggestionProductIds || []}
+            shopId={shopId?.toString() || ""}
+            queryKey={"suggestForYou"}
+            title="Gợi ý cho bạn"
+          />
+        );
+      }
+
+      if (item.type === "promotionSection") {
+        return (
+          <ProductSection
+            dataProvider="productIds"
+            productIds={shop?.hotDealProductIds || []}
+            shopId={shopId?.toString() || ""}
+            queryKey={"promotion"}
+            title="ƯU ĐÃI KHỦNG"
+          />
+        );
+      }
+
+      if (item.type === "categorySection") {
+        return <CategorySection />;
+      }
+
+      if (item.type === "Section") {
+        return (
+          <ProductSection
+            dataProvider="categoryId"
+            categoryId={item.categoryId || 0}
+            shopId={shopId?.toString() || ""}
+            queryKey={"Section" + item.id}
+            title={item.heading || ""}
+          />
+        );
+      }
+
+      if (item.type === "banner") {
+        return <BannerSection banner={item.banner} />;
+      }
+
+      return null;
+    },
+    [shopId, shop?.suggestionProductIds, shop?.hotDealProductIds]
+  );
+
+  const flashListData = useMemo(() => {
+    const baseItems: any[] = [
+      { type: "promotion", id: "promotion" },
+      { type: "suggestForYou", id: "suggestForYou" },
+      { type: "promotionSection", id: "promotionSection" },
+      { type: "categorySection", id: "categorySection" },
+    ];
+
+    if (shop?.repeaters?.length) {
+      shop.repeaters.forEach((item, index) => {
+        if (item?.banner) {
+          baseItems.push({
+            type: "banner",
+            id: "banner" + index.toString(),
+            banner: item.banner,
+          });
+        }
+
+        baseItems.push({
+          type: "Section",
+          id: "Section" + index.toString(),
+          categoryId: item.categoryId,
+          heading: item.heading,
+        });
+      });
     }
 
-    if (item.type === "suggestForYou") {
-      return <SuggestForYouSection />;
-    }
-
-    if (item.type === "promotionSection") {
-      return <PromotionSection />;
-    }
-
-    if (item.type === "categorySection") {
-      return <CategorySection />;
-    }
-
-    if (item.type === "bannerSection") {
-      return <BannerSection />;
-    }
-
-    if (item.type === "bestSellerSection") {
-      return <BestSellerSection />;
-    }
-
-    if (item.type === "gardeningToolsSection") {
-      return <GardeningToolsSection />;
-    }
-
-    if (item.type === "fertilizerSection") {
-      return <FertilizerSection />;
-    }
-
-    if (item.type === "soilSection") {
-      return <SoilSection />;
-    }
-
-    if (item.type === "seedSection") {
-      return <SeedSection />;
-    }
-
-    return null;
-  };
-
-  useEffect(() => {
-    setFlashListData([
-      { type: "promotion" },
-      { type: "suggestForYou" },
-      { type: "promotionSection" },
-      { type: "categorySection" },
-      { type: "bannerSection" },
-      { type: "bestSellerSection" },
-      { type: "gardeningToolsSection" },
-      { type: "fertilizerSection" },
-      { type: "soilSection" },
-      { type: "seedSection" },
-    ]);
-  }, []);
+    return [...baseItems];
+  }, [shop]);
 
   return (
     <View className="flex-1">
@@ -243,6 +235,15 @@ const ShopScreen = () => {
         renderItem={renderItem}
         estimatedItemSize={320}
         getItemType={(item) => item.type}
+        keyExtractor={(item) => item.id}
+        ListEmptyComponent={
+          <Empty
+            title="Không có dữ liệu"
+            backgroundColor="#fff"
+            isLoading={false}
+          />
+        }
+        ListFooterComponent={<View className="h-20" />}
       />
     </View>
   );
