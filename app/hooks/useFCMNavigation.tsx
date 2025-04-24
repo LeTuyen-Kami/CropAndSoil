@@ -16,6 +16,8 @@ import {
 } from "@react-native-firebase/messaging";
 import { useEffect } from "react";
 import { toast } from "~/components/common/Toast";
+import * as Notifications from "expo-notifications";
+import { Platform } from "react-native";
 
 export default function useFCMNavigation(
   navigationRef: NavigationContainerRef<any>
@@ -36,18 +38,40 @@ export default function useFCMNavigation(
     }
   };
 
-  // // 1) Cold‑start
+  // 1) Cold‑start
   useEffect(() => {
-    getInitialNotification(messaging).then(handle);
+    if (Platform.OS === "ios") {
+      getInitialNotification(messaging).then(handle);
+    }
   }, [messaging]);
 
   // // 2) Background → foreground (tap)
   useEffect(() => onNotificationOpenedApp(messaging, handle), [messaging]);
 
+  useEffect(() => {
+    if (Platform.OS === "android") {
+      Notifications.getLastNotificationResponseAsync().then(
+        async (notification) => {
+          console.log("notification", notification?.notification?.request);
+
+          handle({
+            data: {
+              id: notification?.notification?.request?.content?.data?.id,
+              title: notification?.notification?.request?.content?.title,
+              body: notification?.notification?.request?.content?.body,
+            },
+          } as any);
+        }
+      );
+    }
+  }, []);
+
   // 3) Foreground message realtime
   useEffect(
     () =>
       onMessage(messaging, (msg) => {
+        console.log("msg", msg);
+
         if (msg.notification?.body) {
           toast.info(msg.notification?.body);
         }
