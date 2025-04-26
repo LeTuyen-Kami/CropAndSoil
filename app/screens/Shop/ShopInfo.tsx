@@ -94,7 +94,7 @@ const ShopInfo = () => {
       </View>
 
       {/* Action buttons */}
-      <View className="flex-row justify-between items-center px-2 py-4 gap-1.5">
+      {/* <View className="flex-row justify-between items-center px-2 py-4 gap-1.5">
         <TouchableOpacity className="h-10 rounded-lg justify-center items-center bg-[#FCBA27] flex-1 px-4">
           <View className="flex-row justify-center items-center gap-1.5">
             <Image
@@ -131,7 +131,9 @@ const ShopInfo = () => {
             style={{ tintColor: "white" }}
           />
         </TouchableOpacity>
-      </View>
+      </View> */}
+
+      <View className="h-10" />
     </View>
   );
 };

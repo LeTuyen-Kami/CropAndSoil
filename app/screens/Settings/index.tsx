@@ -19,6 +19,7 @@ import { authService } from "~/services/api/auth.service";
 import { signOut } from "~/store/atoms";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
+import { useState } from "react";
 
 const Section = ({
   title,
@@ -57,19 +58,25 @@ const SettingItem = ({
 const Settings = () => {
   const navigation = useSmartNavigation();
   const { bottom } = useSafeAreaInsets();
+  const [loading, setLoading] = useState(false);
 
   const mutateLogout = useMutation({
     mutationFn: authService.logout,
   });
 
   const onPressLogout = () => {
+    setLoading(true);
     mutateLogout.mutate(undefined, {
       onSuccess: () => {
         toast.success("Đăng xuất thành công");
-        signOut();
-        navigation.smartGoBack();
       },
     });
+
+    setTimeout(() => {
+      signOut();
+      navigation.smartGoBack();
+      setLoading(false);
+    }, 1000);
   };
 
   const changePassword = () => {
@@ -107,7 +114,7 @@ const Settings = () => {
           }}
         >
           <Button onPress={onPressLogout} className="bg-[#FCBA26] ">
-            {mutateLogout.isPending ? (
+            {loading ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
               <Text>Đăng xuất</Text>

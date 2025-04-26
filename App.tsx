@@ -14,12 +14,17 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SystemBars } from "react-native-edge-to-edge";
 import ModalConfirm from "~/components/common/ModalConfirm";
-// SplashScreen.preventAutoHideAsync();
+import * as Sentry from "@sentry/react-native";
+import { ENV } from "~/utils";
+import FallBackUI from "~/components/common/FallbackUI";
+import { withErrorBoundary } from "~/hooks/withErrorBoundary";
+
+SplashScreen.preventAutoHideAsync();
 
 cssInterop(Image, {
   className: "style",
 });
-export default function App() {
+function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <KeyboardProvider>
@@ -39,3 +44,15 @@ export default function App() {
     </GestureHandlerRootView>
   );
 }
+
+if (!__DEV__) {
+  Sentry.init({
+    dsn: ENV.EXPO_PUBLIC_SENTRY_DSN,
+    debug: true,
+    replaysSessionSampleRate: 0.1,
+    replaysOnErrorSampleRate: 1.0,
+    integrations: [Sentry.mobileReplayIntegration()],
+  });
+}
+const Boundary = withErrorBoundary(App);
+export default Sentry.wrap(Boundary);

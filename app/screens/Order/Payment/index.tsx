@@ -41,7 +41,7 @@ import PaymentStore from "./PaymentStore";
 const Payment = () => {
   const navigation = useNavigation<RootStackScreenProps<"Payment">>();
   const route = useRoute<RootStackRouteProp<"Payment">>();
-  const { isClearCart } = route.params;
+  const isClearCart = route.params?.isClearCart;
 
   const [voucherShopId, setVoucherShopId] = useState<string>();
 
@@ -159,7 +159,7 @@ const Payment = () => {
           voucherState?.voucher?.voucherType !== "shipping"
             ? voucherState?.voucher?.code!
             : "",
-        isClearCart: isClearCart,
+        isClearCart: !!isClearCart,
         shops: selectedStore?.map((store) => ({
           id: Number(store.id),
           shippingMethodKey: "ghtk",

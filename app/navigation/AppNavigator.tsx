@@ -77,13 +77,13 @@ const TabNavigator = () => {
 export const AppNavigator = () => {
   const navigationRef = useNavigationContainerRef();
 
-  // useEffect(() => {
-  //   SplashScreen.setOptions({
-  //     fade: true,
-  //     duration: 500,
-  //   });
-  //   SplashScreen.hideAsync();
-  // }, []);
+  useEffect(() => {
+    SplashScreen.setOptions({
+      fade: true,
+      duration: 500,
+    });
+    SplashScreen.hideAsync();
+  }, []);
 
   useFCMNavigation(navigationRef);
 

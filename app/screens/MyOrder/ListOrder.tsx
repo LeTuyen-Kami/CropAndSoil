@@ -35,6 +35,7 @@ const ListOrder = ({ status }: { status?: string }) => {
       statusKey: status,
     },
   });
+
   const setConfirmState = useSetAtom(confirmAtom);
 
   const mutationCancelOrder = useMutation({
@@ -94,15 +95,15 @@ const ListOrder = ({ status }: { status?: string }) => {
         ItemSeparatorComponent={() => <View className="h-2.5" />}
         renderItem={({ item }) => (
           <ProductCart
-            shopName={item.shop.shopName}
+            shopName={item.shop?.shopName}
             products={item.items.map((item) => ({
-              name: item.product.name,
-              type: item.variation.name,
+              name: item.product?.name,
+              type: item.variation?.name,
               quantity: item.quantity,
-              originalPrice: formatPrice(item.variation.regularPrice),
-              discountedPrice: formatPrice(item.variation.salePrice),
-              imageUri: item.variation.thumbnail || item?.product?.thumbnail,
-              productId: item.product.id,
+              originalPrice: formatPrice(item.variation?.regularPrice),
+              discountedPrice: formatPrice(item.variation?.salePrice),
+              imageUri: item.variation?.thumbnail || item?.product?.thumbnail,
+              productId: item.product?.id,
             }))}
             status={!status ? getStatusInfo(item?.status).label : undefined}
             statusColor={
@@ -119,7 +120,7 @@ const ListOrder = ({ status }: { status?: string }) => {
                 : undefined
             }
             onViewDetails={() => onViewDetails(item.id)}
-            shopId={item.shop.id}
+            shopId={item.shop?.id}
           />
         )}
         refreshControl={

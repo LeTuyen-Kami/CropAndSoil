@@ -38,6 +38,8 @@ const ProductItem = ({
   const navigation = useSmartNavigation();
 
   const navigationToProduct = (productId: string) => {
+    if (!productId) return;
+
     navigation.navigate("DetailProduct", { id: productId });
   };
 
@@ -109,6 +111,8 @@ const ProductCart = ({
   const navigation = useSmartNavigation();
 
   const onViewShop = () => {
+    if (!shopId) return;
+
     navigation.navigate("Shop", { id: shopId });
   };
 

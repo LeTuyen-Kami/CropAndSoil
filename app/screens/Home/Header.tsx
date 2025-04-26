@@ -20,12 +20,12 @@ const Header: React.FC<HeaderProps> = ({
         contentFit="contain"
       />
       <View className="flex flex-row gap-6">
-        <TouchableOpacity onPress={onPressMessages}>
+        {/* <TouchableOpacity onPress={onPressMessages}>
           <Image
             source={imagePaths.icMessages}
             style={{ width: 24, height: 24 }}
           />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <TouchableOpacity onPress={onPressQuestionCircle}>
           <Image
             source={imagePaths.icQuestionCircle}

@@ -106,7 +106,6 @@ const SearchScreen = () => {
         showBack
         className="border-0"
         hasSafeTop={false}
-        onBackPress={() => navigation.popToTop()}
       />
       <View className="flex-1">
         <SearchBar

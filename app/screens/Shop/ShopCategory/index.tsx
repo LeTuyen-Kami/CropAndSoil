@@ -6,14 +6,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Text } from "~/components/ui/text";
 import { imagePaths } from "~/assets/imagePath";
-import { useQuery } from "@tanstack/react-query";
-import { shopService } from "~/services/api/shop.service";
-import { categoryService } from "~/services/api/category.service";
-import { usePagination } from "~/hooks/usePagination";
 import Empty from "~/components/common/Empty";
+import { Text } from "~/components/ui/text";
 import { COLORS } from "~/constants/theme";
+import { usePagination } from "~/hooks/usePagination";
+import { categoryService } from "~/services/api/category.service";
 import useGetShopId from "../useGetShopId";
 
 interface ItemProps {
@@ -29,6 +27,8 @@ const Item = ({ title, image, count }: ItemProps) => {
         className="size-[46px] rounded-lg"
         source={image}
         contentFit="contain"
+        placeholder={imagePaths.placeholder}
+        placeholderContentFit="contain"
       />
       <View className="flex-1 justify-center">
         <Text className="text-lg leading-7">{title}</Text>

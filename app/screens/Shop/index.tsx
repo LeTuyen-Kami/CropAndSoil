@@ -7,6 +7,7 @@ import { Input } from "~/components/ui/input";
 import Background from "./Background";
 import ShopInfo from "./ShopInfo";
 import Tabs from "./Tabs";
+import { Text } from "~/components/ui/text";
 
 const Shop = () => {
   const { top, bottom } = useSafeAreaInsets();
@@ -35,22 +36,26 @@ const Shop = () => {
               style={{ width: 7.5, height: 15, tintColor: "white" }}
             />
           </TouchableOpacity>
-          <Input
-            placeholder="Tìm kiếm"
-            className="flex-1 border-0 bg-white/20"
-            placeholderTextColor="white"
-            textInputClassName="text-sm leading-4 text-white"
-            rightIcon={
+          <TouchableOpacity
+            className="flex-row flex-1 items-center px-5 rounded-full bg-white/20"
+            onPress={() => navigation.navigate("Search")}
+          >
+            <View className="flex-1 py-4">
+              <Text className="text-sm leading-4 text-white opacity-70">
+                Tìm kiếm
+              </Text>
+            </View>
+            <View className="ml-2">
               <Image
                 source={imagePaths.icMagnifier}
                 className="size-5"
                 style={{ tintColor: "white" }}
               />
-            }
-          />
-          <TouchableOpacity hitSlop={20} onPress={() => navigation.goBack()}>
-            <Image source={imagePaths.icThreeDot} className="size-[50px]" />
+            </View>
           </TouchableOpacity>
+          {/* <TouchableOpacity hitSlop={20} onPress={() => navigation.goBack()}>
+            <Image source={imagePaths.icThreeDot} className="size-[50px]" />
+          </TouchableOpacity> */}
         </View>
         <ShopInfo />
       </View>

@@ -7,7 +7,7 @@ import {
 import { Text } from "~/components/ui/text";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import ProductItem from "~/components/common/ProductItem";
 import {
   calculateDiscount,
@@ -102,7 +102,7 @@ const RenderTwoProduct = ({ items }: { items: IProduct[] }) => {
           rating={item.averageRating}
           soldCount={item.reviewCount}
           id={item.id}
-          image={item.images[0]}
+          image={item.thumbnail}
           onSale={item.regularPrice > item.salePrice}
           location={item.shop?.shopWarehouseLocation?.province?.name}
           height={"100%"}
@@ -161,27 +161,30 @@ const ShopProduct = () => {
     }
   };
 
-  const renderItem = ({ item }: { item: any }) => {
-    if (item.type === "header") {
-      return <Header total={total} sort={sort} onToggleSort={onToggleSort} />;
-    }
+  const renderItem = useCallback(
+    ({ item }: { item: any }) => {
+      if (item.type === "header") {
+        return <Header total={total} sort={sort} onToggleSort={onToggleSort} />;
+      }
 
-    if (item.type === "product") {
-      return <RenderTwoProduct items={item.items} />;
-    }
+      if (item.type === "product") {
+        return <RenderTwoProduct items={item.items} />;
+      }
 
-    if (item.type === "noData") {
-      return (
-        <Empty
-          title="Không có sản phẩm nào"
-          backgroundColor="#EEE"
-          isLoading={isLoading}
-        />
-      );
-    }
+      if (item.type === "noData") {
+        return (
+          <Empty
+            title="Không có sản phẩm nào"
+            backgroundColor="#EEE"
+            isLoading={isLoading}
+          />
+        );
+      }
 
-    return null;
-  };
+      return null;
+    },
+    [isLoading, sort]
+  );
 
   useEffect(() => {
     if (!sort) return resetParams();
@@ -196,10 +199,13 @@ const ShopProduct = () => {
     const handledData = preHandleFlashListData(data);
 
     if (!data || data.length === 0) {
-      return [{ type: "header" }, { type: "noData" }];
+      return [
+        { type: "header", id: "header" },
+        { type: "noData", id: "noData" },
+      ];
     }
 
-    return [{ type: "header" }, ...handledData];
+    return [{ type: "header", id: "header" }, ...handledData];
   }, [data, sort]);
 
   return (
@@ -215,6 +221,7 @@ const ShopProduct = () => {
         refreshControl={
           <RefreshControl refreshing={isRefresh} onRefresh={refresh} />
         }
+        keyExtractor={(item) => item.id}
         onEndReached={fetchNextPage}
         onEndReachedThreshold={0.5}
         ListFooterComponent={() => {

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { imagePaths } from "~/assets/imagePath";
 import { Text } from "~/components/ui/text";
 import { usePagination } from "~/hooks/usePagination";
 import { cn } from "~/lib/utils";
@@ -34,6 +35,8 @@ const Item = ({ title, image, itemBgColor, textColor, onPress }: ItemProps) => {
             source={image}
             style={{ width: "100%", height: "100%" }}
             contentFit="contain"
+            placeholder={imagePaths.placeholder}
+            placeholderContentFit="contain"
           />
         </View>
         <Text

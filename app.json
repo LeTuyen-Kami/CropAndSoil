@@ -52,6 +52,14 @@
         {
           "ios": { "useFrameworks": "static" }
         }
+      ],
+      [
+        "@sentry/react-native/expo",
+        {
+          "organization": "me-lq",
+          "project": "react-native",
+          "url": "https://sentry.io/"
+        }
       ]
     ]
   }

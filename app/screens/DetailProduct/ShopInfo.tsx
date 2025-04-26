@@ -145,7 +145,7 @@ const ShopInfo = ({ id }: { id: string | number }) => {
               </View>
             </View>
           </View>
-          <TouchableOpacity>
+          {/* <TouchableOpacity>
             <Image
               source={imagePaths.icMessages}
               className="w-6 h-6"
@@ -153,7 +153,7 @@ const ShopInfo = ({ id }: { id: string | number }) => {
                 tintColor: "#AEAEAE",
               }}
             />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </View>
       <View className="items-center mt-3 px-2.5">
@@ -192,9 +192,9 @@ const ShopInfo = ({ id }: { id: string | number }) => {
         >
           <Text className="text-sm font-medium text-white">Xem shop</Text>
         </TouchableOpacity>
-        <TouchableOpacity className="bg-[#DEF1E5] border border-[#BEE2CC] rounded-full px-4 py-2.5 items-center flex-1">
+        {/* <TouchableOpacity className="bg-[#DEF1E5] border border-[#BEE2CC] rounded-full px-4 py-2.5 items-center flex-1">
           <Text className="text-[#159747] text-sm font-medium">Liên hệ</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
     </View>
   );

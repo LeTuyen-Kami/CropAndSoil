@@ -94,6 +94,8 @@ const ProductItem = ({
             source={image}
             style={{ width: "100%", height: "100%" }}
             contentFit="cover"
+            placeholder={imagePaths.placeholder}
+            placeholderContentFit="contain"
           />
         </View>
         <View className="p-[10] flex-col gap-[2] flex-1">

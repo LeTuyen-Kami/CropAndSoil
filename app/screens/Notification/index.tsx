@@ -1,26 +1,22 @@
+import { useIsFocused } from "@react-navigation/native";
+import { FlashList } from "@shopify/flash-list";
 import React, { useEffect, useRef } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
   ActivityIndicator,
   RefreshControl,
+  StyleSheet,
+  View,
 } from "react-native";
-import { FlashList } from "@shopify/flash-list";
+import Empty from "~/components/common/Empty";
 import Header from "~/components/common/Header";
 import ScreenWrapper from "~/components/common/ScreenWrapper";
-import NotificationTypeTab from "~/components/notification/NotificationTypeTab";
 import NotificationItem from "~/components/notification/NotificationItem";
-import { useNotifications } from "~/hooks/useNotifications";
-import { SafeAreaView } from "react-native-safe-area-context";
-import Empty from "~/components/common/Empty";
+import { COLORS } from "~/constants/theme";
 import { usePagination } from "~/hooks/usePagination";
 import {
   INotification,
   notificationService,
 } from "~/services/api/notification.service";
-import { COLORS } from "~/constants/theme";
-import { useIsFocused } from "@react-navigation/native";
 const Notification = () => {
   const isFocused = useIsFocused();
   const flashListRef = useRef<FlashList<INotification>>(null);
@@ -57,6 +53,7 @@ const Notification = () => {
         className="bg-transparent border-0"
         textColor="#fff"
       />
+
       <View className="flex-1 bg-[#EEE] rounded-t-3xl overflow-hidden">
         <FlashList
           ref={flashListRef}

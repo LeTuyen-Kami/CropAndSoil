@@ -64,7 +64,7 @@ const HeaderLogging = () => {
               <TouchableOpacity
                 hitSlop={10}
                 onPress={() => {
-                  navigation.navigate("Followers");
+                  // navigation.navigate("Followers");
                 }}
               >
                 <Text className="text-xs text-white">
@@ -75,7 +75,7 @@ const HeaderLogging = () => {
               <TouchableOpacity
                 hitSlop={10}
                 onPress={() => {
-                  navigation.navigate("Followings");
+                  // navigation.navigate("Followings");
                 }}
               >
                 <Text className="text-xs text-white">

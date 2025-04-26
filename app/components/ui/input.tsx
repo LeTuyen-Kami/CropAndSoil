@@ -18,6 +18,7 @@ interface InputProps extends TextInputProps {
   clearable?: boolean;
   focusedStyle?: string;
   placeholderTextColor?: string;
+  onPress?: () => void;
 }
 
 const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
@@ -32,15 +33,18 @@ const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
       clearable,
       focusedStyle,
       placeholderTextColor = "#AEAEAE",
+      onPress,
       ...props
     },
     ref
   ) => {
     const [isFocused, setIsFocused] = React.useState(false);
 
+    const Wrapper = onPress ? TouchableOpacity : View;
+
     return (
       <>
-        <View
+        <Wrapper
           className={cn(
             "flex-row items-center bg-white rounded-full px-5 border border-white",
             props.editable === false && "opacity-50 web:cursor-not-allowed",
@@ -71,7 +75,7 @@ const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
               <Ionicons name="close" size={14} color="#AEAEAE" />
             </TouchableOpacity>
           )}
-        </View>
+        </Wrapper>
         {error && (
           <View className="flex-row gap-1 items-center pl-5 mt-1">
             <MaterialIcons name="error" size={12} color="red" />
