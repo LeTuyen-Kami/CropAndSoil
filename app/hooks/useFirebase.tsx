@@ -15,11 +15,7 @@ import {
 
 import { getApp } from "@react-native-firebase/app";
 
-type UseFirebaseOpts = {
-  onMessage?: (msg: FirebaseMessagingTypes.RemoteMessage) => void;
-};
-
-export default function useFirebase(opts: UseFirebaseOpts = {}) {
+export default function useFirebase() {
   const app = getApp(); // modular: lấy default app
   const messaging = getMessaging(app);
 
@@ -69,16 +65,14 @@ export default function useFirebase(opts: UseFirebaseOpts = {}) {
     requestPermission().then(refreshToken);
 
     // foreground listener
-    const unsubMsg = onMessage(messaging, opts.onMessage ?? (() => {}));
 
     // token refresh listener
     const unsubToken = onTokenRefresh(messaging, refreshToken);
 
     return () => {
-      unsubMsg();
       unsubToken();
     };
-  }, [messaging, opts.onMessage, refreshToken, requestPermission]);
+  }, [messaging, refreshToken, requestPermission]);
 
   const handleInitialMessage = useCallback(async () => {}, [messaging]);
 

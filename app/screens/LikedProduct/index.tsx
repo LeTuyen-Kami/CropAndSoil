@@ -102,7 +102,7 @@ const TwoProductItem = ({
       {items.map((item, index) => (
         <ProductItem
           key={item?.id}
-          height={"100%"}
+          className="flex-1"
           width={width}
           name={item?.name}
           id={item?.id}
@@ -234,6 +234,8 @@ const LikedProductScreen = () => {
     return preHandleFlashListData(data, "product");
   }, [data]);
 
+  console.log("handledData", handledData?.length);
+
   return (
     <ScreenWrapper hasGradient={true} hasSafeBottom={false}>
       <Header
@@ -258,7 +260,6 @@ const LikedProductScreen = () => {
         <FlashList
           data={handledData}
           ItemSeparatorComponent={() => <View className="h-2" />}
-          numColumns={2}
           ListEmptyComponent={() => (
             <Empty
               title="Không có sản phẩm yêu thích"

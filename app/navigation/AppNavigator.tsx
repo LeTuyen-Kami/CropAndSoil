@@ -58,7 +58,6 @@ const TempSearchScreen = () => {
 };
 
 const TabNavigator = () => {
-  useUpdateFCMToken();
   return (
     <Tab.Navigator
       tabBar={(props) => <CustomTabBar {...props} />}
@@ -76,6 +75,7 @@ const TabNavigator = () => {
 
 export const AppNavigator = () => {
   const navigationRef = useNavigationContainerRef();
+  useUpdateFCMToken();
 
   useEffect(() => {
     SplashScreen.setOptions({
@@ -88,12 +88,7 @@ export const AppNavigator = () => {
   useFCMNavigation(navigationRef);
 
   return (
-    <NavigationContainer
-      ref={navigationRef}
-      onReady={() => {
-        console.log("onReady");
-      }}
-    >
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="MainTabs" component={TabNavigator} />
         <Stack.Screen name="Buttons" component={Buttons} />

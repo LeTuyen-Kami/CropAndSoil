@@ -276,7 +276,7 @@ const Payment = () => {
         { name: "MainTabs", params: { screen: "Profile" } },
         {
           name: "DetailOrder",
-          params: { id: checkoutData?.payload.orders[0].id },
+          params: { orderId: checkoutData?.payload.orders[0].id },
         },
       ],
     });
