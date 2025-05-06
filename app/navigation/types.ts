@@ -18,10 +18,13 @@ export type RootStackParamList = {
   // Add other root stack screens here
   Buttons: undefined;
   Inputs: undefined;
-  Search: undefined;
+  Search?: {
+    shopId?: string;
+  };
   Login: undefined;
   SearchAdvance: {
     searchText: string;
+    shopId?: string;
   };
   DetailProduct: {
     id: string | number;
@@ -80,6 +83,10 @@ export type RootStackParamList = {
   };
   DetailOrder: {
     orderId: number;
+  };
+  ProductBy: {
+    productIds: string[];
+    title: string;
   };
 };
 

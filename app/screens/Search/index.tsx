@@ -1,4 +1,4 @@
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import React, { useEffect, useRef, useState } from "react";
@@ -9,7 +9,7 @@ import SearchBar from "~/components/common/SearchBar";
 import SearchResults from "~/components/search/SearchResults";
 import { Text } from "~/components/ui/text";
 import { useDebounce } from "~/hooks/useDebounce";
-import { RootStackParamList } from "~/navigation/types";
+import { RootStackParamList, RootStackRouteProp } from "~/navigation/types";
 import { searchService } from "~/services/api/search.services";
 
 // Mock data for search history and suggestions
@@ -33,6 +33,8 @@ const SearchScreen = () => {
   const [searchHistory, setSearchHistory] = useState(MOCK_SEARCH_HISTORY);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const isFirstRender = useRef(true);
+  const route = useRoute<RootStackRouteProp<"Search">>();
+  const { shopId } = route.params || {};
 
   const { data: trending } = useQuery({
     queryKey: ["trending"],
@@ -61,7 +63,10 @@ const SearchScreen = () => {
     console.log("value", value);
 
     if (value?.trim()) {
-      navigation.navigate("SearchAdvance", { searchText: value });
+      navigation.navigate("SearchAdvance", {
+        searchText: value,
+        ...(shopId && { shopId: shopId }),
+      });
     }
   };
 

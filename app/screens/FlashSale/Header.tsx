@@ -21,7 +21,7 @@ const Header = () => {
         />
       </TouchableOpacity>
       <Input
-        placeholder="Tìm kiếm sản phẩm, cửa hàng"
+        placeholder="Tìm kiếm sản phẩm"
         placeholderTextColor="#AEAEAE"
         className="flex-1"
         textInputClassName="text-sm leading-4"

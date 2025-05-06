@@ -140,6 +140,7 @@ interface CategoryProps {
   itemBgColor?: string;
   textColor?: string;
   className?: string;
+  onPress?: (category: ICategory) => void;
 }
 
 const Category = ({
@@ -148,6 +149,7 @@ const Category = ({
   itemBgColor = "rgba(0,0,0,0.25)",
   textColor = "white",
   className,
+  onPress,
 }: CategoryProps) => {
   const navigation = useNavigation<RootStackScreenProps<"MainTabs">>();
 
@@ -161,9 +163,13 @@ const Category = ({
   );
 
   const handlePressCategory = (category: ICategory) => {
-    navigation.navigate("SearchAdvance", {
-      searchText: category.name,
-    });
+    if (onPress) {
+      onPress(category);
+    } else {
+      navigation.navigate("SearchAdvance", {
+        searchText: category.name,
+      });
+    }
   };
 
   return (

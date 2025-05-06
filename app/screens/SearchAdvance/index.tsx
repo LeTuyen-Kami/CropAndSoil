@@ -52,15 +52,16 @@ const Header = ({
   onOpen,
   searchText,
   hasActiveFilters,
+  hasShopId,
 }: {
   isOpen: boolean;
   onOpen: () => void;
   searchText: string;
   hasActiveFilters: boolean;
+  hasShopId?: boolean;
 }) => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const route = useRoute<RootStackRouteProp<"SearchAdvance">>();
 
   const onPressSearch = () => {
     navigation.dispatch((state) => {
@@ -109,7 +110,7 @@ const Header = ({
           )}
           numberOfLines={1}
         >
-          {searchText || "Tìm kiếm sản phẩm cửa hàng"}
+          {searchText || "Tìm kiếm sản phẩm"}
         </Text>
         <Image
           source={imagePaths.icMagnifier}
@@ -117,22 +118,24 @@ const Header = ({
           contentFit="contain"
         />
       </TouchableOpacity>
-      <TouchableOpacity
-        onPress={onOpen}
-        className={cn(
-          "h-12 rounded-full aspect-square bg-[#39CA71] justify-center items-center",
-          hasActiveFilters && "border-2 border-white"
-        )}
-        hitSlop={20}
-      >
-        <View className="relative">
-          <Image
-            source={imagePaths.icFilter}
-            className="size-6"
-            contentFit="contain"
-          />
-        </View>
-      </TouchableOpacity>
+      {!hasShopId && (
+        <TouchableOpacity
+          onPress={onOpen}
+          className={cn(
+            "h-12 rounded-full aspect-square bg-[#39CA71] justify-center items-center",
+            hasActiveFilters && "border-2 border-white"
+          )}
+          hitSlop={20}
+        >
+          <View className="relative">
+            <Image
+              source={imagePaths.icFilter}
+              className="size-6"
+              contentFit="contain"
+            />
+          </View>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -261,7 +264,7 @@ const noDataData = [
 
 const SearchAdvance = () => {
   const route = useRoute<RootStackRouteProp<"SearchAdvance">>();
-  const { searchText } = route.params;
+  const { searchText, shopId } = route.params || {};
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [sort, setSort] = useState<{
     sortBy: "salePrice" | "createdAt";
@@ -276,14 +279,13 @@ const SearchAdvance = () => {
   });
   const hasActiveFilters = useMemo(() => {
     return (
-      !!sort ||
       activeFilters.minPrice > 0 ||
       activeFilters.maxPrice > 0 ||
       activeFilters.categories.length > 0 ||
       activeFilters.locations.length > 0 ||
       activeFilters.ratings.length > 0
     );
-  }, [sort, activeFilters]);
+  }, [activeFilters]);
 
   const {
     data,
@@ -300,6 +302,14 @@ const SearchAdvance = () => {
     initialPagination: {
       skip: 0,
       take: 10,
+    },
+    initialParams: {
+      search: searchText,
+      ...(shopId && { shopId: shopId }),
+      ...(sort && {
+        sortBy: sort?.sortBy,
+        sortDirection: sort?.sortDirection,
+      }),
     },
     queryKey: ["search-products"],
   });
@@ -388,7 +398,11 @@ const SearchAdvance = () => {
       }
     });
 
-    forceUpdateParams(params);
+    forceUpdateParams({
+      ...params,
+      ...(shopId && { shopId: shopId }),
+      ...(searchText && { search: searchText }),
+    });
   };
 
   const onResetFilter = () => {
@@ -406,16 +420,18 @@ const SearchAdvance = () => {
     const handledData = preHandleFlashListData(data);
 
     if (!data || data.length === 0) {
-      return [...categoryData, ...containerHeaderData, ...noDataData];
+      return [
+        ...(shopId ? [] : categoryData),
+        ...containerHeaderData,
+        ...noDataData,
+      ];
     }
-    return [...categoryData, ...containerHeaderData, ...handledData];
-  }, [data, sort]);
-
-  useEffect(() => {
-    updateParams({
-      search: searchText,
-    });
-  }, [searchText]);
+    return [
+      ...(shopId ? [] : categoryData),
+      ...containerHeaderData,
+      ...handledData,
+    ];
+  }, [data, sort, shopId]);
 
   return (
     <ScreenWrapper hasGradient hasSafeBottom={false}>
@@ -424,8 +440,11 @@ const SearchAdvance = () => {
         onOpen={onOpen}
         searchText={searchText}
         hasActiveFilters={hasActiveFilters}
+        hasShopId={!!shopId}
       />
-      <View className="flex-1">
+      <View className="relative flex-1">
+        <View className="absolute right-0 bottom-0 left-0 h-1/2 bg-[#EEE] z-0" />
+
         <FlashList
           className="mt-4"
           data={flashListData}
@@ -459,12 +478,14 @@ const SearchAdvance = () => {
           }
         />
       </View>
-      <Filter
-        isOpen={isOpen}
-        onClose={onClose}
-        onApply={onFilter}
-        onResetFilter={onResetFilter}
-      />
+      {!shopId && (
+        <Filter
+          isOpen={isOpen}
+          onClose={onClose}
+          onApply={onFilter}
+          onResetFilter={onResetFilter}
+        />
+      )}
     </ScreenWrapper>
   );
 };

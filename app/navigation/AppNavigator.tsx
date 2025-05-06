@@ -50,6 +50,7 @@ import * as SplashScreen from "expo-splash-screen";
 import AllProductReview from "~/screens/AllProductReview";
 import DetailOrder from "~/screens/DetailOrder";
 import useUpdateFCMToken from "~/hooks/useUpdateFCMToken";
+import ProductByScreen from "~/screens/ProductBy";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -157,6 +158,7 @@ export const AppNavigator = () => {
         <Stack.Screen name="FlashSaleProduct" component={FlashSaleProduct} />
         <Stack.Screen name="MyVoucher" component={MyVoucherScreen} />
         <Stack.Screen name="AllProductReview" component={AllProductReview} />
+        <Stack.Screen name="ProductBy" component={ProductByScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -1,17 +1,16 @@
-import { useNavigation } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { deepEqual } from "fast-equals";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import { imagePaths } from "~/assets/imagePath";
 import WebViewContent from "~/components/common/WebViewContent";
 import { Text } from "~/components/ui/text";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
-import { RootStackScreenProps } from "~/navigation/types";
 import { flashSaleService } from "~/services/api/flashsale.service";
 const Detail = ({ id }: { id: string | number }) => {
   const [expanded, setExpanded] = useState(false);
+  const [showAllProperties, setShowAllProperties] = useState(false);
   const navigation = useSmartNavigation();
 
   const { data: productDescription } = useQuery({
@@ -27,6 +26,21 @@ const Detail = ({ id }: { id: string | number }) => {
       };
     },
   });
+
+  const showViewAllButton = useMemo(() => {
+    return (productDescription?.properties?.length || 0) > 4;
+  }, [productDescription?.properties]);
+
+  const visibleProperties = useMemo(() => {
+    if (!productDescription?.properties) return [];
+    return showAllProperties
+      ? productDescription.properties
+      : productDescription.properties.slice(0, 4);
+  }, [productDescription?.properties, showAllProperties]);
+
+  const handleToggleProperties = () => {
+    setShowAllProperties(true);
+  };
 
   const handlePressAllProduct = () => {
     if (!productDescription?.shop?.id) return;
@@ -47,13 +61,15 @@ const Detail = ({ id }: { id: string | number }) => {
               Chi tiết sản phẩm
             </Text>
           </View>
-          <TouchableOpacity
-            className="flex-row items-center"
-            onPress={handlePressAllProduct}
-          >
-            <Text className="text-[#159747] text-base mr-1">Xem tất cả</Text>
-            <Image source={imagePaths.icArrowRight} className="w-5 h-5" />
-          </TouchableOpacity>
+          {showViewAllButton && !showAllProperties && (
+            <TouchableOpacity
+              className="flex-row items-center"
+              onPress={handleToggleProperties}
+            >
+              <Text className="text-[#159747] text-base mr-1">Xem tất cả</Text>
+              <Image source={imagePaths.icArrowRight} className="w-5 h-5" />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
@@ -67,7 +83,7 @@ const Detail = ({ id }: { id: string | number }) => {
 
         <View className="flex flex-col gap-5 px-5 py-2 mt-2">
           {/* Product description items */}
-          {productDescription?.properties?.map((item) => (
+          {visibleProperties.map((item) => (
             <View className="flex-row justify-between" key={item?.key}>
               <Text className="text-[#979797] text-sm w-36">{item?.name}</Text>
               <Text className="text-[#545454] text-sm flex-1">

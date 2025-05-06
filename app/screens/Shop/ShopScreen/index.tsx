@@ -18,6 +18,7 @@ import { deepEqual } from "fast-equals";
 import Empty from "~/components/common/Empty";
 import { activeIndexAtom } from "../atom";
 import { useSetAtom } from "jotai";
+import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 
 type ProductIdsSection = {
   shopId: string;
@@ -95,7 +96,7 @@ const ProductSection = memo(
 
 const CategorySection = () => {
   const shopId = useGetShopId();
-
+  const navigation = useSmartNavigation();
   const setActiveIndex = useSetAtom(activeIndexAtom);
 
   return (
@@ -109,6 +110,12 @@ const CategorySection = () => {
         itemBgColor="#FFF5DF"
         textColor="#676767"
         className="p-2"
+        onPress={(category) => {
+          navigation.smartNavigate("SearchAdvance", {
+            searchText: category.name,
+            shopId: shopId,
+          });
+        }}
         getCategoriesApi={(payload) => {
           return categoryService.getCategoryByShopId({
             ...payload,

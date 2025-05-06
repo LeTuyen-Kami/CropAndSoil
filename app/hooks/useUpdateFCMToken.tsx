@@ -7,8 +7,6 @@ const useUpdateFCMToken = () => {
   const auth = useAtomValue(authAtom);
   const { token } = useFirebase();
 
-  console.log("token", token);
-
   useEffect(() => {
     if (!auth?.isLoggedIn || !token) return;
 

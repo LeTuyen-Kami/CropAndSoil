@@ -33,9 +33,7 @@ const HeaderSearch = () => {
           onPress={() => navigation.navigate("Search")}
           className="flex-row flex-1 gap-2 justify-between items-center px-4 py-2 bg-white rounded-full"
         >
-          <Text className="text-sm text-zinc-400">
-            Tìm kiếm sản phẩm, cửa hàng
-          </Text>
+          <Text className="text-sm text-zinc-400">Tìm kiếm sản phẩm</Text>
           <Image
             source={imagePaths.icSearch}
             style={{ width: 20, height: 20 }}

@@ -1,5 +1,5 @@
 import { useNavigation } from "@react-navigation/native";
-import { FlashList } from "@shopify/flash-list";
+import { FlashList, FlashListProps } from "@shopify/flash-list";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import * as WebBrowser from "expo-web-browser";
@@ -28,6 +28,16 @@ import { calculateDiscount, checkCanRender, chunkArray, screen } from "~/utils";
 import ContainerList from "./ContainerList";
 import Header from "./Header";
 import HeaderSearch from "./HeaderSearch";
+import Animated, {
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
+
+const AnimatedFlashList = Animated.createAnimatedComponent(
+  FlashList as unknown as React.ComponentType<FlashListProps<any>>
+);
+const LIMIT_PRODUCT_IN_FOOTER = 4;
 
 const FlashSale = () => {
   const navigation = useSmartNavigation();
@@ -156,25 +166,27 @@ const SectionHeader = ({ title, image }: { title: string; image: string }) => {
 };
 
 // BestSellerFooter component
-const SectionFooter = ({ url, title }: { url: string; title: string }) => {
+const SectionFooter = ({ ids, title }: { ids: number[]; title: string }) => {
+  const navigation = useSmartNavigation();
+
+  const onPress = () => {
+    navigation.navigate("ProductBy", {
+      productIds: ids,
+      title: title,
+    });
+  };
+
   return (
     <View className="bg-primary-100">
       <View
         className="px-3 bg-white rounded-b-2xl"
         style={{
-          paddingVertical: url ? 16 : 8,
+          paddingVertical: ids.length > LIMIT_PRODUCT_IN_FOOTER ? 16 : 8,
         }}
       >
-        {!!url && (
-          <Button
-            variant={"outline"}
-            onPress={() => {
-              if (url) {
-                WebBrowser.openBrowserAsync(url);
-              }
-            }}
-          >
-            <Text>{title}</Text>
+        {!!ids && ids.length > LIMIT_PRODUCT_IN_FOOTER && (
+          <Button variant={"outline"} onPress={onPress}>
+            <Text>Xem tất cả</Text>
           </Button>
         )}
       </View>
@@ -296,6 +308,7 @@ interface IFlashListData {
   headerImage?: string;
   footerUrl?: string;
   footerTitle?: string;
+  productIds?: number[];
   banners?: {
     id: string;
     image: string;
@@ -348,12 +361,14 @@ export const HomeScreen: React.FC = () => {
         id,
         footerUrl,
         footerTitle,
+        productIds,
       }: {
         headerTitle: string;
         headerImage: string;
         id: string;
         footerUrl: string;
         footerTitle: string;
+        productIds: number[];
       }
     ) => {
       if (!checkCanRender(data)) {
@@ -364,7 +379,7 @@ export const HomeScreen: React.FC = () => {
       const chunkedProducts = chunkArray(data!, 2);
 
       // Tạo các item cho FlashList từ chunked products
-      const bestSellerItems = chunkedProducts.map((products, index) => ({
+      const items = chunkedProducts.map((products, index) => ({
         id: `product-${id}-${index}`,
         type: ITEM_TYPES.SECTION_PRODUCTS,
         products,
@@ -378,12 +393,13 @@ export const HomeScreen: React.FC = () => {
           headerTitle: headerTitle,
           headerImage: headerImage,
         },
-        ...bestSellerItems,
+        ...items,
         {
           id: "footer" + id,
           type: ITEM_TYPES.SECTION_FOOTER,
           footerUrl: footerUrl,
-          footerTitle: footerTitle,
+          footerTitle: headerTitle,
+          productIds: productIds,
         },
       ];
     },
@@ -419,6 +435,7 @@ export const HomeScreen: React.FC = () => {
             id: item.id,
             footerUrl: item.button.url,
             footerTitle: item.button.title,
+            productIds: item.productIds,
           });
           baseItems.push(...processedData);
         }
@@ -456,7 +473,7 @@ export const HomeScreen: React.FC = () => {
         case ITEM_TYPES.SECTION_FOOTER:
           return (
             <SectionFooter
-              url={item.footerUrl ?? ""}
+              ids={item?.productIds ?? []}
               title={item.footerTitle ?? ""}
             />
           );
@@ -473,9 +490,13 @@ export const HomeScreen: React.FC = () => {
       const handledRepeaters = homeData.repeaters.map((item, index) => {
         const currentIndex = index;
 
+        const displayProductIds = item?.productIds
+          ?.slice(0, LIMIT_PRODUCT_IN_FOOTER)
+          .join(",");
+
         productService
           .searchProducts({
-            ids: item?.productIds?.join(","),
+            ids: displayProductIds,
             skip: 0,
             take: 100,
           })
@@ -512,6 +533,32 @@ export const HomeScreen: React.FC = () => {
     }
   }, [auth]);
 
+  const scrollY = useSharedValue(0);
+
+  // scroll handler
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      const contentHeight = event.contentSize.height;
+      const layoutHeight = event.layoutMeasurement.height;
+      const yOffset = event.contentOffset.y;
+
+      // nếu kéo tới dưới cùng và kéo quá (overscroll)
+      const overScroll = yOffset + layoutHeight - contentHeight;
+
+      if (overScroll > 0) {
+        scrollY.value = overScroll;
+      } else {
+        scrollY.value = 0;
+      }
+    },
+  });
+
+  const animatedFooterStyle = useAnimatedStyle(() => {
+    return {
+      height: 60 + scrollY.value * 2, // chiều cao tăng dần theo overScroll
+    };
+  });
+
   return (
     <ScreenWrapper hasGradient={true}>
       <Header
@@ -519,7 +566,14 @@ export const HomeScreen: React.FC = () => {
         onPressQuestionCircle={onPressQuestionCircle}
       />
 
-      <FlashList
+      <Animated.View
+        className="absolute bottom-0 left-0 right-0 bg-[#DDF1E5]"
+        style={animatedFooterStyle}
+      />
+
+      <AnimatedFlashList
+        scrollEventThrottle={16}
+        onScroll={scrollHandler}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
@@ -527,6 +581,7 @@ export const HomeScreen: React.FC = () => {
             tintColor={"white"}
           />
         }
+        bouncesZoom
         data={flashlistData}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
@@ -534,7 +589,7 @@ export const HomeScreen: React.FC = () => {
         getItemType={(item) => item.type}
         ListHeaderComponent={<HeaderSearch />}
         onEndReachedThreshold={0.5}
-        ListFooterComponent={<View className="h-[200px] bg-primary-100" />}
+        ListFooterComponent={<View className="h-[100px] bg-[#DDF1E5]" />}
       />
     </ScreenWrapper>
   );

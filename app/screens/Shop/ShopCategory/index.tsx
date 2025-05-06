@@ -11,18 +11,23 @@ import Empty from "~/components/common/Empty";
 import { Text } from "~/components/ui/text";
 import { COLORS } from "~/constants/theme";
 import { usePagination } from "~/hooks/usePagination";
-import { categoryService } from "~/services/api/category.service";
+import { categoryService, ICategory } from "~/services/api/category.service";
 import useGetShopId from "../useGetShopId";
+import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 
 interface ItemProps {
   title: string;
   image: string;
   count: number;
+  onPress: () => void;
 }
 
-const Item = ({ title, image, count }: ItemProps) => {
+const Item = ({ title, image, count, onPress }: ItemProps) => {
   return (
-    <TouchableOpacity className="flex-row gap-2 items-center px-2 py-3 bg-white">
+    <TouchableOpacity
+      className="flex-row gap-2 items-center px-2 py-3 bg-white"
+      onPress={onPress}
+    >
       <Image
         className="size-[46px] rounded-lg"
         source={image}
@@ -46,6 +51,7 @@ const Item = ({ title, image, count }: ItemProps) => {
 
 const ShopCategory = () => {
   const shopId = useGetShopId();
+  const navigation = useSmartNavigation();
 
   const {
     data,
@@ -64,6 +70,13 @@ const ShopCategory = () => {
     staleTime: 5000,
   });
 
+  const handlePressCategory = (category: ICategory) => {
+    navigation.smartNavigate("SearchAdvance", {
+      searchText: category.name,
+      shopId: shopId,
+    });
+  };
+
   return (
     <FlashList
       showsVerticalScrollIndicator={false}
@@ -73,6 +86,7 @@ const ShopCategory = () => {
           title={item.name}
           image={item.thumbnail}
           count={item.totalProducts}
+          onPress={() => handlePressCategory(item)}
         />
       )}
       ListEmptyComponent={() => (

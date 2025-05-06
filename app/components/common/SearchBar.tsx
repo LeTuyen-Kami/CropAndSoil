@@ -11,7 +11,7 @@ interface SearchBarProps {
 }
 
 const SearchBar = ({
-  placeholder = "Tìm kiếm sản phẩm, cửa hàng",
+  placeholder = "Tìm kiếm sản phẩm",
   value,
   onChangeText,
   onSearch,

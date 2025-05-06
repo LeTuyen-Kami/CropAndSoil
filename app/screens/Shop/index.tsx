@@ -8,10 +8,11 @@ import Background from "./Background";
 import ShopInfo from "./ShopInfo";
 import Tabs from "./Tabs";
 import { Text } from "~/components/ui/text";
-
+import useGetShopId from "./useGetShopId";
 const Shop = () => {
   const { top, bottom } = useSafeAreaInsets();
   const navigation = useNavigation();
+  const shopId = useGetShopId();
 
   return (
     <View className="flex-1 bg-green-300">
@@ -38,7 +39,11 @@ const Shop = () => {
           </TouchableOpacity>
           <TouchableOpacity
             className="flex-row flex-1 items-center px-5 rounded-full bg-white/20"
-            onPress={() => navigation.navigate("Search")}
+            onPress={() =>
+              navigation.navigate("Search", {
+                shopId: (shopId || "")?.toString(),
+              })
+            }
           >
             <View className="flex-1 py-4">
               <Text className="text-sm leading-4 text-white opacity-70">

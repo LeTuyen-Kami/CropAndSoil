@@ -5,7 +5,8 @@ import axios, {
   InternalAxiosRequestConfig,
 } from "axios";
 import { Platform } from "react-native";
-import { authAtom } from "~/store/atoms";
+import { toast } from "~/components/common/Toast";
+import { authAtom, signOut } from "~/store/atoms";
 import { jotaiStore } from "~/store/store";
 import { ENV, getDeviceId } from "~/utils";
 
@@ -40,7 +41,7 @@ export const axiosInstance = axios.create({
 // Create a separate instance for refresh token requests
 const identityInstance = axios.create({
   baseURL: IDENTITY_BASE_URL,
-  timeout: 10000,
+  timeout: 60000,
   headers: {
     "Content-Type": "application/json",
   },
@@ -66,7 +67,11 @@ const refreshTokenFn = async () => {
   try {
     const refreshToken = auth.token?.refreshToken;
 
-    if (!refreshToken) throw new Error("No refresh token");
+    if (!refreshToken)
+      throw {
+        code: 999,
+        message: "Phiên đăng nhập hết hạn, vui lòng đăng nhập lại",
+      };
 
     const response = await identityInstance.post(
       "/auth/extend",
@@ -94,12 +99,11 @@ const refreshTokenFn = async () => {
     });
 
     return newAccessToken;
-  } catch (error) {
-    jotaiStore.set(authAtom, {
-      ...auth,
-      accessToken: null,
-      refreshToken: null,
-    });
+  } catch (error: any) {
+    if (error?.code !== 999) {
+      toast.warning("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại");
+    }
+    signOut();
     throw error;
   }
 };
