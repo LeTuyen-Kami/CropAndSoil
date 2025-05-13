@@ -138,6 +138,7 @@ const ListRated = () => {
         refreshControl={
           <RefreshControl refreshing={isRefresh} onRefresh={refresh} />
         }
+        showsVerticalScrollIndicator={false}
         estimatedItemSize={500}
         ItemSeparatorComponent={() => <View className="h-2" />}
         ListEmptyComponent={() => (

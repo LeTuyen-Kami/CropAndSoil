@@ -55,7 +55,7 @@ const ShopInfo = () => {
       <View className="flex-row justify-between items-center px-2">
         <Image
           source={{ uri: shopDetail?.shopLogoUrl }}
-          className="size-[60px] rounded-full"
+          className="size-[60px] rounded-full border border-gray-100"
           contentFit="cover"
         />
 

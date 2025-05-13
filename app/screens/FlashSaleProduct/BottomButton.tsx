@@ -2,7 +2,7 @@ import { AntDesign } from "@expo/vector-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Modal,
   TouchableOpacity,
@@ -23,6 +23,9 @@ import {
   flashSaleService,
   IFlashSaleProduct,
 } from "~/services/api/flashsale.service";
+import ModalAddToCartAnimation, {
+  ModalAddToCartAnimationRef,
+} from "~/components/common/ModalAddToCartAnimation";
 type Variation = IFlashSaleProduct["flashSaleVariation"];
 
 const SelectVariation = ({
@@ -212,6 +215,7 @@ const BottomButton = ({
   const [actionType, setActionType] = useState<"add" | "buy">("add");
   const setStores = useSetAtom(storeAtom);
   const setVoucherState = useSetAtom(selectedVoucherAtom);
+  const modalRef = useRef<ModalAddToCartAnimationRef>(null);
 
   const { data: flashSaleProductDetail } = useQuery({
     queryKey: ["flash-sale-product-detail", flashSaleProductId],
@@ -293,6 +297,19 @@ const BottomButton = ({
 
   const handleConfirmAction = () => {
     if (actionType === "add") {
+      setTimeout(() => {
+        modalRef.current
+          ?.startAnimation(selectedVariation?.thumbnail!, {
+            x: screen.width - 70,
+            y: 30,
+          })
+          .then(() => {
+            queryClient.invalidateQueries({
+              queryKey: ["detail-cart"],
+            });
+          });
+      }, 1000);
+
       mutationAddToCart.mutate();
     } else {
       // Handle buy now action
@@ -390,6 +407,7 @@ const BottomButton = ({
         quantity={quantity}
         setQuantity={setQuantity}
       />
+      <ModalAddToCartAnimation ref={modalRef} />
     </View>
   );
 };

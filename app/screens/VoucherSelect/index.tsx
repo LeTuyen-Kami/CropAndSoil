@@ -371,6 +371,7 @@ const VoucherSelectScreen = () => {
               <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />
             }
             data={flashListData}
+            showsVerticalScrollIndicator={false}
             renderItem={renderItem}
             getItemType={(item) => item.type}
             estimatedItemSize={100}

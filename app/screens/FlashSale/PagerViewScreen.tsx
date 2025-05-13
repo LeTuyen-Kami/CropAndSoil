@@ -258,6 +258,7 @@ const PagerViewScreen = ({ timeSlot }: { timeSlot: string }) => {
       renderItem={renderItem}
       estimatedItemSize={250}
       data={flashlistData}
+      showsVerticalScrollIndicator={false}
       keyExtractor={(item, i) => `${item.type}-${i}`}
       removeClippedSubviews
       getItemType={(item) => item.type}

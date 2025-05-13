@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import { Image } from "expo-image";
 import { deepEqual } from "fast-equals";
 import { useAtomValue } from "jotai";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { imagePaths } from "~/assets/imagePath";
 import FlashSaleBadge from "~/components/common/FlashSaleBadge";
@@ -174,6 +174,8 @@ const Info = ({ id }: { id: string | number }) => {
   const queryClient = useQueryClient();
   const auth = useAtomValue(authAtom);
   const navigation = useSmartNavigation();
+  const [isLiked, setIsLiked] = useState(false);
+
   const {
     data: productDetail,
     refetch,
@@ -240,12 +242,18 @@ const Info = ({ id }: { id: string | number }) => {
       return;
     }
 
-    if (productDetail?.isLiked) {
+    setIsLiked(!isLiked);
+
+    if (isLiked) {
       mutationUnlikeProduct.mutate();
     } else {
       mutationLikeProduct.mutate();
     }
   };
+
+  useEffect(() => {
+    setIsLiked(productDetail?.isLiked || false);
+  }, [productDetail?.isLiked]);
 
   if (isLoading) {
     return <InfoSkeleton />;
@@ -283,7 +291,7 @@ const Info = ({ id }: { id: string | number }) => {
         </View>
         <SalesCount
           quantity={productDetail?.totalSales}
-          isLiked={productDetail?.isLiked || false}
+          isLiked={isLiked}
           onPress={handleLikeProduct}
         />
       </View>

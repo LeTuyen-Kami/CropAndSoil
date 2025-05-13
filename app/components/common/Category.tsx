@@ -28,15 +28,15 @@ const Item = ({ title, image, itemBgColor, textColor, onPress }: ItemProps) => {
     <TouchableOpacity onPress={onPress}>
       <View className="w-[71] flex-col gap-2 items-center">
         <View
-          className={`flex justify-center items-center p-3 rounded-full size-[60]`}
+          className={`flex overflow-hidden justify-center items-center rounded-full size-[60]`}
           style={{ backgroundColor: itemBgColor }}
         >
           <Image
             source={image}
             style={{ width: "100%", height: "100%" }}
-            contentFit="contain"
+            contentFit="cover"
             placeholder={imagePaths.placeholder}
-            placeholderContentFit="contain"
+            placeholderContentFit="cover"
           />
         </View>
         <Text

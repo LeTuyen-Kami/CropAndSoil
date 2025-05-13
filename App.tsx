@@ -48,10 +48,9 @@ function App() {
 if (!__DEV__) {
   Sentry.init({
     dsn: ENV.EXPO_PUBLIC_SENTRY_DSN,
-    debug: true,
-    replaysSessionSampleRate: 0.1,
     replaysOnErrorSampleRate: 1.0,
-    integrations: [Sentry.mobileReplayIntegration()],
+    replaysSessionSampleRate: 0,
+    tracesSampleRate: 0,
   });
 }
 const Boundary = withErrorBoundary(App);

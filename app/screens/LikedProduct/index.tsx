@@ -272,6 +272,7 @@ const LikedProductScreen = () => {
               onRefresh={refetch}
             />
           }
+          showsVerticalScrollIndicator={false}
           contentContainerClassName="pt-2"
           estimatedItemSize={200}
           renderItem={({ item, index }) => (

@@ -92,6 +92,7 @@ const ListOrder = ({ status }: { status?: string }) => {
         ListEmptyComponent={() => (
           <Empty title="Không có đơn hàng" isLoading={isLoading} />
         )}
+        showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={() => <View className="h-2.5" />}
         renderItem={({ item }) => (
           <ProductCart

@@ -123,7 +123,7 @@ const ShopInfo = ({ id }: { id: string | number }) => {
       <View className="px-4">
         <View className="flex-row justify-between items-start">
           <View className="flex-row gap-2">
-            <View>
+            <View className="rounded-full border border-gray-100">
               <Image
                 source={{ uri: shopDetail?.shopLogoUrl }}
                 className="size-[60px] rounded-full"

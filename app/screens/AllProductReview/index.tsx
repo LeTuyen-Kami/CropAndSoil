@@ -143,6 +143,7 @@ const AllProductReview = ({ route }: { route?: { params?: RouteParams } }) => {
           onPressItem={onPressFilter}
         />
         <FlashList
+          showsVerticalScrollIndicator={false}
           data={reviews || []}
           renderItem={({ item }: { item: IReview }) => (
             <View className="mx-3 mb-2 bg-white rounded-2xl">

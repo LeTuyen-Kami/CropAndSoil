@@ -161,19 +161,19 @@ const Rating: React.FC<RatingProps> = ({ id }) => {
           <ReviewItem
             key={index}
             reviewer={{
-              name: review.authorName,
-              avatar: review.authorAvatar,
+              name: review?.authorName,
+              avatar: review?.authorAvatar,
             }}
-            rating={review.rating}
-            quality={review.quality}
-            date={formatDate(review.createdAt)}
-            productVariant={review.variation.name}
-            likes={review.totalLikes}
-            comment={review.comment}
-            media={review.gallery.map((media) => ({
-              type: media.type === "video" ? "video" : "image",
-              uri: media.thumbnail,
-              src: media.src,
+            rating={review?.rating}
+            quality={review?.quality}
+            date={formatDate(review?.createdAt)}
+            productVariant={review?.variation?.name}
+            likes={review?.totalLikes}
+            comment={review?.comment}
+            media={review?.gallery?.map((media) => ({
+              type: media?.type === "video" ? "video" : "image",
+              uri: media?.thumbnail,
+              src: media?.src,
             }))}
           />
         ))}

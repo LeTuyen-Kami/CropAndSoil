@@ -221,6 +221,7 @@ const ShopProduct = () => {
         refreshControl={
           <RefreshControl refreshing={isRefresh} onRefresh={refresh} />
         }
+        showsVerticalScrollIndicator={false}
         keyExtractor={(item) => item.id}
         onEndReached={fetchNextPage}
         onEndReachedThreshold={0.5}

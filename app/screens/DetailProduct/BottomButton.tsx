@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useState } from "react";
-import { TouchableOpacity, View } from "react-native";
+import { useRef, useState } from "react";
+import { Modal, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { imagePaths } from "~/assets/imagePath";
 import { toggleLoading } from "~/components/common/ScreenLoading";
@@ -13,8 +13,11 @@ import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 import { cartService } from "~/services/api/cart.service";
 import { IProduct, productService } from "~/services/api/product.service";
 import { authAtom, selectedVoucherAtom } from "~/store/atoms";
-import { getErrorMessage } from "~/utils";
+import { getErrorMessage, screen } from "~/utils";
 import { storeAtom } from "../Order/atom";
+import ModalAddToCartAnimation, {
+  ModalAddToCartAnimationRef,
+} from "~/components/common/ModalAddToCartAnimation";
 type Variation = IProduct["variations"][0];
 
 const BottomButton = ({ productId }: { productId: number | string }) => {
@@ -30,6 +33,7 @@ const BottomButton = ({ productId }: { productId: number | string }) => {
   const [actionType, setActionType] = useState<"add" | "buy">("add");
   const setStores = useSetAtom(storeAtom);
   const setVoucherState = useSetAtom(selectedVoucherAtom);
+  const modalRef = useRef<ModalAddToCartAnimationRef>(null);
 
   const { data: productDetail } = useQuery({
     queryKey: ["productDetail", productId],
@@ -77,6 +81,19 @@ const BottomButton = ({ productId }: { productId: number | string }) => {
 
   const handleConfirmAction = () => {
     if (actionType === "add") {
+      setTimeout(() => {
+        modalRef.current
+          ?.startAnimation(selectedVariation?.thumbnail!, {
+            x: screen.width - 70,
+            y: 30,
+          })
+          .then(() => {
+            queryClient.invalidateQueries({
+              queryKey: ["detail-cart"],
+            });
+          });
+      }, 1000);
+
       mutationAddToCart.mutate();
     } else {
       // Handle buy now action
@@ -172,6 +189,7 @@ const BottomButton = ({ productId }: { productId: number | string }) => {
         quantity={quantity}
         setQuantity={setQuantity}
       />
+      <ModalAddToCartAnimation ref={modalRef} />
     </View>
   );
 };

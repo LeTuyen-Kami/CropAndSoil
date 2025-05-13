@@ -216,6 +216,7 @@ const MyVoucherScreen = () => {
             renderItem={renderItem}
             getItemType={(item) => item.type}
             estimatedItemSize={100}
+            showsVerticalScrollIndicator={false}
             ListFooterComponent={() =>
               hasNextPage && isFetching ? (
                 <View className="flex-row justify-center items-center px-2 py-2.5 mb-2.5 bg-white rounded-b-3xl">

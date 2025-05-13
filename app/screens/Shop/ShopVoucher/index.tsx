@@ -221,6 +221,7 @@ const ShopVoucher = () => {
       <FlashList
         data={flashListData}
         renderItem={renderItem}
+        showsVerticalScrollIndicator={false}
         estimatedItemSize={500}
         getItemType={(item) => item.type}
         ListFooterComponent={<View className="h-10" />}

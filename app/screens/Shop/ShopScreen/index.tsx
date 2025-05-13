@@ -243,6 +243,7 @@ const ShopScreen = () => {
         estimatedItemSize={320}
         getItemType={(item) => item.type}
         keyExtractor={(item) => item.id}
+        showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <Empty
             title="Không có dữ liệu"

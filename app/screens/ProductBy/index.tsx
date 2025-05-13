@@ -103,6 +103,7 @@ const ProductByScreen = () => {
           estimatedItemSize={200}
           getItemType={(item) => item.type}
           keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
               refreshing={isRefreshing}

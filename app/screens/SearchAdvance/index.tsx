@@ -452,6 +452,7 @@ const SearchAdvance = () => {
           keyExtractor={(item) => item.id}
           estimatedItemSize={302}
           getItemType={(item) => item.type}
+          showsVerticalScrollIndicator={false}
           onEndReached={fetchNextPage}
           onEndReachedThreshold={0.5}
           refreshControl={

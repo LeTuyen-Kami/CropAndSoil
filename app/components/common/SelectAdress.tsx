@@ -240,6 +240,7 @@ const SelectAddress = () => {
           data={filteredData}
           estimatedItemSize={50}
           ListFooterComponent={<View className="h-10" />}
+          showsVerticalScrollIndicator={false}
           // extraData={provinces}
           renderItem={({ item }) => (
             <TouchableOpacity onPress={() => handleSelect(item)}>

@@ -5,7 +5,13 @@ import { Image } from "expo-image";
 import * as WebBrowser from "expo-web-browser";
 import { useAtomValue } from "jotai";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { FlatList, Pressable, RefreshControl, View } from "react-native";
+import {
+  FlatList,
+  FlatListProps,
+  Pressable,
+  RefreshControl,
+  View,
+} from "react-native";
 import { imagePaths } from "~/assets/imagePath";
 import CarouselEmpty from "~/components/common/CarouselEmpty";
 import CarouselSkeleton from "~/components/common/CarouselSkeleton";
@@ -37,6 +43,7 @@ import Animated, {
 const AnimatedFlashList = Animated.createAnimatedComponent(
   FlashList as unknown as React.ComponentType<FlashListProps<any>>
 );
+
 const LIMIT_PRODUCT_IN_FOOTER = 4;
 
 const FlashSale = () => {
@@ -581,6 +588,7 @@ export const HomeScreen: React.FC = () => {
             tintColor={"white"}
           />
         }
+        showsVerticalScrollIndicator={false}
         bouncesZoom
         data={flashlistData}
         renderItem={renderItem}
