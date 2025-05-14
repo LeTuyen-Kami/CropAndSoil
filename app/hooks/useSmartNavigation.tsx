@@ -4,7 +4,7 @@ import { RootStackScreenProps } from "~/navigation/types";
 import { authAtom } from "~/store/atoms";
 export const useSmartNavigation = () => {
   const auth = useAtomValue(authAtom);
-  const navigation = useNavigation<RootStackScreenProps<"MainTabs">>();
+  const navigation = useNavigation<RootStackScreenProps<"MainTabs">>() as any;
 
   const checkAuthThen = (action: () => void) => {
     if (auth?.token) {

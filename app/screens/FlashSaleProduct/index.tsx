@@ -27,6 +27,7 @@ import Animated, {
 } from "react-native-reanimated";
 import Badge from "~/components/common/Badge";
 import { cartService } from "~/services/api/cart.service";
+import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 
 const AnimatedFlashList = Animated.createAnimatedComponent(
   FlashList as unknown as React.ComponentType<FlashListProps<any>>
@@ -37,7 +38,7 @@ const AnimatedTouchableOpacity =
 
 const Header = ({ scrollY }: { scrollY: SharedValue<number> }) => {
   const { top } = useSafeAreaInsets();
-  const navigation = useNavigation();
+  const navigation = useSmartNavigation();
 
   const { data: detailCart } = useQuery({
     queryKey: ["detail-cart"],
@@ -69,6 +70,10 @@ const Header = ({ scrollY }: { scrollY: SharedValue<number> }) => {
     };
   });
 
+  const onPressCart = () => {
+    navigation.smartNavigate("ShoppingCart");
+  };
+
   return (
     <Animated.View className="absolute z-10 px-4 w-full" style={{ top: top }}>
       <Animated.View
@@ -82,7 +87,7 @@ const Header = ({ scrollY }: { scrollY: SharedValue<number> }) => {
       />
       <View className="flex-row justify-between items-center w-full">
         <AnimatedTouchableOpacity
-          onPress={() => navigation.goBack()}
+          onPress={() => navigation.smartGoBack()}
           className="justify-center items-center w-10 h-10 bg-[#F5F5F5] rounded-full opacity-90"
           style={buttonAnimatedStyle}
         >
@@ -99,6 +104,7 @@ const Header = ({ scrollY }: { scrollY: SharedValue<number> }) => {
         <AnimatedTouchableOpacity
           className="justify-center items-center w-10 h-10 bg-[#F5F5F5] rounded-full opacity-90"
           style={buttonAnimatedStyle}
+          onPress={onPressCart}
         >
           <Image
             source={imagePaths.icCart}
