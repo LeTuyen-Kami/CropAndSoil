@@ -2120,7 +2120,7 @@ PODS:
     - FirebaseCoreExtension
     - React-Core
     - RNFBApp
-  - RNFlashList (1.7.3):
+  - RNFlashList (1.8.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2841,7 +2841,7 @@ SPEC CHECKSUMS:
   RNFBApp: b67ded6e4b0a6c0fee5e4f8e75e3a31567949a08
   RNFBAuth: 6aabe6440ba66c82b3c87fc8ebf70d921e5156dd
   RNFBMessaging: 7202ad4c49bdcdc7fd3634d85827a6305049c148
-  RNFlashList: bdf4c37b98a08f1c5e448164b91cfe69ca27ca26
+  RNFlashList: a8af251e5e8b31bad6825e4882f775d3e3a2196e
   RNGestureHandler: 598e45cedb905b157e9764acbef0b5e365693451
   RNReanimated: ddc60075b382b872662cadaf9972b07d52a8fce7
   RNScreens: 8ae716a7e26b9ecee7f2856e6ff47b8e7e253ee8

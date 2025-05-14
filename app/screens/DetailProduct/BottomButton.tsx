@@ -2,7 +2,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useRef, useState } from "react";
-import { Modal, StyleSheet, TouchableOpacity, View } from "react-native";
+import {
+  Modal,
+  Platform,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { imagePaths } from "~/assets/imagePath";
 import { toggleLoading } from "~/components/common/ScreenLoading";
@@ -23,7 +29,7 @@ type Variation = IProduct["variations"][0];
 const BottomButton = ({ productId }: { productId: number | string }) => {
   const auth = useAtomValue(authAtom);
   const navigation = useSmartNavigation();
-  const { bottom } = useSafeAreaInsets();
+  const { bottom, top } = useSafeAreaInsets();
   const [showVariations, setShowVariations] = useState(false);
   const [selectedVariation, setSelectedVariation] = useState<Variation | null>(
     null
@@ -85,7 +91,7 @@ const BottomButton = ({ productId }: { productId: number | string }) => {
         modalRef.current
           ?.startAnimation(selectedVariation?.thumbnail!, {
             x: screen.width - 70,
-            y: 30,
+            y: Platform.OS === "ios" ? 30 : 0,
           })
           .then(() => {
             queryClient.invalidateQueries({
