@@ -19,6 +19,11 @@ const PaymentMenu = ({
   voucher,
   calculatedData,
 }: PaymentMenuProps) => {
+  console.log(
+    "calculatedData?.marketplaceProductVoucherDiscountTotal",
+    calculatedData?.marketplaceProductVoucherDiscountTotal
+  );
+
   return (
     <View className="bg-white rounded-t-xl border-t border-[#F0F0F0] border-l border-r">
       {/* Voucher Selection Section */}
@@ -50,8 +55,11 @@ const PaymentMenu = ({
                     className="flex-1 text-xs text-right text-primary"
                     numberOfLines={1}
                   >
-                    Giảm phí vận chuyển{" "}
-                    {calculatedData?.marketplaceShippingVoucherDiscountTotal}k
+                    Giảm phí vận chuyển ₫
+                    {convertToK(
+                      calculatedData?.marketplaceShippingVoucherDiscountTotal
+                    )}
+                    k
                   </Text>
                 )}
                 {!!calculatedData?.marketplaceProductVoucherDiscountTotal && (

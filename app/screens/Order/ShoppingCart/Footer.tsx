@@ -63,8 +63,11 @@ const Footer = ({
                   className="flex-1 text-xs text-right text-primary"
                   numberOfLines={1}
                 >
-                  Giảm phí vận chuyển{" "}
-                  {calculatedData?.marketplaceShippingVoucherDiscountTotal}k
+                  Giảm phí vận chuyển ₫
+                  {convertToK(
+                    calculatedData?.marketplaceShippingVoucherDiscountTotal
+                  )}
+                  k
                 </Text>
               )}
               {!!calculatedData?.marketplaceProductVoucherDiscountTotal && (

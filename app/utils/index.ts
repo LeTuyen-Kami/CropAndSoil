@@ -132,7 +132,7 @@ export const getItemWidth = ({ containerPadding, itemGap }: Options) => {
 };
 
 export const formatPrice = (price?: number) => {
-  if (price === null || price === undefined) return "";
+  if (price === null || price === undefined || price === 0) return "";
 
   return price.toLocaleString("vi-VN", {
     style: "currency",
