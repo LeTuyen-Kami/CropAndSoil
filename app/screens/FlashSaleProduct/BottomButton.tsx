@@ -234,7 +234,7 @@ const BottomButton = ({
     mutationFn: () => {
       if (!selectedVariation) return Promise.reject("No variation selected");
       return cartService.addToCart({
-        productId: flashSaleProductDetail?.id!,
+        productId: +flashSaleProductDetail?.id!,
         quantity: quantity,
         isChecked: true,
         variationId: selectedVariation.id,

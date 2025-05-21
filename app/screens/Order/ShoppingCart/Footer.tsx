@@ -94,7 +94,7 @@ const Footer = ({
 
       {/* Total Price and Payment Button */}
       <View className="flex-row justify-between items-center px-3 py-3 border-t border-[#F0F0F0]">
-        {!!calculatedData ? (
+        {!!calculatedData && selectedCount > 0 ? (
           <View>
             <Text className="text-xs text-[#676767]">Tổng thanh toán</Text>
             {!!calculatedData?.total && (

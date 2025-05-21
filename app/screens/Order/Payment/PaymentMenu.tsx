@@ -19,11 +19,6 @@ const PaymentMenu = ({
   voucher,
   calculatedData,
 }: PaymentMenuProps) => {
-  console.log(
-    "calculatedData?.marketplaceProductVoucherDiscountTotal",
-    calculatedData?.marketplaceProductVoucherDiscountTotal
-  );
-
   return (
     <View className="bg-white rounded-t-xl border-t border-[#F0F0F0] border-l border-r">
       {/* Voucher Selection Section */}

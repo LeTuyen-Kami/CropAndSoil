@@ -52,7 +52,7 @@ const BottomButton = ({ productId }: { productId: number | string }) => {
     mutationFn: () => {
       if (!selectedVariation) return Promise.reject("No variation selected");
       return cartService.addToCart({
-        productId: productId,
+        productId: +productId,
         quantity: quantity,
         isChecked: true,
         variationId: selectedVariation.id,

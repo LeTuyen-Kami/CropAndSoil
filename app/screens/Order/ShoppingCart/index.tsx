@@ -1,4 +1,4 @@
-import { useNavigation } from "@react-navigation/native";
+import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Checkbox from "expo-checkbox";
@@ -52,6 +52,8 @@ const ShoppingCart = () => {
     staleTime: 0,
     refetchOnMount: "always",
   });
+
+  const isFocused = useIsFocused();
 
   const mutationRemoveCartItem = useMutation({
     mutationFn: (cartItemIds: number[]) =>
@@ -186,7 +188,7 @@ const ShoppingCart = () => {
         );
 
         handleStore.forEach((store) => {
-          store.isSelected = store.items.every((item) => item.isSelected);
+          store.isSelected = store.items.some((item) => item.isSelected);
         });
 
         return handleStore;
@@ -337,12 +339,17 @@ const ShoppingCart = () => {
     stores.length > 0 && stores.every((store) => store.isSelected);
 
   useEffect(() => {
+    if (!isFocused) {
+      toggleLoading(false);
+      return;
+    }
+
     if (isRefetching || isPending) {
       toggleLoading(true);
     } else {
       toggleLoading(false);
     }
-  }, [isRefetching, isPending]);
+  }, [isRefetching, isPending, isFocused]);
 
   const onVoucherPress = () => {
     setSelectedVoucher({
