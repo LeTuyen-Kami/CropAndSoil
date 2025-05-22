@@ -72,8 +72,9 @@ const ShopCategory = () => {
 
   const handlePressCategory = (category: ICategory) => {
     navigation.smartNavigate("SearchAdvance", {
-      searchText: category.name,
       shopId: shopId,
+      categoryId: category.id,
+      categoryName: category.name,
     });
   };
 

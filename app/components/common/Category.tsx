@@ -167,7 +167,8 @@ const Category = ({
       onPress(category);
     } else {
       navigation.navigate("SearchAdvance", {
-        searchText: category.name,
+        categoryId: category.id.toString(),
+        categoryName: category.name,
       });
     }
   };

@@ -30,7 +30,7 @@ import { screen } from "~/utils";
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export interface GalleryItem {
-  url: string;
+  url: string | number;
   type: "image" | "video";
   thumbnail?: string;
 }
@@ -315,11 +315,7 @@ const GalleryImageItem = ({ url, onClose }: GalleryImageItemProps) => {
   return (
     <GestureDetector gesture={gestures}>
       <Animated.View style={[styles.imageWrapper, animatedStyle]}>
-        <Image
-          source={{ uri: url }}
-          style={styles.image}
-          contentFit="contain"
-        />
+        <Image source={url} style={styles.image} contentFit="contain" />
       </Animated.View>
     </GestureDetector>
   );

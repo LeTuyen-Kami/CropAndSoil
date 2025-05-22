@@ -28,20 +28,24 @@ const SelectVariation = ({
   onSelectVariation: (variation: Variation) => void;
   selectedVariation: Variation | null;
   onConfirm: () => void;
-  quantity: number;
-  setQuantity: (quantity: number) => void;
+  quantity?: number;
+  setQuantity?: (quantity: number) => void;
 }) => {
   const { bottom } = useSafeAreaInsets();
 
   if (!variations) return null;
 
   const incrementQuantity = () => {
+    if (!quantity || !setQuantity) return;
+
     if (selectedVariation && quantity < selectedVariation.stock) {
       setQuantity(quantity + 1);
     }
   };
 
   const decrementQuantity = () => {
+    if (!quantity || !setQuantity) return;
+
     if (quantity > 1) {
       setQuantity(quantity - 1);
     }
@@ -118,43 +122,46 @@ const SelectVariation = ({
                 ))}
               </View>
 
-              <View className="flex-row justify-between items-center mb-4">
-                <Text className="mb-3 text-base font-medium">Số lượng</Text>
-                <View className="flex-row items-center">
-                  <TouchableOpacity
-                    onPress={decrementQuantity}
-                    className="justify-center items-center w-8 h-8 rounded-md border border-gray-300"
-                    disabled={quantity <= 1}
-                  >
-                    <AntDesign
-                      name="minus"
-                      size={16}
-                      color={quantity <= 1 ? "#D3D3D3" : "black"}
-                    />
-                  </TouchableOpacity>
+              {!!quantity && !!setQuantity && (
+                <View className="flex-row justify-between items-center mb-4">
+                  <Text className="mb-3 text-base font-medium">Số lượng</Text>
+                  <View className="flex-row items-center">
+                    <TouchableOpacity
+                      onPress={decrementQuantity}
+                      className="justify-center items-center w-8 h-8 rounded-md border border-gray-300"
+                      disabled={quantity <= 1}
+                    >
+                      <AntDesign
+                        name="minus"
+                        size={16}
+                        color={quantity <= 1 ? "#D3D3D3" : "black"}
+                      />
+                    </TouchableOpacity>
 
-                  <Text className="mx-4 text-base">{quantity}</Text>
+                    <Text className="mx-4 text-base">{quantity}</Text>
 
-                  <TouchableOpacity
-                    onPress={incrementQuantity}
-                    className="justify-center items-center w-8 h-8 rounded-md border border-gray-300"
-                    disabled={
-                      !selectedVariation || quantity >= selectedVariation.stock
-                    }
-                  >
-                    <AntDesign
-                      name="plus"
-                      size={16}
-                      color={
+                    <TouchableOpacity
+                      onPress={incrementQuantity}
+                      className="justify-center items-center w-8 h-8 rounded-md border border-gray-300"
+                      disabled={
                         !selectedVariation ||
                         quantity >= selectedVariation.stock
-                          ? "#D3D3D3"
-                          : "black"
                       }
-                    />
-                  </TouchableOpacity>
+                    >
+                      <AntDesign
+                        name="plus"
+                        size={16}
+                        color={
+                          !selectedVariation ||
+                          quantity >= selectedVariation.stock
+                            ? "#D3D3D3"
+                            : "black"
+                        }
+                      />
+                    </TouchableOpacity>
+                  </View>
                 </View>
-              </View>
+              )}
 
               <TouchableOpacity
                 className="w-full py-3 rounded-full bg-[#FF424E]"

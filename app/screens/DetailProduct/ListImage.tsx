@@ -9,11 +9,13 @@ import { toast } from "~/components/common/Toast";
 import { Text } from "~/components/ui/text";
 import { productService } from "~/services/api/product.service";
 import { getErrorMessage, screen } from "~/utils";
+import { imagePaths } from "~/assets/imagePath";
 
 const ListImage = ({ id }: { id: string | number }) => {
   const [isGalleryVisible, setIsGalleryVisible] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [images, setImages] = useState<GalleryItem[]>([]);
+
   const flatListRef = useRef<FlatList>(null);
   const navigation = useNavigation();
   const {
@@ -45,12 +47,21 @@ const ListImage = ({ id }: { id: string | number }) => {
   });
 
   useEffect(() => {
-    setImages(
+    let _images =
       productDetail?.images?.map((image) => ({
         url: image,
         type: "image",
-      })) ?? []
-    );
+      })) ?? [];
+
+    if (_images.length === 0) {
+      _images = [
+        {
+          url: imagePaths.placeholder as string,
+          type: "image",
+        },
+      ];
+    }
+    setImages(_images as GalleryItem[]);
   }, [productDetail]);
 
   useEffect(() => {
@@ -115,12 +126,13 @@ const ListImage = ({ id }: { id: string | number }) => {
             }}
           >
             <Image
-              source={{
-                uri: item.url,
-              }}
+              source={item.url}
               style={{
-                width: screen.width,
+                width:
+                  screen.width -
+                  (item?.url === imagePaths.placeholder ? 20 : 0),
                 aspectRatio: 1,
+                marginHorizontal: item?.url === imagePaths.placeholder ? 10 : 0,
               }}
               contentFit="cover"
             />

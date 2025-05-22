@@ -1,21 +1,18 @@
-import {
-  View,
-  TouchableOpacity,
-  ImageSourcePropType,
-  Pressable,
-} from "react-native";
-import { Text } from "~/components/ui/text";
-import { Image } from "expo-image";
-import Checkbox from "expo-checkbox";
 import { Feather } from "@expo/vector-icons";
-import { memo, useState, useRef, useEffect } from "react";
-import { imagePaths } from "~/assets/imagePath";
-import { deepEqual } from "fast-equals";
 import { useNavigation } from "@react-navigation/native";
-import { RootStackScreenProps } from "~/navigation/types";
-import { formatPrice, getErrorMessage } from "~/utils";
-import { cartService } from "~/services/api/cart.service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import Checkbox from "expo-checkbox";
+import { Image } from "expo-image";
+import { deepEqual } from "fast-equals";
+import { memo, useEffect, useState } from "react";
+import { Pressable, TouchableOpacity, View } from "react-native";
+import { imagePaths } from "~/assets/imagePath";
+import { Text } from "~/components/ui/text";
+import { RootStackScreenProps } from "~/navigation/types";
+import { cartService } from "~/services/api/cart.service";
+import { Variation } from "~/services/api/product.service";
+import { formatPrice, getErrorMessage } from "~/utils";
+import SelectVariation from "./SelectVariation";
 import { toast } from "./Toast";
 
 export interface ShoppingCartItemProps {
@@ -32,6 +29,8 @@ export interface ShoppingCartItemProps {
   onDelete?: (id: string) => void;
   productId: string;
   variationId: string;
+  variations: Variation[];
+  onVariationChange?: (id: string, variation: Variation) => void;
 }
 
 const ShoppingCartItem = ({
@@ -45,15 +44,25 @@ const ShoppingCartItem = ({
   isSelected = false,
   onSelect,
   onQuantityChange,
+  onVariationChange,
   onDelete,
   productId,
   variationId,
+  variations,
 }: ShoppingCartItemProps) => {
   const navigation = useNavigation<RootStackScreenProps<"MainTabs">>();
   const queryClient = useQueryClient();
+  const [showVariations, setShowVariations] = useState(false);
+  const [selectedVariation, setSelectedVariation] = useState<Variation | null>(
+    null
+  );
 
   const mutationUpdateCartItem = useMutation({
-    mutationFn: (data: { quantity: number; isChecked: boolean }) => {
+    mutationFn: (data: {
+      quantity: number;
+      isChecked: boolean;
+      variationId: string;
+    }) => {
       return cartService.updateCartItem({
         cartItemId: Number(id),
         data: {
@@ -77,6 +86,7 @@ const ShoppingCartItem = ({
     mutationUpdateCartItem.mutate({
       quantity: quantity,
       isChecked: value,
+      variationId: variationId,
     });
   };
 
@@ -87,6 +97,7 @@ const ShoppingCartItem = ({
     mutationUpdateCartItem.mutate({
       quantity: newQuantity,
       isChecked: isSelected,
+      variationId: variationId,
     });
   };
 
@@ -111,6 +122,28 @@ const ShoppingCartItem = ({
       id: productId,
     });
   };
+
+  const handleSelectVariation = (variation: Variation) => {
+    // Call mutation to update variation
+    setSelectedVariation(variation);
+  };
+
+  const handleConfirmVariation = () => {
+    onVariationChange?.(id, selectedVariation!);
+    onQuantityChange?.(id, 1);
+    // Call mutation to update variation
+    mutationUpdateCartItem.mutate({
+      quantity: 1,
+      isChecked: isSelected,
+      variationId: selectedVariation?.id.toString() || "",
+    });
+  };
+  useEffect(() => {
+    setSelectedVariation(
+      variations.find((variation) => variation.id === Number(variationId)) ||
+        null
+    );
+  }, [variations, variationId]);
 
   return (
     <View className="flex-row gap-2 pt-4 px-3 pb-3 border-b border-[#F0F0F0]">
@@ -150,7 +183,10 @@ const ShoppingCartItem = ({
 
         {!!type && (
           <View className="flex-row items-center mt-1">
-            <View className="flex-row items-center bg-[#F5F5F5] rounded-full py-1.5 px-3 gap-2">
+            <TouchableOpacity
+              className="flex-row items-center bg-[#F5F5F5] rounded-full py-1.5 px-3 gap-2"
+              onPress={() => setShowVariations(true)}
+            >
               <Text className="text-[10px] text-black leading-[14px]">
                 {type}
               </Text>
@@ -163,7 +199,7 @@ const ShoppingCartItem = ({
                   transform: [{ rotate: "90deg" }],
                 }}
               />
-            </View>
+            </TouchableOpacity>
           </View>
         )}
 
@@ -206,6 +242,17 @@ const ShoppingCartItem = ({
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* Variant Selection Modal */}
+
+      <SelectVariation
+        variations={variations}
+        isVisible={showVariations}
+        onClose={() => setShowVariations(false)}
+        onSelectVariation={handleSelectVariation}
+        selectedVariation={selectedVariation}
+        onConfirm={handleConfirmVariation}
+      />
     </View>
   );
 };

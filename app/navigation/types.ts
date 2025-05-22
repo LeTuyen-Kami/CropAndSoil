@@ -23,8 +23,10 @@ export type RootStackParamList = {
   };
   Login: undefined;
   SearchAdvance: {
-    searchText: string;
+    searchText?: string;
     shopId?: string;
+    categoryId?: string;
+    categoryName?: string;
   };
   DetailProduct: {
     id: string | number;

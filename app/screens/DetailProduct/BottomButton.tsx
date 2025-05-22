@@ -125,6 +125,7 @@ const BottomButton = ({ productId }: { productId: number | string }) => {
               },
               quantity: quantity,
               isSelected: true,
+              variations: productDetail?.variations || [],
             },
           ],
         },

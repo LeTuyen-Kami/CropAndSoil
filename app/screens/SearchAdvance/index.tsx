@@ -7,7 +7,7 @@ import {
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
 import { Image } from "expo-image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   RefreshControl,
@@ -31,17 +31,22 @@ import {
   preHandleFlashListData,
   screen,
 } from "~/utils";
-import Filter from "./Filter";
+import Filter, { FilterRef } from "./Filter";
 import { COLORS } from "~/constants/theme";
+import { ICategory } from "~/services/api/category.service";
 
-const ExploreCategory = () => {
+const ExploreCategory = ({
+  onPress,
+}: {
+  onPress: (category: ICategory) => void;
+}) => {
   return (
     <View className="px-2 py-4 mx-2 rounded-2xl bg-white/20">
       <Text className="text-lg font-bold text-white uppercase">
         Khám phá theo danh mục
       </Text>
       <View className="mt-4">
-        <Category />
+        <Category onPress={onPress} />
       </View>
     </View>
   );
@@ -52,13 +57,13 @@ const Header = ({
   onOpen,
   searchText,
   hasActiveFilters,
-  hasShopId,
+  showFilter,
 }: {
   isOpen: boolean;
   onOpen: () => void;
   searchText: string;
   hasActiveFilters: boolean;
-  hasShopId?: boolean;
+  showFilter?: boolean;
 }) => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -118,7 +123,7 @@ const Header = ({
           contentFit="contain"
         />
       </TouchableOpacity>
-      {!hasShopId && (
+      {showFilter && (
         <TouchableOpacity
           onPress={onOpen}
           className={cn(
@@ -264,7 +269,7 @@ const noDataData = [
 
 const SearchAdvance = () => {
   const route = useRoute<RootStackRouteProp<"SearchAdvance">>();
-  const { searchText, shopId } = route.params || {};
+  const { searchText, shopId, categoryId, categoryName } = route.params || {};
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [sort, setSort] = useState<{
     sortBy: "salePrice" | "createdAt";
@@ -277,6 +282,9 @@ const SearchAdvance = () => {
     locations: [] as string[],
     ratings: [] as number[],
   });
+
+  const FilterRef = useRef<FilterRef>(null);
+
   const hasActiveFilters = useMemo(() => {
     return (
       activeFilters.minPrice > 0 ||
@@ -306,12 +314,18 @@ const SearchAdvance = () => {
     initialParams: {
       search: searchText,
       ...(shopId && { shopId: shopId }),
+      ...(categoryId && { categoryIds: categoryId }),
       ...(sort && {
         sortBy: sort?.sortBy,
         sortDirection: sort?.sortDirection,
       }),
     },
-    queryKey: ["search-products"],
+    queryKey: [
+      "search-products",
+      searchText || "",
+      categoryId || "",
+      shopId || "",
+    ],
   });
 
   const onToggleSort = () => {
@@ -330,9 +344,13 @@ const SearchAdvance = () => {
     }
   };
 
+  const onPressCategory = (category: ICategory) => {
+    FilterRef.current?.forceUpdateCategories([category.id.toString()]);
+  };
+
   const renderItem = ({ item }: { item: any }) => {
     if (item.type === "category") {
-      return <ExploreCategory />;
+      return <ExploreCategory onPress={onPressCategory} />;
     }
 
     if (item.type === "containerHeader") {
@@ -421,13 +439,13 @@ const SearchAdvance = () => {
 
     if (!data || data.length === 0) {
       return [
-        ...(shopId ? [] : categoryData),
+        ...(shopId || categoryId ? [] : categoryData),
         ...containerHeaderData,
         ...noDataData,
       ];
     }
     return [
-      ...(shopId ? [] : categoryData),
+      ...(shopId || categoryId ? [] : categoryData),
       ...containerHeaderData,
       ...handledData,
     ];
@@ -438,9 +456,9 @@ const SearchAdvance = () => {
       <Header
         isOpen={isOpen}
         onOpen={onOpen}
-        searchText={searchText}
+        searchText={searchText ?? categoryName ?? ""}
         hasActiveFilters={hasActiveFilters}
-        hasShopId={!!shopId}
+        showFilter={!shopId && !categoryId}
       />
       <View className="relative flex-1">
         <View className="absolute right-0 bottom-0 left-0 h-1/2 bg-[#EEE] z-0" />
@@ -479,8 +497,9 @@ const SearchAdvance = () => {
           }
         />
       </View>
-      {!shopId && (
+      {!shopId && !categoryId && (
         <Filter
+          ref={FilterRef}
           isOpen={isOpen}
           onClose={onClose}
           onApply={onFilter}

@@ -1,3 +1,4 @@
+import { Variation } from "~/services/api/product.service";
 import { IVoucher } from "~/services/api/shop.service";
 
 export interface StoreItem {
@@ -14,6 +15,7 @@ export interface StoreItem {
     id: number;
     name: string;
   };
+  variations: Variation[];
 }
 
 export interface Store {

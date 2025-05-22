@@ -136,8 +136,6 @@ const ModalAddToCartAnimation = forwardRef<
     };
   });
 
-  if (!visible) return null;
-
   return (
     <Modal visible={visible} transparent animationType="none">
       <View className="flex-1">

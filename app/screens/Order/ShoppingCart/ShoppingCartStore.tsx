@@ -12,6 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import { RootStackScreenProps } from "~/navigation/types";
 import { ICalculateResponse } from "~/services/api/order.service";
 import { convertToK } from "~/utils";
+import { Variation } from "~/services/api/product.service";
 const ShoppingCartStore = ({
   store,
   onItemSelect,
@@ -20,6 +21,7 @@ const ShoppingCartStore = ({
   onSelectAllItems,
   onShopVoucherPress,
   calculatedData,
+  onVariationChange,
 }: {
   store: Store;
   onItemSelect: (storeId: string, itemId: string, selected: boolean) => void;
@@ -32,6 +34,11 @@ const ShoppingCartStore = ({
   onSelectAllItems: (storeId: string, selected: boolean) => void;
   onShopVoucherPress: (shopId: string) => void;
   calculatedData?: ICalculateResponse;
+  onVariationChange: (
+    storeId: string,
+    itemId: string,
+    variation: Variation
+  ) => void;
 }) => {
   const navigation = useNavigation<RootStackScreenProps<"ShoppingCart">>();
 
@@ -54,6 +61,13 @@ const ShoppingCartStore = ({
       onItemQuantityChange(store.id, id, quantity);
     },
     [store.id, onItemQuantityChange]
+  );
+
+  const handleVariationChange = useCallback(
+    (id: string, variation: Variation) => {
+      onVariationChange(store.id, id, variation);
+    },
+    [store.id, onVariationChange]
   );
 
   const handleDeleteItem = useCallback(
@@ -134,6 +148,8 @@ const ShoppingCartStore = ({
           onSelect={handleItemSelect}
           onQuantityChange={handleQuantityChange}
           onDelete={handleDeleteItem}
+          variations={item?.variations || []}
+          onVariationChange={handleVariationChange}
         />
       ))}
 

@@ -112,8 +112,9 @@ const CategorySection = () => {
         className="p-2"
         onPress={(category) => {
           navigation.smartNavigate("SearchAdvance", {
-            searchText: category.name,
             shopId: shopId,
+            categoryId: category.id,
+            categoryName: category.name,
           });
         }}
         getCategoriesApi={(payload) => {

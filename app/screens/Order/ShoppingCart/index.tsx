@@ -20,6 +20,7 @@ import ModalSelectShopVoucher from "~/screens/VoucherSelect/ModalSelectShopVouch
 import {
   cartService,
   IUpdatePatchCartItemRequest,
+  Variation,
 } from "~/services/api/cart.service";
 import {
   ICalculateResponse,
@@ -98,50 +99,47 @@ const ShoppingCart = () => {
         return;
       }
 
-      mutationCalculateOrder.mutate(
-        {
-          paymentMethodKey: paymentMethods[0].key,
-          shippingAddressId: address?.id!,
-          shippingVoucherCode:
-            selectedVoucher.voucher?.voucherType === "shipping"
-              ? selectedVoucher.voucher?.code!
-              : "",
-          productVoucherCode:
-            selectedVoucher.voucher?.voucherType !== "shipping"
-              ? selectedVoucher.voucher?.code!
-              : "",
-          shops:
-            stores
-              ?.filter((store) => store.isSelected)
-              ?.map((store) => ({
-                id: Number(store.id),
-                shippingMethodKey: "ghtk",
-                note: "",
-                voucherCode: store.shopVoucher?.code || "",
-                items: store.items
-                  ?.filter((item) => item.isSelected)
-                  .map((item) => ({
-                    product: {
-                      id: Number(item.productId),
-                      name: item.name,
-                    },
-                    variation: {
-                      id: Number(item.variation.id),
-                      name: item?.variation.name,
-                    },
-                    quantity: item.quantity,
-                  })),
-              })) || [],
+      const params = {
+        paymentMethodKey: paymentMethods[0].key,
+        shippingAddressId: address?.id!,
+        shippingVoucherCode:
+          selectedVoucher.voucher?.voucherType === "shipping"
+            ? selectedVoucher.voucher?.code!
+            : "",
+        productVoucherCode:
+          selectedVoucher.voucher?.voucherType !== "shipping"
+            ? selectedVoucher.voucher?.code!
+            : "",
+        shops:
+          selectedStore?.map((store) => ({
+            id: Number(store.id),
+            shippingMethodKey: "ghtk",
+            note: "",
+            voucherCode: store.shopVoucher?.code || "",
+            items: store.items
+              ?.filter((item) => item.isSelected)
+              .map((item) => ({
+                product: {
+                  id: Number(item.productId),
+                  name: item.name,
+                },
+                variation: {
+                  id: Number(item.variation.id),
+                  name: item?.variation.name,
+                },
+                quantity: item.quantity,
+              })),
+          })) || [],
+      };
+
+      mutationCalculateOrder.mutate(params, {
+        onSuccess: (data) => {
+          setCalculatedData(data);
         },
-        {
-          onSuccess: (data) => {
-            setCalculatedData(data);
-          },
-          onError: (error) => {
-            toast.error(getErrorMessage(error, "Lỗi khi tính toán đơn hàng"));
-          },
-        }
-      );
+        onError: (error) => {
+          toast.error(getErrorMessage(error, "Lỗi khi tính toán đơn hàng"));
+        },
+      });
     }
   }, [paymentMethods, stores, address, selectedVoucher.voucher]);
 
@@ -166,6 +164,7 @@ const ShoppingCart = () => {
           },
           quantity: item.quantity,
           isSelected: item.isChecked,
+          variations: item?.product?.variations || [],
         })),
       }));
 
@@ -276,6 +275,24 @@ const ShoppingCart = () => {
                 ...store,
                 items: store.items.map((item) =>
                   item.id === itemId ? { ...item, quantity } : item
+                ),
+              }
+            : store
+        )
+      );
+    },
+    []
+  );
+
+  const handleVariationChange = useCallback(
+    (storeId: string, itemId: string, variation: Variation) => {
+      setStores((prev) =>
+        prev.map((store) =>
+          store.id === storeId
+            ? {
+                ...store,
+                items: store.items.map((item) =>
+                  item.id === itemId ? { ...item, variation } : item
                 ),
               }
             : store
@@ -447,6 +464,7 @@ const ShoppingCart = () => {
             onSelectAllItems={handleSelectAllItems}
             onShopVoucherPress={setVoucherShopId}
             calculatedData={calculatedData!}
+            onVariationChange={handleVariationChange}
           />
         )}
         extraData={calculatedData}
