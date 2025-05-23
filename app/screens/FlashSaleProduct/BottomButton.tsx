@@ -11,21 +11,21 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { imagePaths } from "~/assets/imagePath";
+import ModalAddToCartAnimation, {
+  ModalAddToCartAnimationRef,
+} from "~/components/common/ModalAddToCartAnimation";
 import { toggleLoading } from "~/components/common/ScreenLoading";
 import { toast } from "~/components/common/Toast";
 import { Text } from "~/components/ui/text";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 import { cartService } from "~/services/api/cart.service";
-import { authAtom, selectedVoucherAtom } from "~/store/atoms";
-import { getErrorMessage } from "~/utils";
-import { storeAtom } from "../Order/atom";
 import {
   flashSaleService,
   IFlashSaleProduct,
 } from "~/services/api/flashsale.service";
-import ModalAddToCartAnimation, {
-  ModalAddToCartAnimationRef,
-} from "~/components/common/ModalAddToCartAnimation";
+import { authAtom, selectedVoucherAtom } from "~/store/atoms";
+import { getErrorMessage } from "~/utils";
+import { storeAtom } from "../Order/atom";
 type Variation = IFlashSaleProduct["flashSaleVariation"];
 
 const SelectVariation = ({
@@ -331,10 +331,7 @@ const BottomButton = ({
                 0)!,
               originalPrice: (flashSaleProductDetail?.regularPrice || 0)!,
               type: selectedVariation?.name || "",
-              variation: {
-                name: selectedVariation?.name!,
-                id: selectedVariation?.id!,
-              },
+              variation: selectedVariation,
               quantity: quantity,
               isSelected: true,
             },
@@ -342,7 +339,7 @@ const BottomButton = ({
         },
       ];
 
-      setStores(data);
+      setStores(data as any);
       setVoucherState({
         voucher: null,
         canSelect: false,

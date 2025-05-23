@@ -24,6 +24,7 @@ import { storeAtom } from "../Order/atom";
 import ModalAddToCartAnimation, {
   ModalAddToCartAnimationRef,
 } from "~/components/common/ModalAddToCartAnimation";
+import { Store } from "../Order/types";
 type Variation = IProduct["variations"][0];
 
 const BottomButton = ({ productId }: { productId: number | string }) => {
@@ -119,10 +120,7 @@ const BottomButton = ({ productId }: { productId: number | string }) => {
                 0)!,
               originalPrice: (productDetail?.regularPrice || 0)!,
               type: selectedVariation?.name || "",
-              variation: {
-                name: selectedVariation?.name!,
-                id: selectedVariation?.id!,
-              },
+              variation: selectedVariation,
               quantity: quantity,
               isSelected: true,
               variations: productDetail?.variations || [],
@@ -131,7 +129,7 @@ const BottomButton = ({ productId }: { productId: number | string }) => {
         },
       ];
 
-      setStores(data);
+      setStores(data as Store[]);
       setVoucherState({
         voucher: null,
         canSelect: false,
