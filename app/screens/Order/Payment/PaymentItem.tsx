@@ -24,6 +24,8 @@ const PaymentItem = ({
   quantity,
   onPress,
 }: PaymentItemProps) => {
+  console.log("price", price, originalPrice);
+
   const formatPrice = (value: number) => {
     return value.toLocaleString() + "đ";
   };
@@ -59,8 +61,10 @@ const PaymentItem = ({
         {/* Price and Quantity */}
         <View className="flex-row justify-between items-center mt-auto">
           <View className="flex-row items-center gap-1.5">
-            <Text className="text-sm text-[#0A0A0A]">{formatPrice(price)}</Text>
-            {originalPrice > price && (
+            <Text className="text-sm text-[#0A0A0A]">
+              {!!price ? formatPrice(price) : formatPrice(originalPrice)}
+            </Text>
+            {!!originalPrice && originalPrice > price && !!price && (
               <Text className="text-xs text-[#AEAEAE] line-through">
                 {formatPrice(originalPrice)}
               </Text>

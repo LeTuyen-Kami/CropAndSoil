@@ -7,14 +7,10 @@ export interface StoreItem {
   image: string;
   price: number;
   originalPrice: number;
-  type: string;
   quantity: number;
   isSelected?: boolean;
   productId: string;
-  variation: {
-    id: number;
-    name: string;
-  };
+  variation: Variation;
   variations: Variation[];
 }
 

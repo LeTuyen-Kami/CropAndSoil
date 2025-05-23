@@ -93,9 +93,9 @@ const PaymentStore = ({
             id={product.id}
             name={product.name}
             image={product.image}
-            price={product.price}
-            originalPrice={product.originalPrice}
-            type={product.type}
+            price={product?.variation?.salePrice || 0}
+            originalPrice={product?.variation?.regularPrice || 0}
+            type={product?.variation?.name || ""}
             quantity={product.quantity}
             onPress={() => navigationToProduct(product.productId)}
           />

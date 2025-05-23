@@ -205,9 +205,9 @@ const ShoppingCartItem = ({
 
         <View className="flex-row items-center gap-1.5 mt-1">
           <Text className="text-xs font-bold text-[#E01839]">
-            {formatPrice(price)}
+            {!!price ? formatPrice(price) : formatPrice(originalPrice)}
           </Text>
-          {originalPrice && originalPrice > price && (
+          {!!originalPrice && originalPrice > price && !!price && (
             <Text className="text-xs text-[#AEAEAE] line-through">
               {formatPrice(originalPrice)}
             </Text>

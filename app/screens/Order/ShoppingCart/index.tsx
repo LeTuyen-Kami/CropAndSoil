@@ -157,11 +157,7 @@ const ShoppingCart = () => {
           image: item?.variation?.thumbnail || item?.product?.thumbnail,
           price: item.unitPrice,
           originalPrice: item?.product?.regularPrice,
-          type: item?.variation?.name || "",
-          variation: {
-            name: item?.variation?.name || "",
-            id: item?.variation?.id,
-          },
+          variation: item?.variation,
           quantity: item.quantity,
           isSelected: item.isChecked,
           variations: item?.product?.variations || [],
