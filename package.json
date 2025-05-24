@@ -10,6 +10,7 @@
     "prebuild": "expo prebuild"
   },
   "dependencies": {
+    "@legendapp/list": "^1.0.14",
     "@react-native-community/datetimepicker": "8.2.0",
     "@react-native-firebase/app": "^21.14.0",
     "@react-native-firebase/auth": "^21.14.0",

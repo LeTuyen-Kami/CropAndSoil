@@ -455,6 +455,13 @@ export interface Order {
   orderTotal: number;
 }
 
+// export interface Payload {
+//   orders: Order[];
+//   receiptTotal: number;
+//   paymentMethod: PaymentMethod;
+//   paymentUrl?: any;
+// }
+
 export interface PaymentMethod {
   key: string;
   title: string;
@@ -462,10 +469,10 @@ export interface PaymentMethod {
 }
 
 export interface Payload {
-  orders: Order[];
   receiptTotal: number;
   paymentMethod: PaymentMethod;
   paymentUrl?: any;
+  paymentOrderId: string;
 }
 
 export interface IOrderCheckoutResponse {

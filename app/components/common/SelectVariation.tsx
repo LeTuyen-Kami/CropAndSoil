@@ -1,5 +1,6 @@
 import { AntDesign } from "@expo/vector-icons";
 import { Image } from "expo-image";
+import { useMemo } from "react";
 import {
   Modal,
   TouchableOpacity,
@@ -33,8 +34,6 @@ const SelectVariation = ({
 }) => {
   const { bottom } = useSafeAreaInsets();
 
-  if (!variations) return null;
-
   const incrementQuantity = () => {
     if (!quantity || !setQuantity) return;
 
@@ -50,6 +49,15 @@ const SelectVariation = ({
       setQuantity(quantity - 1);
     }
   };
+
+  const disabled = useMemo(() => {
+    if (!quantity) return true;
+    if (!selectedVariation) return true;
+    if (quantity > selectedVariation.stock) return true;
+    return false;
+  }, [quantity, setQuantity, selectedVariation]);
+
+  if (!variations) return null;
 
   return (
     <Modal
@@ -164,7 +172,8 @@ const SelectVariation = ({
               )}
 
               <TouchableOpacity
-                className="w-full py-3 rounded-full bg-[#FF424E]"
+                className="w-full py-3 rounded-full bg-[#FF424E] disabled:opacity-50"
+                disabled={disabled}
                 onPress={() => {
                   if (selectedVariation) {
                     onClose();

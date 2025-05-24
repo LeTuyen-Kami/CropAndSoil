@@ -55,7 +55,7 @@ const ModalSuccess = ({
             <Text className="font-medium">Tiếp tục mua</Text>
           </Button>
           <Button className="bg-white" onPress={onViewOrder}>
-            <Text className="font-medium text-black">Chi tiết đơn</Text>
+            <Text className="font-medium text-black">Danh sách đơn hàng</Text>
           </Button>
         </View>
         <LottieView

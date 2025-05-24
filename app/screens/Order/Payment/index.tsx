@@ -275,8 +275,7 @@ const Payment = () => {
       routes: [
         { name: "MainTabs", params: { screen: "Profile" } },
         {
-          name: "DetailOrder",
-          params: { orderId: checkoutData?.payload.orders[0].id },
+          name: "MyOrder",
         },
       ],
     });

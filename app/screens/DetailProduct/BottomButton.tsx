@@ -188,7 +188,10 @@ const BottomButton = ({ productId }: { productId: number | string }) => {
         variations={productDetail?.variations}
         isVisible={showVariations}
         onClose={() => setShowVariations(false)}
-        onSelectVariation={setSelectedVariation}
+        onSelectVariation={(variation: Variation) => {
+          setSelectedVariation(variation);
+          setQuantity(1);
+        }}
         selectedVariation={selectedVariation}
         onConfirm={handleConfirmAction}
         quantity={quantity}

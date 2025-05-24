@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import Checkbox from "expo-checkbox";
 import { Image } from "expo-image";
 import { useAtom } from "jotai";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Pressable, TouchableOpacity, View } from "react-native";
 import { RefreshControl } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -192,20 +192,20 @@ const ShoppingCart = () => {
     []
   );
 
-  const handleSelectAll = useCallback((selected: boolean) => {
-    setStores((prev) =>
-      prev.map((store) => ({
-        ...store,
-        isSelected: selected,
-        items: store.items.map((item) => ({
-          ...item,
+  const handleSelectAll = useCallback(
+    (selected: boolean) => {
+      setStores((prev) =>
+        prev.map((store) => ({
+          ...store,
           isSelected: selected,
-        })),
-      }))
-    );
+          items: store.items.map((item) => ({
+            ...item,
+            isSelected: selected,
+          })),
+        }))
+      );
 
-    mutationUpdatePatchCartItem.mutate({
-      cartItems: stores.flatMap((store) =>
+      const payload = stores.flatMap((store) =>
         store.items.map((item) => ({
           cartItemId: Number(item.id),
           productId: Number(item.productId),
@@ -213,9 +213,18 @@ const ShoppingCart = () => {
           quantity: item.quantity,
           isChecked: selected,
         }))
-      ),
-    });
-  }, []);
+      );
+
+      if (payload.length === 0) {
+        return;
+      }
+
+      mutationUpdatePatchCartItem.mutate({
+        cartItems: payload,
+      });
+    },
+    [stores]
+  );
 
   const handleSelectAllItems = useCallback(
     (storeId: string, selected: boolean) => {
@@ -237,18 +246,20 @@ const ShoppingCart = () => {
       const store = stores.find((store) => store.id === storeId);
 
       if (store) {
+        const payload = store.items.map((item) => ({
+          cartItemId: Number(item.id),
+          productId: Number(item.productId),
+          variationId: Number(item.variation.id),
+          quantity: item.quantity,
+          isChecked: selected,
+        }));
+
         mutationUpdatePatchCartItem.mutate({
-          cartItems: store.items.map((item) => ({
-            cartItemId: Number(item.id),
-            productId: Number(item.productId),
-            variationId: Number(item.variation.id),
-            quantity: item.quantity,
-            isChecked: selected,
-          })),
+          cartItems: payload,
         });
       }
     },
-    []
+    [stores]
   );
 
   const handleShopVoucherPress = useCallback(
@@ -348,8 +359,12 @@ const ShoppingCart = () => {
     });
   }, [stores]);
 
-  const allItemsSelected =
-    stores.length > 0 && stores.every((store) => store.isSelected);
+  const allItemsSelected = useMemo(
+    () =>
+      stores.length > 0 &&
+      stores.every((store) => store.items.every((item) => item.isSelected)),
+    [stores]
+  );
 
   useEffect(() => {
     if (!isFocused) {

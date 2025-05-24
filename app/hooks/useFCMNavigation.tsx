@@ -28,12 +28,18 @@ export default function useFCMNavigation(
   const handle = async (msg: FirebaseMessagingTypes.RemoteMessage | null) => {
     console.log("msg", msg);
 
-    if (!msg?.data?.id) return;
-    const { id, ...params } = msg.data;
+    if (!msg?.data?.notificationId) return;
+    const { notificationId, ...params } = msg.data;
+
+    console.log("orderId", notificationId);
+
     if (navigationRef.isReady()) {
+      console.log("navigationRef.isReady()");
+
       navigationRef.navigate("Notifications");
       setTimeout(() => {
-        navigationRef.navigate("DetailNotification", { id });
+        console.log("navigate");
+        navigationRef.navigate("DetailNotification", { id: notificationId });
       }, 100);
     }
   };
@@ -56,7 +62,9 @@ export default function useFCMNavigation(
 
           handle({
             data: {
-              id: notification?.notification?.request?.content?.data?.id,
+              notificationId:
+                notification?.notification?.request?.content?.data
+                  ?.notificationId,
               title: notification?.notification?.request?.content?.title,
               body: notification?.notification?.request?.content?.body,
             },

@@ -252,6 +252,7 @@ const ShoppingCartItem = ({
         onSelectVariation={handleSelectVariation}
         selectedVariation={selectedVariation}
         onConfirm={handleConfirmVariation}
+        quantity={quantity}
       />
     </View>
   );

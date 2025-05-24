@@ -210,18 +210,16 @@ const LikedProductScreen = () => {
   });
 
   const handleAddToCart = (product: IProduct) => {
-    toast.success("Thêm vào giỏ hàng thành công");
+    if (!auth?.isLoggedIn) {
+      navigation.smartNavigate("Login");
+      return;
+    }
 
-    // if (!auth?.isLoggedIn) {
-    //   navigation.smartNavigate("Login");
-    //   return;
-    // }
+    setQuantity(1);
 
-    // setQuantity(1);
+    setCurrentProduct(product);
 
-    // setCurrentProduct(product);
-
-    // setShowVariations(true);
+    setShowVariations(true);
   };
 
   const handleConfirmAction = () => {
@@ -233,8 +231,6 @@ const LikedProductScreen = () => {
 
     return preHandleFlashListData(data, "product");
   }, [data]);
-
-  console.log("handledData", handledData?.length);
 
   return (
     <ScreenWrapper hasGradient={true} hasSafeBottom={false}>
@@ -290,9 +286,10 @@ const LikedProductScreen = () => {
         variations={currentProduct?.variations}
         isVisible={showVariations}
         onClose={() => setShowVariations(false)}
-        onSelectVariation={(variation: Variation) =>
-          setSelectedVariation(variation)
-        }
+        onSelectVariation={(variation: Variation) => {
+          setSelectedVariation(variation);
+          setQuantity(1);
+        }}
         selectedVariation={selectedVariation}
         onConfirm={handleConfirmAction}
         quantity={quantity}

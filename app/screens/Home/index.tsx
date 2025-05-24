@@ -39,9 +39,14 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
+import { LegendList, LegendListProps } from "@legendapp/list";
 
 const AnimatedFlashList = Animated.createAnimatedComponent(
   FlashList as unknown as React.ComponentType<FlashListProps<any>>
+);
+
+const AnimatedLegendList = Animated.createAnimatedComponent(
+  LegendList as unknown as React.ComponentType<LegendListProps<any>>
 );
 
 const LIMIT_PRODUCT_IN_FOOTER = 4;
