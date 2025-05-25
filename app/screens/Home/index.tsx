@@ -140,12 +140,12 @@ const Banner = ({
           WebBrowser.openBrowserAsync(banner.url);
         }
       }}
-      className="w-full aspect-[7/2]"
+      className="w-full aspect-[2.5/1]"
     >
       <Image
         source={{ uri: banner.image }}
         style={{ width: "100%", height: "100%" }}
-        contentFit="contain"
+        contentFit="cover"
       />
     </Pressable>
   );
@@ -269,6 +269,7 @@ const HomeCarousel = () => {
           <Image
             source={{ uri: item.image }}
             style={{ width: "100%", height: "100%" }}
+            contentFit="cover"
           />
         </Pressable>
       )}
@@ -302,7 +303,7 @@ const Banners = ({
           url: item.url,
         }))}
         width={screen.width}
-        height={(screen.width * 2) / 7}
+        height={screen.width / 2.5}
         renderItem={({ item }) => <Banner banner={item} />}
         autoPlay={true}
         autoPlayInterval={5000}

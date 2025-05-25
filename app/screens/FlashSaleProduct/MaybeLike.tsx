@@ -1,16 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
 import { deepEqual } from "fast-equals";
+import { useAtomValue } from "jotai";
 import React from "react";
 import { View } from "react-native";
 import ProductItem from "~/components/common/ProductItem";
 import { Text } from "~/components/ui/text";
 import { productService } from "~/services/api/product.service";
+import { authAtom } from "~/store/atoms";
 import { calculateDiscount, screen } from "~/utils";
 
 const MaybeLike = ({ id }: { id: string | number }) => {
+  const auth = useAtomValue(authAtom);
   const { data: recommendedProduct } = useQuery({
     queryKey: ["recommended-product"],
     queryFn: () => productService.getRecommendedProducts(),
+    enabled: !!auth?.isLoggedIn,
   });
 
   return (

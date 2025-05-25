@@ -196,7 +196,7 @@ const Info = ({ id }: { id: string | number }) => {
 
   const { data: voucher } = useQuery({
     queryKey: ["vouchers", (productDetail?.shop?.id || "")?.toString()],
-    enabled: !!productDetail?.shop?.id,
+    enabled: !!productDetail?.shop?.id && auth?.isLoggedIn,
     queryFn: () =>
       shopService.getListVoucher({
         shopId: productDetail?.shop?.id,

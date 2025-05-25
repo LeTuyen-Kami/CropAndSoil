@@ -8,11 +8,16 @@ import { Text } from "~/components/ui/text";
 import { cn } from "~/lib/utils";
 import { calculateDiscount, screen } from "~/utils";
 import { productService } from "~/services/api/product.service";
+import { useAtomValue } from "jotai";
+import { authAtom } from "~/store/atoms";
 
 const MaybeLike = ({ id }: { id: string | number }) => {
+  const auth = useAtomValue(authAtom);
+
   const { data: recommendedProduct } = useQuery({
     queryKey: ["recommended-product"],
     queryFn: () => productService.getRecommendedProducts(),
+    enabled: !!auth?.isLoggedIn,
   });
 
   return (

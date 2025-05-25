@@ -85,10 +85,12 @@ const PrivateOffer = () => {
                 uri: item.image,
               }}
               style={{ width: "100%", height: "100%", borderRadius: 12 }}
+              contentFit="cover"
             />
           </Pressable>
         )}
       />
+
       <FlatList
         data={products?.data}
         horizontal

@@ -336,7 +336,9 @@ const EditReview = () => {
       mutationUpdateReview.mutate(updateData, {
         onSuccess: () => {
           queryClient.invalidateQueries({
-            queryKey: ["list-unrated", "reviews"],
+            predicate: (query) =>
+              query?.queryKey?.includes("list-unrated") ||
+              query?.queryKey?.includes("reviews"),
           });
           toast.success("Cập nhật đánh giá thành công");
         },

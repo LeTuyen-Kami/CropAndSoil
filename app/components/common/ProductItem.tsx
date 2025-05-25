@@ -96,6 +96,7 @@ const ProductItem = ({
             contentFit="cover"
             placeholder={imagePaths.placeholder}
             placeholderContentFit="contain"
+            cachePolicy={"memory-disk"}
           />
         </View>
         <View className="p-[10] flex-col gap-[2] flex-1">
@@ -121,9 +122,9 @@ const ProductItem = ({
               </Text>
             )}
           </View>
-          {(hasSoldCount || hasRating) && (
+          {!!(hasSoldCount || hasRating) && (
             <View className="flex-row justify-between items-center">
-              {hasSoldCount && (
+              {!!hasSoldCount && (
                 <View className="flex-1 mt-1">
                   <View className="bg-secondary-100 rounded-full h-[14] w-full overflow-hidden">
                     <View
@@ -146,7 +147,7 @@ const ProductItem = ({
 
               {!hasSoldCount && hasRating && (
                 <View className="flex-row gap-2 items-center mt-1">
-                  {hasRating && (
+                  {!!hasRating && (
                     <View className="flex-row items-center bg-[#FDF8EA] rounded-[12px] py-[2] px-[4]">
                       <Text className="text-[10px] text-[#545454] mr-[2]">
                         {rating.toFixed(1)}
@@ -158,7 +159,7 @@ const ProductItem = ({
                     </View>
                   )}
 
-                  {soldCount && (
+                  {!!soldCount && (
                     <Text className="text-[10px] tracking-tight text-neutral-700">
                       Đã bán {soldCount}
                     </Text>
@@ -167,7 +168,7 @@ const ProductItem = ({
               )}
             </View>
           )}
-          {location && (
+          {!!location && (
             <View className="flex-row gap-[2] items-center pt-1 mt-auto">
               <Image
                 source={imagePaths.icLocation}

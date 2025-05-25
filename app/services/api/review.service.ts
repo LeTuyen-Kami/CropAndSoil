@@ -335,7 +335,7 @@ class ReviewService {
     data.variationId && formData.append("variationId", data.variationId);
 
     data.images.forEach((image, index) => {
-      formData.append("images[]", {
+      formData.append("images", {
         uri: image.uri,
         type: image.type,
         name: image.name || `image_${index}.jpg`,

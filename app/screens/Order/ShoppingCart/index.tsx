@@ -3,7 +3,7 @@ import { FlashList } from "@shopify/flash-list";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Checkbox from "expo-checkbox";
 import { Image } from "expo-image";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Pressable, TouchableOpacity, View } from "react-native";
 import { RefreshControl } from "react-native-gesture-handler";
@@ -30,7 +30,7 @@ import {
 import { paymentService } from "~/services/api/payment.service";
 import { IVoucher } from "~/services/api/shop.service";
 import { userService } from "~/services/api/user.service";
-import { selectedVoucherAtom, showModalConfirm } from "~/store/atoms";
+import { authAtom, selectedVoucherAtom, showModalConfirm } from "~/store/atoms";
 import { getErrorMessage } from "~/utils";
 import { storeAtom } from "../atom";
 import Footer from "./Footer";
@@ -39,6 +39,7 @@ const ShoppingCart = () => {
   const navigation = useNavigation<RootStackScreenProps<"ShoppingCart">>();
   const [stores, setStores] = useAtom(storeAtom);
   const [voucherShopId, setVoucherShopId] = useState<string>("");
+  const auth = useAtomValue(authAtom);
 
   const [selectedVoucher, setSelectedVoucher] = useAtom(selectedVoucherAtom);
   const { bottom } = useSafeAreaInsets();
@@ -52,6 +53,7 @@ const ShoppingCart = () => {
     queryFn: () => cartService.getDetailCart(),
     staleTime: 0,
     refetchOnMount: "always",
+    enabled: !!auth?.isLoggedIn,
   });
 
   const isFocused = useIsFocused();
