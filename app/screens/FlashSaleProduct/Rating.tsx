@@ -167,8 +167,8 @@ const Rating: React.FC<RatingProps> = ({ id }) => {
             rating={review?.rating}
             quality={review?.quality}
             date={formatDate(review?.createdAt)}
-            productVariant={review?.variation?.name}
-            likes={review?.totalLikes}
+            productVariant={review?.variation?.name || ""}
+            likes={review?.totalLikes || 0}
             comment={review?.comment}
             media={review?.gallery?.map((media) => ({
               type: media?.type === "video" ? "video" : "image",

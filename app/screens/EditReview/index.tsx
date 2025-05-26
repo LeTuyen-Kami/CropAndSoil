@@ -367,7 +367,9 @@ const EditReview = () => {
           toast.success("Đã gửi đánh giá thành công");
           navigation.smartGoBack();
           queryClient.invalidateQueries({
-            queryKey: ["list-unrated", "reviews"],
+            predicate: (query) =>
+              query?.queryKey?.includes("list-unrated") ||
+              query?.queryKey?.includes("reviews"),
           });
         },
         onError: (error) => {
@@ -626,7 +628,7 @@ const EditReview = () => {
 
           {/* Anonymous Option */}
           <View className="flex-row justify-between items-center py-2">
-            <View className="flex-row items-center">
+            <View className="flex-row items-center mr-2">
               <Text className="text-[#575964] text-sm mr-2">Ẩn danh</Text>
               <Checkbox
                 value={isAnonymous}
@@ -640,7 +642,7 @@ const EditReview = () => {
                 }}
               />
             </View>
-            <Text className="text-[#676767] text-xs">
+            <Text className="text-[#676767] text-xs flex-1" numberOfLines={1}>
               Tên của bạn sẽ được hiển thị là {hideName(auth?.user?.name)}
             </Text>
           </View>

@@ -364,8 +364,7 @@ class ReviewService {
     data.quality && formData.append("quality", data.quality);
     data.packaging && formData.append("packaging", data.packaging);
     data.comment && formData.append("comment", data.comment);
-    data.isAnonymous &&
-      formData.append("isAnonymous", String(data.isAnonymous));
+    formData.append("isAnonymous", String(data.isAnonymous));
     data.orderId && formData.append("orderId", data.orderId);
     data.productId && formData.append("productId", data.productId);
     data.variationId && formData.append("variationId", data.variationId);

@@ -150,7 +150,7 @@ const AllProductReview = ({ route }: { route?: { params?: RouteParams } }) => {
               <TouchableOpacity
                 className="flex-row gap-2 items-center px-3 pt-3"
                 onPress={() => {
-                  navigation.navigate("Shop", { id: String(item.shop.id) });
+                  navigation.navigate("Shop", { id: String(item?.shop?.id) });
                 }}
               >
                 <Image
@@ -162,26 +162,26 @@ const AllProductReview = ({ route }: { route?: { params?: RouteParams } }) => {
                   }}
                 />
                 <Text className="text-sm text-[#393B45] font-medium">
-                  {item.shop.shopName}
+                  {item?.shop?.shopName}
                 </Text>
               </TouchableOpacity>
               <ReviewItem
                 reviewer={{
-                  name: item.authorName,
-                  avatar: item.authorAvatar,
+                  name: item?.authorName,
+                  avatar: item?.authorAvatar,
                 }}
                 sellerResponse={item?.replies?.[0]?.comment}
-                rating={item.rating}
+                rating={item?.rating}
                 media={item?.gallery?.map((media) => ({
-                  type: media.type === "video" ? "video" : "image",
-                  uri: media.thumbnail,
-                  src: media.src,
+                  type: media?.type === "video" ? "video" : "image",
+                  uri: media?.thumbnail,
+                  src: media?.src,
                 }))}
-                quality={item.quality}
-                date={formatDate(item.createdAt)}
-                productVariant={item.variation.name}
-                likes={item.totalLikes}
-                comment={item.comment}
+                quality={item?.quality}
+                date={formatDate(item?.createdAt)}
+                productVariant={item?.variation?.name || ""}
+                likes={item?.totalLikes || 0}
+                comment={item?.comment}
               />
             </View>
           )}
