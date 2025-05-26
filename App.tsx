@@ -45,14 +45,14 @@ function App() {
   );
 }
 
-if (!__DEV__) {
-  Sentry.init({
-    dsn: ENV.EXPO_PUBLIC_SENTRY_DSN,
-    replaysOnErrorSampleRate: 1.0,
-    replaysSessionSampleRate: 0.1,
-    integrations: [Sentry.mobileReplayIntegration()],
-    enabled: !__DEV__,
-  });
-}
+// if (!__DEV__) {
+Sentry.init({
+  dsn: ENV.EXPO_PUBLIC_SENTRY_DSN,
+  replaysOnErrorSampleRate: 1.0,
+  replaysSessionSampleRate: 0.1,
+  integrations: [Sentry.mobileReplayIntegration()],
+  enabled: !__DEV__,
+});
+// }
 const Boundary = withErrorBoundary(App);
 export default Sentry.wrap(Boundary);
