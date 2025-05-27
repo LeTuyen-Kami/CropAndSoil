@@ -275,7 +275,7 @@ export interface IProductReviewRequest extends PaginationRequests {
 export interface ICreateReviewRequest {
   rating: number;
   quality: string;
-  packaging: string;
+  package: string;
   comment: string;
   isAnonymous: boolean;
   orderId: string;
@@ -327,7 +327,7 @@ class ReviewService {
 
     data.rating && formData.append("rating", String(data.rating));
     data.quality && formData.append("quality", data.quality);
-    data.packaging && formData.append("packaging", data.packaging);
+    data.package && formData.append("package", data.package);
     data.comment && formData.append("comment", data.comment);
     formData.append("isAnonymous", String(data.isAnonymous));
     data.orderId && formData.append("orderId", data.orderId);
@@ -362,7 +362,7 @@ class ReviewService {
 
     data.rating && formData.append("rating", String(data.rating));
     data.quality && formData.append("quality", data.quality);
-    data.packaging && formData.append("packaging", data.packaging);
+    data.package && formData.append("package", data.package);
     data.comment && formData.append("comment", data.comment);
     formData.append("isAnonymous", String(data.isAnonymous));
     data.orderId && formData.append("orderId", data.orderId);
