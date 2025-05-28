@@ -157,9 +157,10 @@ const BottomButton = ({
               image:
                 selectedVariation?.thumbnail! ||
                 flashSaleProductDetail?.thumbnail!,
-              price: (flashSaleProductDetail?.salePrice ||
-                flashSaleProductDetail?.regularPrice ||
-                0)!,
+              price:
+                selectedVariation?.salePrice ||
+                selectedVariation?.regularPrice ||
+                0,
               originalPrice: (flashSaleProductDetail?.regularPrice || 0)!,
               type: selectedVariation?.name || "",
               variation: selectedVariation,

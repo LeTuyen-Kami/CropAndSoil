@@ -18,6 +18,8 @@ import { RootStackRouteProp, RootStackScreenProps } from "~/navigation/types";
 import { cn } from "~/lib/utils";
 import { ICalculateResponse } from "~/services/api/order.service";
 import { convertToK } from "~/utils";
+import { deepEqual } from "fast-equals";
+
 const PaymentStore = ({
   store,
   onMessagePress,
@@ -50,6 +52,21 @@ const PaymentStore = ({
     (acc, product) => acc + product.price * product.quantity,
     0
   );
+
+  const totalPriceWithVoucher = useMemo(() => {
+    const calculatedOrderShop = calculatedData?.orderShops?.find(
+      (orderShop) => orderShop.shop.id + "" === store.id + ""
+    );
+
+    const originalPrice = calculatedOrderShop?.subtotal || 0;
+
+    const finalPrice =
+      originalPrice -
+      (calculatedOrderShop?.shopProductVoucherDiscount || 0) -
+      (calculatedOrderShop?.shopShippingVoucherDiscount || 0);
+
+    return Math.max(finalPrice, 0);
+  }, [calculatedData, store?.id]);
 
   const navigationToShop = () => {
     navigation.navigate("Shop", { id: store.id });
@@ -156,11 +173,13 @@ const PaymentStore = ({
           Tổng số tiền ({totalItems} sản phẩm)
         </Text>
         <Text className="text-sm font-medium text-[#383B45]">
-          {formatPrice(totalPrice)}
+          {formatPrice(totalPriceWithVoucher || totalPrice)}
         </Text>
       </View>
     </View>
   );
 };
 
-export default PaymentStore;
+export default React.memo(PaymentStore, (prev, next) => {
+  return deepEqual(prev, next);
+});

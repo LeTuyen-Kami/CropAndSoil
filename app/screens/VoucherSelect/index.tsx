@@ -52,7 +52,7 @@ const ShippingVoucher = ({
     <WrapperVoucher>
       <TicketVoucher
         title={"Mã vận chuyển"}
-        description={voucher.description}
+        description={voucher.title || voucher.description}
         minOrder={`Đơn tối thiểu ${convertToK(voucher.minimumAmount)}đ`}
         expiryDate={formatDate(voucher.expiryDate)}
         usagePercent={Math.round(
@@ -84,7 +84,7 @@ export const ProductVoucher = ({
         title="Voucher toàn sàn"
         minOrder={`Đơn tối thiểu ${convertToK(voucher.minimumAmount)}đ`}
         expiryDate={formatDate(voucher.expiryDate)}
-        description={voucher.description}
+        description={voucher.title || voucher.description}
         usagePercent={Math.round(
           (voucher.usedCount / (voucher.usageLimit || 1)) * 100
         )}

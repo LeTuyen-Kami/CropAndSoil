@@ -115,9 +115,10 @@ const BottomButton = ({ productId }: { productId: number | string }) => {
               productId: productDetail?.id?.toString() || "",
               name: productDetail?.name || "",
               image: selectedVariation?.thumbnail! || productDetail?.thumbnail!,
-              price: (productDetail?.salePrice ||
-                productDetail?.regularPrice ||
-                0)!,
+              price:
+                selectedVariation?.salePrice ||
+                selectedVariation?.regularPrice ||
+                0,
               originalPrice: (productDetail?.regularPrice || 0)!,
               type: selectedVariation?.name || "",
               variation: selectedVariation,

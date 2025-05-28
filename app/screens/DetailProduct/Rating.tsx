@@ -70,7 +70,7 @@ const Rating: React.FC<RatingProps> = ({ id }) => {
   };
 
   const onViewAllPress = () => {
-    if (!productDetail?.averageRating) {
+    if (!productDetail?.reviewCount) {
       toast.info("Chưa có đánh giá nào");
       return;
     }
