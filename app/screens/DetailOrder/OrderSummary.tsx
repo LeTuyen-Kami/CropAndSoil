@@ -33,6 +33,7 @@ type OrderSummaryProps = {
   vouchers?: OrderVoucher[];
   orderTotal?: number;
   cartDiscount?: number;
+  shippingFee?: number;
 };
 
 const OrderSummary: React.FC<OrderSummaryProps> = ({
@@ -41,13 +42,12 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   vouchers,
   orderTotal,
   cartDiscount,
+  shippingFee,
 }) => {
   const calculateSubtotal = () => {
     if (!items || items.length === 0) return 0;
     return items.reduce((sum, item) => sum + item.subtotal, 0);
   };
-
-  const shippingFee = fees?.find((fee) => fee.type === "shipping")?.total || 0;
 
   return (
     <View>
@@ -59,7 +59,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
           <Text className="text-sm">{formatPrice(calculateSubtotal())}</Text>
         </View>
 
-        {shippingFee > 0 && (
+        {!!shippingFee && shippingFee > 0 && (
           <View className="flex-row justify-between">
             <Text className="text-sm text-gray-500">Phí vận chuyển</Text>
             <Text className="text-sm">{formatPrice(shippingFee)}</Text>
@@ -75,7 +75,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
           </View>
         )}
 
-        {!!vouchers && vouchers.length > 0 && (
+        {/* {!!vouchers && vouchers.length > 0 && (
           <View className="pt-1">
             {vouchers.map((voucher, index) => (
               <View key={index} className="flex-row justify-between">
@@ -89,7 +89,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
               </View>
             ))}
           </View>
-        )}
+        )} */}
 
         <View className="pt-2 mt-2 border-t border-gray-100">
           <View className="flex-row justify-between">

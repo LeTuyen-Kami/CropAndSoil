@@ -53,7 +53,7 @@ const ShippingVoucher = ({
       <TicketVoucher
         title={"Mã vận chuyển"}
         description={voucher.title || voucher.description}
-        minOrder={`Đơn tối thiểu ${convertToK(voucher.minimumAmount)}đ`}
+        minOrder={`Đơn tối thiểu ₫${convertToK(voucher.minimumAmount)}k`}
         expiryDate={formatDate(voucher.expiryDate)}
         usagePercent={Math.round(
           (voucher.usedCount / (voucher.usageLimit || 1)) * 100
@@ -82,7 +82,7 @@ export const ProductVoucher = ({
         shadowBorderColor="#FEEBC1"
         image={imagePaths.bag}
         title="Voucher toàn sàn"
-        minOrder={`Đơn tối thiểu ${convertToK(voucher.minimumAmount)}đ`}
+        minOrder={`Đơn tối thiểu ₫${convertToK(voucher.minimumAmount)}k`}
         expiryDate={formatDate(voucher.expiryDate)}
         description={voucher.title || voucher.description}
         usagePercent={Math.round(
@@ -101,6 +101,7 @@ export const UnavailableVoucher = ({ voucher }: { voucher: IVoucher }) => {
     <WrapperVoucher>
       <View className="opacity-70">
         <TicketVoucher
+          isBestChoice={false}
           linearGradientColors={
             voucher?.voucherType === "shipping"
               ? ["#FBFDFB", "#FBFDFB"]
@@ -125,7 +126,7 @@ export const UnavailableVoucher = ({ voucher }: { voucher: IVoucher }) => {
               ? "Mã vận chuyển"
               : "Voucher toàn sàn"
           }
-          minOrder={`Đơn tối thiểu ${convertToK(voucher.minimumAmount)}đ`}
+          minOrder={`Đơn tối thiểu ₫${convertToK(voucher.minimumAmount)}k`}
           expiryDate={formatDate(voucher.expiryDate)}
           description={voucher.description}
           usagePercent={Math.round(
@@ -173,6 +174,7 @@ const VoucherSelectScreen = () => {
     queryKey: ["vouchers", "shipping"],
     queryFn: () =>
       voucherService.getVouchers({
+        isAvailable: true,
         voucherType: "shipping",
         skip: 0,
         take: 100,
@@ -192,6 +194,7 @@ const VoucherSelectScreen = () => {
     queryKey: ["vouchers", "product"],
     queryFn: () =>
       voucherService.getVouchers({
+        isAvailable: true,
         voucherType: "product",
         skip: 0,
         take: 100,
@@ -218,6 +221,7 @@ const VoucherSelectScreen = () => {
   const onRefresh = () => {
     refetch();
     refetchProductVouchers();
+    refetchUnavailableVouchers();
   };
 
   const isRefetching =

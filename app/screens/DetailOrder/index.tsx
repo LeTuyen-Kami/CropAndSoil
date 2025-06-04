@@ -154,6 +154,7 @@ const DetailOrder = () => {
               vouchers={order?.vouchers}
               orderTotal={order?.orderTotal}
               cartDiscount={order?.cartDiscount}
+              shippingFee={order?.shippingMethod?.total}
             />
           </View>
           <View className="h-[100px]" />

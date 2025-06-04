@@ -3,7 +3,8 @@ import { Image } from "expo-image";
 import { deepEqual } from "fast-equals";
 import { useAtomValue } from "jotai";
 import React from "react";
-import { DimensionValue, TouchableOpacity, View } from "react-native";
+import { DimensionValue, View } from "react-native";
+import { Pressable, TouchableOpacity } from "react-native-gesture-handler";
 import { imagePaths } from "~/assets/imagePath";
 import { Text } from "~/components/ui/text";
 import { cn } from "~/lib/utils";
@@ -78,7 +79,13 @@ const ProductItem = ({
   };
 
   return (
-    <TouchableOpacity onPress={handlePress} activeOpacity={0.8}>
+    <Pressable
+      onPress={handlePress}
+      style={({ pressed }) => ({
+        opacity: pressed ? 0.8 : 1,
+        transform: [{ scale: pressed ? 0.98 : 1 }],
+      })}
+    >
       <View
         className={cn(
           "overflow-hidden bg-white rounded-2xl border shadow-sm border-neutral-200",
@@ -111,8 +118,8 @@ const ProductItem = ({
               {!!overrideSalePrice
                 ? overrideSalePrice
                 : auth?.isLoggedIn
-                  ? formatPrice(price || originalPrice || 0)
-                  : maskVNDPriceBeforeSale(price || originalPrice || 0)}
+                ? formatPrice(price || originalPrice || 0)
+                : maskVNDPriceBeforeSale(price || originalPrice || 0)}
             </Text>
             {onSale && originalPrice && (
               <Text className="text-xs tracking-tight line-through text-neutral-400">
@@ -190,7 +197,7 @@ const ProductItem = ({
           </View>
         )}
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 

@@ -27,8 +27,8 @@ const ShippingInfo: React.FC<ShippingInfoProps> = ({ shippingMethod }) => {
   };
 
   const formatPrice = (price?: number) => {
-    if (price === undefined) return "0 đ";
-    return price.toLocaleString("vi-VN") + " đ";
+    if (price === undefined) return "0 ₫";
+    return price.toLocaleString("vi-VN") + " ₫";
   };
 
   return (
