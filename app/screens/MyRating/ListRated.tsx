@@ -2,7 +2,12 @@ import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { Image } from "expo-image";
 import { useCallback, useState } from "react";
-import { ActivityIndicator, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  TouchableOpacity,
+  View,
+  Image as RNImage,
+} from "react-native";
 import { RefreshControl } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { imagePaths } from "~/assets/imagePath";
@@ -12,7 +17,7 @@ import { Text } from "~/components/ui/text";
 import { COLORS } from "~/constants/theme";
 import { usePagination } from "~/hooks/usePagination";
 import { IReview, reviewService } from "~/services/api/review.service";
-import { formatDate } from "~/utils";
+import { formatDate, isIOS } from "~/utils";
 import RatingFilter from "./RatedFilter";
 
 const ITEMS = [
@@ -88,6 +93,7 @@ const ListRated = () => {
                 tintColor: "#393B45",
               }}
             />
+
             <Text className="text-sm text-[#393B45]  font-medium">
               {item.shop.shopName}
             </Text>

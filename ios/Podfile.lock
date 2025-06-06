@@ -1,4 +1,9 @@
 PODS:
+  - BlastedImage (1.1.2):
+    - React-Core
+    - SDWebImage
+    - SDWebImageAVIFCoder
+    - SDWebImageSVGCoder
   - boost (1.84.0)
   - DoubleConversion (1.1.6)
   - EXApplication (6.0.2):
@@ -2373,6 +2378,7 @@ PODS:
   - Yoga (0.0.0)
 
 DEPENDENCIES:
+  - BlastedImage (from `../node_modules/react-native-blasted-image`)
   - boost (from `../node_modules/react-native/third-party-podspecs/boost.podspec`)
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - EXApplication (from `../node_modules/expo-application/ios`)
@@ -2509,6 +2515,8 @@ SPEC REPOS:
     - SocketRocket
 
 EXTERNAL SOURCES:
+  BlastedImage:
+    :path: "../node_modules/react-native-blasted-image"
   boost:
     :podspec: "../node_modules/react-native/third-party-podspecs/boost.podspec"
   DoubleConversion:
@@ -2724,6 +2732,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
+  BlastedImage: f0b232e41d75f8f3b97f8a19f8d14684f28ac92e
   boost: 1dca942403ed9342f98334bf4c3621f011aa7946
   DoubleConversion: f16ae600a246532c4020132d54af21d0ddb2a385
   EXApplication: 27a524f5c3e671c6218220fba04752629466a1a9

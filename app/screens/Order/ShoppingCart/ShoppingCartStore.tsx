@@ -103,6 +103,7 @@ const ShoppingCartStore = ({
               borderWidth: 2,
               borderColor: "#CCC",
             }}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           />
           <Image
             source={imagePaths.icShop}

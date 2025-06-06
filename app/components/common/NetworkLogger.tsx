@@ -68,10 +68,7 @@ const NetworkLogger = () => {
     })
     .runOnJS(true);
 
-  if (
-    ENV.EXPO_PUBLIC_ENV !== "dev" &&
-    (!devMode.showNetworkLogger || !devMode.networkLoggerUnlocked)
-  ) {
+  if (!devMode.showNetworkLogger || !devMode.networkLoggerUnlocked) {
     return null;
   }
 

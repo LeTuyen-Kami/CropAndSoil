@@ -2,8 +2,8 @@ import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { useMutation } from "@tanstack/react-query";
-import { useSetAtom } from "jotai";
-import { useEffect } from "react";
+import { useAtom, useSetAtom } from "jotai";
+import { useEffect, useMemo } from "react";
 import { ActivityIndicator, RefreshControl, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Header from "~/components/common/Header";
@@ -17,6 +17,7 @@ import { IAddress, userService } from "~/services/api/user.service";
 import {
   editAddressAtom,
   initialAddress,
+  selectedAddressAtom,
   showModalConfirm,
 } from "~/store/atoms";
 import { PaginationRequests } from "~/types";
@@ -30,6 +31,7 @@ const Address = () => {
   const setEditAddress = useSetAtom(editAddressAtom);
 
   const navigation = useNavigation<RootStackScreenProps<"EditAddress">>();
+  const [selectedAddress, setSelectedAddress] = useAtom(selectedAddressAtom);
 
   const {
     data: addressData,
@@ -83,6 +85,14 @@ const Address = () => {
     });
   };
 
+  const sortedAddress = useMemo(() => {
+    return addressData?.sort((a, b) => {
+      if (a.id === selectedAddress?.id) return -1;
+      if (b.id === selectedAddress?.id) return 1;
+      return 0;
+    });
+  }, [addressData, selectedAddress]);
+
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
       refresh();
@@ -107,9 +117,11 @@ const Address = () => {
             <RefreshControl refreshing={isRefresh} onRefresh={refresh} />
           }
           className="pt-3"
-          data={addressData || []}
+          data={sortedAddress || []}
+          extraData={selectedAddress}
           renderItem={({ item }) => (
             <AddressItem
+              isSelected={selectedAddress?.id === item?.id}
               name={item.name}
               phone={item.phoneNumber}
               address={`${item.addressLine}\n${item.ward.name}, ${item.district.name}, ${item.province.name}`}
@@ -121,6 +133,7 @@ const Address = () => {
               }
               onEdit={() => handleEditAddress(item)}
               onDelete={() => handleDeleteAddress(item)}
+              onPress={() => setSelectedAddress(item)}
             />
           )}
           estimatedItemSize={100}

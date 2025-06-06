@@ -6,13 +6,14 @@ import {
   RefreshControl,
   TouchableOpacity,
   View,
+  Image as RNImage,
 } from "react-native";
 import { imagePaths } from "~/assets/imagePath";
 import Empty from "~/components/common/Empty";
 import { Text } from "~/components/ui/text";
 import { usePagination } from "~/hooks/usePagination";
 import { IOrder, orderService } from "~/services/api/order.service";
-import { formatDate } from "~/utils";
+import { formatDate, isIOS } from "~/utils";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 type ProductItem = IOrder["items"][0] & {
   createdAt: string;
@@ -97,13 +98,23 @@ const ListUnrated = ({}: ListUnratedProps) => {
           </View>
         </View>
         <View className="flex-row p-2">
-          <Image
-            source={{
-              uri: item?.variation?.thumbnail || item?.product?.thumbnail,
-            }}
-            className="w-20 h-20 rounded-lg"
-            contentFit="cover"
-          />
+          {isIOS ? (
+            <RNImage
+              source={{
+                uri: item?.variation?.thumbnail || item?.product?.thumbnail,
+              }}
+              style={{ width: 80, height: 80, borderRadius: 8 }}
+              resizeMode="cover"
+            />
+          ) : (
+            <Image
+              source={{
+                uri: item?.variation?.thumbnail || item?.product?.thumbnail,
+              }}
+              className="w-20 h-20 rounded-lg"
+              contentFit="cover"
+            />
+          )}
           <View className="flex-1 ml-3">
             <Text className="text-sm font-medium" numberOfLines={2}>
               {item.name}

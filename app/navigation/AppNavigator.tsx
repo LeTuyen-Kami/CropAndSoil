@@ -52,6 +52,7 @@ import DetailOrder from "~/screens/DetailOrder";
 import useUpdateFCMToken from "~/hooks/useUpdateFCMToken";
 import ProductByScreen from "~/screens/ProductBy";
 import DevMode from "~/screens/DevMode";
+import useInitSelectedAddress from "~/hooks/useInitSelectedAddress";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -78,6 +79,7 @@ const TabNavigator = () => {
 export const AppNavigator = () => {
   const navigationRef = useNavigationContainerRef();
   useUpdateFCMToken();
+  useInitSelectedAddress();
 
   useEffect(() => {
     SplashScreen.setOptions({

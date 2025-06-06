@@ -30,7 +30,12 @@ import {
 import { paymentService } from "~/services/api/payment.service";
 import { IVoucher } from "~/services/api/shop.service";
 import { userService } from "~/services/api/user.service";
-import { authAtom, selectedVoucherAtom, showModalConfirm } from "~/store/atoms";
+import {
+  authAtom,
+  selectedAddressAtom,
+  selectedVoucherAtom,
+  showModalConfirm,
+} from "~/store/atoms";
 import { getErrorMessage } from "~/utils";
 import { storeAtom } from "../atom";
 import Footer from "./Footer";
@@ -40,7 +45,7 @@ const ShoppingCart = () => {
   const [stores, setStores] = useAtom(storeAtom);
   const [voucherShopId, setVoucherShopId] = useState<string>("");
   const auth = useAtomValue(authAtom);
-
+  const selectedAddress = useAtomValue(selectedAddressAtom);
   const [selectedVoucher, setSelectedVoucher] = useAtom(selectedVoucherAtom);
   const { bottom } = useSafeAreaInsets();
   const {
@@ -81,18 +86,12 @@ const ShoppingCart = () => {
     queryFn: () => paymentService.getAvailablePaymentMethods(),
   });
 
-  const { data: address, refetch: refetchAddress } = useQuery({
-    queryKey: ["payment-address"],
-    queryFn: () => userService.getAddress({ skip: 0, take: 1 }),
-    select: (data) => data.data?.[0] || null,
-  });
-
   const mutationCalculateOrder = useMutation({
     mutationFn: (data: IOrderCalculateRequest) => orderService.calculate(data),
   });
 
   useEffect(() => {
-    if (paymentMethods && address && stores.length > 0) {
+    if (paymentMethods && selectedAddress && stores.length > 0) {
       const selectedStore = stores.filter((store) =>
         store.items?.some((item) => item.isSelected)
       );
@@ -103,7 +102,7 @@ const ShoppingCart = () => {
 
       const params = {
         paymentMethodKey: paymentMethods[0].key,
-        shippingAddressId: address?.id!,
+        shippingAddressId: selectedAddress?.id!,
         shippingVoucherCode:
           selectedVoucher.voucher?.voucherType === "shipping"
             ? selectedVoucher.voucher?.code!
@@ -143,7 +142,7 @@ const ShoppingCart = () => {
         },
       });
     }
-  }, [paymentMethods, stores, address, selectedVoucher.voucher]);
+  }, [paymentMethods, stores, selectedAddress, selectedVoucher.voucher]);
 
   useEffect(() => {
     if (detailCart) {

@@ -1,8 +1,14 @@
 import { Image } from "expo-image";
-import { FlatList, Pressable, ScrollView, View } from "react-native";
+import {
+  FlatList,
+  Pressable,
+  ScrollView,
+  View,
+  Image as RNImage,
+} from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import ProductItem from "~/components/common/ProductItem";
-import { calculateDiscount, checkCanRender, screen } from "~/utils";
+import { calculateDiscount, checkCanRender, isIOS, screen } from "~/utils";
 import SectionTitle from "./SectionTitlte";
 import { searchService } from "~/services/api/search.services";
 import { useQuery } from "@tanstack/react-query";
@@ -80,13 +86,23 @@ const PrivateOffer = () => {
               paddingVertical: 8,
             }}
           >
-            <Image
-              source={{
-                uri: item.image,
-              }}
-              style={{ width: "100%", height: "100%", borderRadius: 12 }}
-              contentFit="cover"
-            />
+            {isIOS ? (
+              <RNImage
+                source={{
+                  uri: item.image,
+                }}
+                style={{ width: "100%", height: "100%", borderRadius: 12 }}
+                resizeMode="cover"
+              />
+            ) : (
+              <Image
+                source={{
+                  uri: item.image,
+                }}
+                style={{ width: "100%", height: "100%", borderRadius: 12 }}
+                contentFit="cover"
+              />
+            )}
           </Pressable>
         )}
       />

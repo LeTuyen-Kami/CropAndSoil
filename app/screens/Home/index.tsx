@@ -11,6 +11,7 @@ import {
   Pressable,
   RefreshControl,
   View,
+  Image as RNImage,
 } from "react-native";
 import Animated, {
   useAnimatedScrollHandler,
@@ -35,7 +36,13 @@ import { homeService, ILocalRepeater } from "~/services/api/home.service";
 import { IProduct, productService } from "~/services/api/product.service";
 import { searchService } from "~/services/api/search.services";
 import { authAtom } from "~/store/atoms";
-import { calculateDiscount, checkCanRender, chunkArray, screen } from "~/utils";
+import {
+  calculateDiscount,
+  checkCanRender,
+  chunkArray,
+  isIOS,
+  screen,
+} from "~/utils";
 import ContainerList from "./ContainerList";
 import Header from "./Header";
 import HeaderSearch from "./HeaderSearch";
@@ -138,11 +145,19 @@ const Banner = ({
       }}
       className="w-full aspect-[2.5/1]"
     >
-      <Image
-        source={{ uri: banner.image }}
-        style={{ width: "100%", height: "100%" }}
-        contentFit="cover"
-      />
+      {isIOS ? (
+        <RNImage
+          source={{ uri: banner.image }}
+          style={{ width: "100%", height: "100%" }}
+          resizeMode="cover"
+        />
+      ) : (
+        <Image
+          source={{ uri: banner.image }}
+          style={{ width: "100%", height: "100%" }}
+          contentFit="cover"
+        />
+      )}
     </Pressable>
   );
 };
@@ -301,11 +316,19 @@ const HomeCarousel = () => {
             }
           }}
         >
-          <Image
-            source={{ uri: item.image }}
-            style={{ width: "100%", height: "100%" }}
-            contentFit="cover"
-          />
+          {isIOS ? (
+            <RNImage
+              source={{ uri: item.image }}
+              style={{ width: "100%", height: "100%" }}
+              resizeMode="cover"
+            />
+          ) : (
+            <Image
+              source={{ uri: item.image }}
+              style={{ width: "100%", height: "100%" }}
+              contentFit="cover"
+            />
+          )}
         </Pressable>
       )}
     />

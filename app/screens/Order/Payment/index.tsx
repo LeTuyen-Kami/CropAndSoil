@@ -4,7 +4,7 @@ import {
   useRoute,
 } from "@react-navigation/native";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -28,7 +28,7 @@ import {
 import { paymentService } from "~/services/api/payment.service";
 import { IVoucher } from "~/services/api/shop.service";
 import { userService } from "~/services/api/user.service";
-import { selectedVoucherAtom } from "~/store/atoms";
+import { selectedAddressAtom, selectedVoucherAtom } from "~/store/atoms";
 import { getErrorMessage } from "~/utils";
 import { storeAtom } from "../atom";
 import AddressItem from "./AddressItem";
@@ -47,8 +47,8 @@ const Payment = () => {
 
   const [voucherState, setVoucherState] = useAtom(selectedVoucherAtom);
   const [checkoutData, setCheckoutData] = useState<IOrderCheckoutResponse>();
-
   const isFocused = useIsFocused();
+  const selectedAddress = useAtomValue(selectedAddressAtom);
   const {
     isOpen: isOpenSuccess,
     onOpen: onOpenSuccess,
@@ -60,13 +60,6 @@ const Payment = () => {
   const { data: paymentMethods } = useQuery({
     queryKey: ["payment-methods"],
     queryFn: () => paymentService.getAvailablePaymentMethods(),
-  });
-
-  const { data: address, refetch: refetchAddress } = useQuery({
-    queryKey: ["payment-address"],
-    queryFn: () => userService.getAddress({ skip: 0, take: 1 }),
-    select: (data) => data?.data?.[0] || null,
-    enabled: false,
   });
 
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
@@ -91,12 +84,16 @@ const Payment = () => {
   }, [stores]);
 
   useEffect(() => {
-    if (selectedPaymentMethod && address) {
+    if (!isFocused) {
+      return;
+    }
+
+    if (selectedPaymentMethod && selectedAddress) {
       toggleLoading(true);
       mutationCalculateOrder.mutate(
         {
           paymentMethodKey: selectedPaymentMethod,
-          shippingAddressId: address?.id!,
+          shippingAddressId: selectedAddress?.id!,
           shippingVoucherCode:
             voucherState?.voucher?.voucherType === "shipping"
               ? voucherState?.voucher?.code
@@ -139,7 +136,13 @@ const Payment = () => {
         }
       );
     }
-  }, [selectedPaymentMethod, voucherState.voucher, address, stores]);
+  }, [
+    selectedPaymentMethod,
+    voucherState.voucher,
+    selectedAddress,
+    stores,
+    isFocused,
+  ]);
 
   const onPressOrder = () => {
     if (!calculatedData) {
@@ -150,7 +153,7 @@ const Payment = () => {
     mutationCheckoutOrder.mutate(
       {
         paymentMethodKey: selectedPaymentMethod,
-        shippingAddressId: address?.id!,
+        shippingAddressId: selectedAddress?.id!,
         shippingVoucherCode:
           voucherState?.voucher?.voucherType === "shipping"
             ? voucherState?.voucher?.code
@@ -195,12 +198,6 @@ const Payment = () => {
       }
     );
   };
-
-  useEffect(() => {
-    if (isFocused) {
-      refetchAddress();
-    }
-  }, [isFocused]);
 
   const {
     isOpen: isOpenFailed,
@@ -296,7 +293,7 @@ const Payment = () => {
         className="flex-1 bg-[#F5F5F5] px-[10px] pt-[10px]"
         contentContainerStyle={{ paddingBottom: 140 }}
       >
-        <AddressItem address={address} />
+        <AddressItem address={selectedAddress!} />
         {selectedStore?.map((store) => (
           <PaymentStore
             key={store.id}

@@ -1,8 +1,9 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Image as RNImage } from "react-native";
 import { Image } from "expo-image";
 import { AntDesign } from "@expo/vector-icons";
 import { imagePaths } from "~/assets/imagePath";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
+import { isIOS } from "~/utils";
 
 interface ProductItemProps {
   name: string;
@@ -49,11 +50,21 @@ const ProductItem = ({
       onPress={() => navigationToProduct(productId + "")}
     >
       <View className="flex-row p-2.5 justify-center items-center rounded-2xl border border-[#F0F0F0]">
-        <Image
-          source={{ uri: imageUri }}
-          className="w-[64px] h-[64px] rounded-lg"
-          contentFit="contain"
-        />
+        {isIOS ? (
+          <RNImage
+            source={{
+              uri: imageUri,
+            }}
+            style={{ width: 64, height: 64, borderRadius: 8 }}
+            resizeMode="cover"
+          />
+        ) : (
+          <Image
+            source={{ uri: imageUri }}
+            className="w-[64px] h-[64px] rounded-lg"
+            contentFit="contain"
+          />
+        )}
       </View>
       <View className="flex-1">
         <View className="self-stretch pb-1">

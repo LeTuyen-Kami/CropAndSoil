@@ -6,6 +6,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Image as RNImage,
 } from "react-native";
 import Animated, {
   LinearTransition,
@@ -21,6 +22,7 @@ import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 import { Video, ResizeMode } from "expo-av";
 import RenderVideo from "./RenderVideo";
 import { deepEqual } from "fast-equals";
+import { isIOS } from "~/utils";
 
 type ReviewMedia = {
   type: "image" | "video";
@@ -160,12 +162,21 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
                     className="relative mr-2"
                   >
                     {item.type !== "video" ? (
-                      <ExpoImage
-                        source={item.uri}
-                        style={{ width: 80, height: 80, borderRadius: 5 }}
-                        contentFit="cover"
-                        shouldRasterizeIOS={true}
-                      />
+                      isIOS ? (
+                        <RNImage
+                          source={{
+                            uri: item.uri,
+                          }}
+                          style={{ width: 80, height: 80, borderRadius: 5 }}
+                          resizeMode="cover"
+                        />
+                      ) : (
+                        <ExpoImage
+                          source={item.uri}
+                          style={{ width: 80, height: 80, borderRadius: 5 }}
+                          contentFit="cover"
+                        />
+                      )
                     ) : (
                       <View className="w-20 h-20 bg-gray-200 rounded-md">
                         <RenderVideo uri={item.uri} />
@@ -248,11 +259,21 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
               onPress={onPressProduct}
             >
               <View className="p-2.5 bg-white rounded-l-lg">
-                <Image
-                  source={product.image}
-                  style={{ width: 40, height: 40, borderRadius: 5 }}
-                  contentFit="cover"
-                />
+                {isIOS ? (
+                  <RNImage
+                    source={{
+                      uri: product.image,
+                    }}
+                    style={{ width: 40, height: 40, borderRadius: 5 }}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <Image
+                    source={product.image}
+                    style={{ width: 40, height: 40, borderRadius: 5 }}
+                    contentFit="cover"
+                  />
+                )}
               </View>
               <View className="flex-1 py-2 bg-[#F0F0F0] pl-1.5">
                 <Text

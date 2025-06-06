@@ -159,6 +159,7 @@ const ShoppingCartItem = ({
             borderWidth: 2,
             borderColor: "#CCC",
           }}
+          hitSlop={{ top: 20, bottom: 20, left: 10, right: 10 }}
         />
         <Pressable onPress={handleNavigateToProductDetail}>
           <View className="w-[100px] h-[100px] border border-[#F0F0F0] rounded-2xl justify-center items-center p-2.5">

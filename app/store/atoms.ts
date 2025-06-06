@@ -130,3 +130,8 @@ export const devModeAtom = atomWithMMKV<DevMode>("devMode", initialDevMode);
 export const resetDevMode = () => {
   jotaiStore.set(devModeAtom, initialDevMode);
 };
+
+export const selectedAddressAtom = atomWithMMKV<IAddress | null>(
+  "selectedAddress",
+  null
+);
