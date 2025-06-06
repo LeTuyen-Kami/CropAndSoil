@@ -18,6 +18,8 @@ import * as Sentry from "@sentry/react-native";
 import { ENV } from "~/utils";
 import FallBackUI from "~/components/common/FallbackUI";
 import { withErrorBoundary } from "~/hooks/withErrorBoundary";
+import { jotaiStore } from "~/store/store";
+import { devModeAtom } from "~/store/atoms";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -45,13 +47,13 @@ function App() {
   );
 }
 
-if (!__DEV__) {
+const enableSentry = jotaiStore.get(devModeAtom)?.enableSentry ?? false;
+
+if (enableSentry) {
   Sentry.init({
     dsn: ENV.EXPO_PUBLIC_SENTRY_DSN,
     replaysOnErrorSampleRate: 1.0,
     replaysSessionSampleRate: 0.1,
-    integrations: [Sentry.mobileReplayIntegration()],
-    enabled: !__DEV__,
   });
 }
 const Boundary = withErrorBoundary(App);

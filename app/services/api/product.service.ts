@@ -180,8 +180,16 @@ class ProductService {
     });
   }
 
-  async getTopDealProducts(params: Partial<IProductResquest>) {
-    return typedAxios.get<PaginatedResponse<IProduct>>(`/products/top-deals`);
+  async getTopDealProducts(params: Partial<PaginationRequests>) {
+    return typedAxios.get<PaginatedResponse<IProduct>>(`/products/top-deals`, {
+      params,
+    });
+  }
+
+  async getTopSaleProducts(params: Partial<PaginationRequests>) {
+    return typedAxios.get<PaginatedResponse<IProduct>>(`/products/top-sales`, {
+      params,
+    });
   }
 
   async getProductDetail(id: string | number) {

@@ -13,6 +13,8 @@ import Animated, {
   useSharedValue,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { devModeAtom } from "~/store/atoms";
+import { useAtomValue } from "jotai";
 
 const AnimatedTouchableOpacity =
   Animated.createAnimatedComponent(TouchableOpacity);
@@ -22,6 +24,7 @@ const NetworkLogger = () => {
   const position = useSharedValue({ x: 0, y: 0 });
   const previousPosition = useSharedValue({ x: 0, y: 0 });
   const { bottom } = useSafeAreaInsets();
+  const devMode = useAtomValue(devModeAtom);
 
   const style: any = expanded
     ? {
@@ -65,7 +68,10 @@ const NetworkLogger = () => {
     })
     .runOnJS(true);
 
-  if (ENV.EXPO_PUBLIC_ENV !== "dev") {
+  if (
+    ENV.EXPO_PUBLIC_ENV !== "dev" &&
+    (!devMode.showNetworkLogger || !devMode.networkLoggerUnlocked)
+  ) {
     return null;
   }
 

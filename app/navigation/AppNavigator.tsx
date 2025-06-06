@@ -51,6 +51,7 @@ import AllProductReview from "~/screens/AllProductReview";
 import DetailOrder from "~/screens/DetailOrder";
 import useUpdateFCMToken from "~/hooks/useUpdateFCMToken";
 import ProductByScreen from "~/screens/ProductBy";
+import DevMode from "~/screens/DevMode";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -159,6 +160,13 @@ export const AppNavigator = () => {
         <Stack.Screen name="MyVoucher" component={MyVoucherScreen} />
         <Stack.Screen name="AllProductReview" component={AllProductReview} />
         <Stack.Screen name="ProductBy" component={ProductByScreen} />
+        <Stack.Screen
+          name="DevMode"
+          component={DevMode}
+          options={{
+            presentation: "modal",
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

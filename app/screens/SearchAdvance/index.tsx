@@ -69,26 +69,17 @@ const Header = ({
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const onPressSearch = () => {
-    navigation.dispatch((state) => {
-      // Remove all the screens after `Profile`
-      const index = state.routes.findIndex((r) => r.name === "Search");
+    const state = navigation.getState();
+    const routes = state.routes;
+    const index = state.index;
 
-      if (index === -1) {
-        return CommonActions.reset({
-          ...state,
-          routes: [...state.routes, { name: "Search" }],
-          index: 0,
-        });
-      }
+    const previousRoute = routes[index - 1];
 
-      const routes = state.routes.slice(0, index + 1);
-
-      return CommonActions.reset({
-        ...state,
-        routes,
-        index: routes.length - 1,
-      });
-    });
+    if (previousRoute?.name === "Search") {
+      navigation.goBack();
+    } else {
+      navigation.navigate("Search");
+    }
   };
 
   return (

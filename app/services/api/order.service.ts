@@ -282,7 +282,7 @@ export interface ICalculateResponse {
 }
 
 export interface IListOrderRequest extends PaginationRequests {
-  status?: string;
+  statusKey?: string;
   ids?: string; // comma separated
   search?: string;
   isNotReviewed?: boolean;

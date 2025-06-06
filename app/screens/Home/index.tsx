@@ -1,17 +1,22 @@
 import { useNavigation } from "@react-navigation/native";
 import { FlashList, FlashListProps } from "@shopify/flash-list";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import * as WebBrowser from "expo-web-browser";
 import { useAtomValue } from "jotai";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  ActivityIndicator,
   FlatList,
-  FlatListProps,
   Pressable,
   RefreshControl,
   View,
 } from "react-native";
+import Animated, {
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
 import { imagePaths } from "~/assets/imagePath";
 import CarouselEmpty from "~/components/common/CarouselEmpty";
 import CarouselSkeleton from "~/components/common/CarouselSkeleton";
@@ -34,22 +39,13 @@ import { calculateDiscount, checkCanRender, chunkArray, screen } from "~/utils";
 import ContainerList from "./ContainerList";
 import Header from "./Header";
 import HeaderSearch from "./HeaderSearch";
-import Animated, {
-  useAnimatedScrollHandler,
-  useAnimatedStyle,
-  useSharedValue,
-} from "react-native-reanimated";
-import { LegendList, LegendListProps } from "@legendapp/list";
 
 const AnimatedFlashList = Animated.createAnimatedComponent(
   FlashList as unknown as React.ComponentType<FlashListProps<any>>
 );
 
-const AnimatedLegendList = Animated.createAnimatedComponent(
-  LegendList as unknown as React.ComponentType<LegendListProps<any>>
-);
-
 const LIMIT_PRODUCT_IN_FOOTER = 4;
+const PRODUCTS_PER_PAGE = 10;
 
 const FlashSale = () => {
   const navigation = useSmartNavigation();
@@ -161,6 +157,7 @@ const ITEM_TYPES = {
   SECTION_HEADER: "sectionHeader",
   SECTION_PRODUCTS: "sectionProducts",
   SECTION_FOOTER: "sectionFooter",
+  SUGGESTION_PRODUCT: "suggestionProduct",
 };
 
 // BestSellerHeader component
@@ -168,9 +165,15 @@ const SectionHeader = ({ title, image }: { title: string; image: string }) => {
   return (
     <View className="pt-6 bg-primary-100">
       <View className="relative bg-white px-5 pb-4 pt-5 flex-row items-center rounded-t-[40px]">
-        <Image source={image} style={{ width: 40, height: 40 }} />
-        <Text className="ml-2 text-xl font-bold text-black uppercase">
-          {title}
+        {image && <Image source={image} style={{ width: 40, height: 40 }} />}
+        <Text
+          className={
+            image
+              ? "ml-2 text-xl font-bold text-black"
+              : "text-xl font-bold text-black"
+          }
+        >
+          {title.toUpperCase()}
         </Text>
       </View>
     </View>
@@ -178,28 +181,60 @@ const SectionHeader = ({ title, image }: { title: string; image: string }) => {
 };
 
 // BestSellerFooter component
-const SectionFooter = ({ ids, title }: { ids: number[]; title: string }) => {
+const SectionFooter = ({
+  ids,
+  title,
+  sectionId,
+  type,
+  hasMore,
+  onLoadMore,
+  isLoadingMore,
+}: {
+  ids: number[];
+  title: string;
+  sectionId: string;
+  type?: "top_deal" | "top_sale";
+  hasMore?: boolean;
+  onLoadMore?: () => void;
+  isLoadingMore?: boolean;
+}) => {
   const navigation = useSmartNavigation();
 
-  const onPress = () => {
-    navigation.navigate("ProductBy", {
-      productIds: ids,
-      title: title,
-    });
-  };
+  // const onPress = () => {
+  //   if (type) {
+  //     // Navigate to specific page for top_deal or top_sale
+  //     navigation.navigate("TopProducts", {
+  //       type: type,
+  //       title: title,
+  //     });
+  //   } else {
+  //     navigation.navigate("ProductBy", {
+  //       productIds: ids,
+  //       title: title,
+  //     });
+  //   }
+  // };
+
+  const shouldShowLoadMore = hasMore && onLoadMore;
 
   return (
     <View className="bg-primary-100">
       <View
         className="px-3 bg-white rounded-b-2xl"
         style={{
-          paddingVertical: ids.length > LIMIT_PRODUCT_IN_FOOTER ? 16 : 8,
+          paddingVertical: shouldShowLoadMore ? 16 : 8,
         }}
       >
-        {!!ids && ids.length > LIMIT_PRODUCT_IN_FOOTER && (
-          <Button variant={"outline"} onPress={onPress}>
-            <Text>Xem tất cả</Text>
-          </Button>
+        {shouldShowLoadMore && (
+          <View className="justify-center h-10">
+            {isLoadingMore ? (
+              <ActivityIndicator size="small" color="#FCBA26" />
+            ) : (
+              <Button variant={"outline"} onPress={onLoadMore}>
+                <Text>Xem thêm</Text>
+              </Button>
+            )}
+          </View>
         )}
       </View>
     </View>
@@ -322,12 +357,29 @@ interface IFlashListData {
   footerUrl?: string;
   footerTitle?: string;
   productIds?: number[];
+  sectionId?: string;
+  sectionType?: "top_deal" | "top_sale";
+  hasMore?: boolean;
+  isLoadingMore?: boolean;
+  buttonTitle?: string;
+  buttonUrl?: string;
   banners?: {
     id: string;
     image: string;
     url: string;
   }[];
 }
+
+// Empty state component for sections
+const SectionEmpty = ({ title }: { title: string }) => {
+  return (
+    <View className="items-center px-4 py-8 bg-white">
+      <Text className="text-center text-gray-500">
+        Hiện tại chưa có sản phẩm nào trong mục {title}
+      </Text>
+    </View>
+  );
+};
 
 export const HomeScreen: React.FC = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -341,7 +393,27 @@ export const HomeScreen: React.FC = () => {
     staleTime: 1000 * 60,
   });
 
+  const mutateTopDealProducts = useMutation({
+    mutationFn: ({ skip, take }: { skip: number; take: number }) =>
+      productService.getTopDealProducts({
+        skip,
+        take,
+      }),
+  });
+
+  const mutateTopSaleProducts = useMutation({
+    mutationFn: ({ skip, take }: { skip: number; take: number }) =>
+      productService.getTopSaleProducts({
+        skip,
+        take,
+      }),
+  });
+
   const [repeaterData, setRepeaterData] = useState<ILocalRepeater[]>([]);
+  const [suggestionProducts, setSuggestionProducts] = useState<IProduct[]>([]);
+  const [sectionPagination, setSectionPagination] = useState<
+    Record<string, { skip: number; hasMore: boolean; isLoading: boolean }>
+  >({});
 
   const navigation = useNavigation();
   const onPressMessages = () => {
@@ -364,6 +436,72 @@ export const HomeScreen: React.FC = () => {
     setIsRefreshing(false);
   };
 
+  const handleLoadMore = useCallback(
+    async (sectionId: string, type?: "top_deal" | "top_sale") => {
+      const currentPagination = sectionPagination[sectionId];
+      if (
+        !currentPagination ||
+        currentPagination.isLoading ||
+        !currentPagination.hasMore
+      ) {
+        return;
+      }
+
+      setSectionPagination((prev) => ({
+        ...prev,
+        [sectionId]: {
+          ...prev[sectionId],
+          isLoading: true,
+        },
+      }));
+
+      try {
+        let newProducts: IProduct[] = [];
+
+        if (type === "top_deal") {
+          const response = await mutateTopDealProducts.mutateAsync({
+            skip: currentPagination.skip,
+            take: PRODUCTS_PER_PAGE,
+          });
+          newProducts = response.data;
+        } else if (type === "top_sale") {
+          const response = await mutateTopSaleProducts.mutateAsync({
+            skip: currentPagination.skip,
+            take: PRODUCTS_PER_PAGE,
+          });
+          newProducts = response.data;
+        }
+
+        setRepeaterData((prev) =>
+          prev.map((item) =>
+            item.id === sectionId
+              ? { ...item, products: [...item.products, ...newProducts] }
+              : item
+          )
+        );
+
+        setSectionPagination((prev) => ({
+          ...prev,
+          [sectionId]: {
+            skip: currentPagination.skip + PRODUCTS_PER_PAGE,
+            hasMore: newProducts.length === PRODUCTS_PER_PAGE,
+            isLoading: false,
+          },
+        }));
+      } catch (error) {
+        console.error("Error loading more products:", error);
+        setSectionPagination((prev) => ({
+          ...prev,
+          [sectionId]: {
+            ...prev[sectionId],
+            isLoading: false,
+          },
+        }));
+      }
+    },
+    [sectionPagination, mutateTopDealProducts, mutateTopSaleProducts]
+  );
+
   // Chuyển đổi dữ liệu BestSeller thành các item cho FlashList
   const processData = useCallback(
     (
@@ -375,6 +513,9 @@ export const HomeScreen: React.FC = () => {
         footerUrl,
         footerTitle,
         productIds,
+        type,
+        hasMore,
+        isLoadingMore,
       }: {
         headerTitle: string;
         headerImage: string;
@@ -382,10 +523,36 @@ export const HomeScreen: React.FC = () => {
         footerUrl: string;
         footerTitle: string;
         productIds: number[];
+        type?: "top_deal" | "top_sale";
+        hasMore?: boolean;
+        isLoadingMore?: boolean;
       }
     ) => {
-      if (!checkCanRender(data)) {
-        return [];
+      if (!checkCanRender(data) || data!.length === 0) {
+        return [
+          {
+            id: "header" + id,
+            type: ITEM_TYPES.SECTION_HEADER,
+            headerTitle: headerTitle,
+            headerImage: headerImage,
+          },
+          {
+            id: "empty" + id,
+            type: "sectionEmpty",
+            headerTitle: headerTitle,
+          },
+          {
+            id: "footer" + id,
+            type: ITEM_TYPES.SECTION_FOOTER,
+            footerUrl: footerUrl,
+            footerTitle: headerTitle,
+            productIds: productIds,
+            sectionId: id,
+            sectionType: type,
+            hasMore: false,
+            isLoadingMore: false,
+          },
+        ];
       }
 
       // Tạo các chunk gồm 2 sản phẩm mỗi chunk
@@ -413,6 +580,10 @@ export const HomeScreen: React.FC = () => {
           footerUrl: footerUrl,
           footerTitle: headerTitle,
           productIds: productIds,
+          sectionId: id,
+          sectionType: type,
+          hasMore: hasMore,
+          isLoadingMore: isLoadingMore,
         },
       ];
     },
@@ -441,21 +612,39 @@ export const HomeScreen: React.FC = () => {
           });
         }
 
-        if (item?.products && item?.products?.length > 0) {
-          const processedData = processData(item.products, {
-            headerTitle: item.heading,
-            headerImage: item.icon,
-            id: item.id,
-            footerUrl: item.button.url,
-            footerTitle: item.button.title,
-            productIds: item.productIds,
-          });
-          baseItems.push(...processedData);
-        }
+        const currentPagination = sectionPagination[item.id];
+        const processedData = processData(item.products, {
+          headerTitle: item.heading,
+          headerImage: item.icon,
+          id: item.id,
+          footerUrl: item.button.url,
+          footerTitle: item.button.title,
+          productIds: item.productIds,
+          type: item.type,
+          hasMore: currentPagination?.hasMore ?? false,
+          isLoadingMore: currentPagination?.isLoading ?? false,
+        });
+        baseItems.push(...processedData);
       });
     }
+
+    // Add suggestion products section at the end
+    if (homeData?.suggestionProduct && suggestionProducts.length > 0) {
+      const suggestionData = processData(suggestionProducts, {
+        headerTitle: homeData.suggestionProduct.title,
+        headerImage: "", // empty string since we don't have icon URL for suggestions
+        id: "suggestion",
+        footerUrl: homeData.suggestionProduct.button.url,
+        footerTitle: homeData.suggestionProduct.button.title,
+        productIds: homeData.suggestionProduct.productIds,
+        hasMore: false,
+        isLoadingMore: false,
+      });
+      baseItems.push(...suggestionData);
+    }
+
     return [...baseItems];
-  }, [repeaterData]);
+  }, [repeaterData, sectionPagination, homeData, suggestionProducts]);
 
   const renderItem = useCallback(
     ({ item }: { item: IFlashListData }) => {
@@ -483,11 +672,21 @@ export const HomeScreen: React.FC = () => {
         case ITEM_TYPES.SECTION_PRODUCTS:
           return <SectionProducts products={item.products ?? []} />;
 
+        case "sectionEmpty":
+          return <SectionEmpty title={item.headerTitle ?? ""} />;
+
         case ITEM_TYPES.SECTION_FOOTER:
           return (
             <SectionFooter
               ids={item?.productIds ?? []}
               title={item.footerTitle ?? ""}
+              sectionId={item.sectionId ?? ""}
+              type={item.sectionType}
+              hasMore={item.hasMore}
+              onLoadMore={() =>
+                handleLoadMore(item.sectionId ?? "", item.sectionType)
+              }
+              isLoadingMore={item.isLoadingMore}
             />
           );
 
@@ -495,40 +694,128 @@ export const HomeScreen: React.FC = () => {
           return null;
       }
     },
-    [loadingMore]
+    [loadingMore, handleLoadMore]
   );
 
   useEffect(() => {
     if (homeData) {
       const handledRepeaters = homeData.repeaters.map((item, index) => {
         const currentIndex = index;
+        const sectionId = index.toString();
 
-        const displayProductIds = item?.productIds
-          ?.slice(0, LIMIT_PRODUCT_IN_FOOTER)
-          .join(",");
+        // Initialize pagination for this section
+        setSectionPagination((prev) => ({
+          ...prev,
+          [sectionId]: {
+            skip: PRODUCTS_PER_PAGE,
+            hasMore: true,
+            isLoading: false,
+          },
+        }));
 
-        productService
-          .searchProducts({
-            ids: displayProductIds,
-            skip: 0,
-            take: 100,
-          })
-          .then((data) => {
-            setRepeaterData((prev) => {
-              const newData = [...prev];
-              newData[currentIndex].products = data.data;
-              return newData;
+        if (item.type === "top_deal" || item.type === "top_sale") {
+          // Use mutation for top_deal and top_sale
+          const mutation =
+            item.type === "top_deal"
+              ? mutateTopDealProducts
+              : mutateTopSaleProducts;
+
+          mutation
+            .mutateAsync({
+              skip: 0,
+              take: PRODUCTS_PER_PAGE,
+            })
+            .then((response) => {
+              setRepeaterData((prev) => {
+                const newData = [...prev];
+                if (newData[currentIndex]) {
+                  newData[currentIndex].products = response.data;
+                }
+                return newData;
+              });
+
+              // Update pagination based on response
+              setSectionPagination((prev) => ({
+                ...prev,
+                [sectionId]: {
+                  skip: PRODUCTS_PER_PAGE,
+                  hasMore: response.data.length === PRODUCTS_PER_PAGE,
+                  isLoading: false,
+                },
+              }));
+            })
+            .catch((error) => {
+              console.error(`Error fetching ${item.type} products:`, error);
+              setSectionPagination((prev) => ({
+                ...prev,
+                [sectionId]: {
+                  skip: 0,
+                  hasMore: false,
+                  isLoading: false,
+                },
+              }));
             });
-          });
+        } else {
+          // Use productIds for other types
+          const displayProductIds = item?.productIds
+            ?.slice(0, LIMIT_PRODUCT_IN_FOOTER)
+            .join(",");
+
+          if (displayProductIds) {
+            productService
+              .searchProducts({
+                ids: displayProductIds,
+                skip: 0,
+                take: 100,
+              })
+              .then((data) => {
+                setRepeaterData((prev) => {
+                  const newData = [...prev];
+                  if (newData[currentIndex]) {
+                    newData[currentIndex].products = data.data;
+                  }
+                  return newData;
+                });
+              });
+          }
+
+          // For non-mutation types, set hasMore to false since we're using productIds
+          setSectionPagination((prev) => ({
+            ...prev,
+            [sectionId]: {
+              skip: 0,
+              hasMore: false,
+              isLoading: false,
+            },
+          }));
+        }
 
         return {
           ...item,
-          id: index.toString(),
+          id: sectionId,
           products: [],
         };
       });
 
       setRepeaterData(handledRepeaters);
+
+      // Handle suggestion products
+      if (homeData.suggestionProduct?.productIds?.length > 0) {
+        const suggestionProductIds =
+          homeData.suggestionProduct.productIds.join(",");
+        productService
+          .searchProducts({
+            ids: suggestionProductIds,
+            skip: 0,
+            take: 100,
+          })
+          .then((data) => {
+            setSuggestionProducts(data.data);
+          })
+          .catch((error) => {
+            console.error("Error fetching suggestion products:", error);
+          });
+      }
     }
   }, [homeData]);
 

@@ -16,6 +16,7 @@ import RecentProduct from "./RecentProduct";
 import SectionTitle from "./SectionTitlte";
 import SupportSection from "./SupportSecction";
 import UtilityItem from "./UlitityItem";
+import { ORDER_STATUS } from "~/utils/contants";
 // Main profile component
 const ProfileScreen = () => {
   const { top } = useSafeAreaInsets();
@@ -51,6 +52,7 @@ const ProfileScreen = () => {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
+        showsVerticalScrollIndicator={false}
       >
         <GradientBackground
           gradientStyle={{ paddingTop: top, paddingBottom: 20 }}
@@ -76,26 +78,31 @@ const ProfileScreen = () => {
                 icon={imagePaths.icWallet}
                 title="Chờ xác nhận"
                 onPress={() => onPressMyOrder(1)}
+                status={ORDER_STATUS.PENDING}
               />
               <OrderStatusItem
                 icon={imagePaths.icBox}
                 title="Chờ vận chuyển"
                 onPress={() => onPressMyOrder(2)}
+                status={ORDER_STATUS.PROCESSING}
               />
               <OrderStatusItem
                 icon={imagePaths.icDelivery}
                 title="Đang vận chuyển"
                 onPress={() => onPressMyOrder(3)}
+                status={ORDER_STATUS.SHIPPED}
               />
               <OrderStatusItem
                 icon={imagePaths.icStarProfile}
                 title="Đã giao"
                 onPress={() => onPressMyOrder(4)}
+                status={ORDER_STATUS.DELIVERED}
               />
               <OrderStatusItem
                 icon={imagePaths.icReturn}
                 title="Đổi trả"
                 onPress={() => onPressMyOrder(5)}
+                status={ORDER_STATUS.RETURNED}
               />
             </View>
           </View>

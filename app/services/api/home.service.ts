@@ -40,18 +40,13 @@ export interface Button {
 export interface Repeater {
   icon: string;
   heading: string;
+  type: "top_deal" | "top_sale";
   productIds: number[];
   button: Button;
   banners: {
     image: string;
     url: string;
   }[];
-}
-
-export interface Button {
-  title: string;
-  url: string;
-  target: string;
 }
 
 export interface SuggestionProduct {

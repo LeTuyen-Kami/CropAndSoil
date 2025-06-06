@@ -60,7 +60,7 @@ const buttonVariants = cva(
       {
         variant: "outline",
         disabled: false,
-        className: "border-input bg-background active:bg-accent",
+        className: "bg-background active:bg-accent",
       },
       {
         variant: "ghost",

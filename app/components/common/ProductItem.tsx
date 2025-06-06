@@ -3,13 +3,18 @@ import { Image } from "expo-image";
 import { deepEqual } from "fast-equals";
 import { useAtomValue } from "jotai";
 import React from "react";
-import { DimensionValue, View } from "react-native";
-import { Pressable, TouchableOpacity } from "react-native-gesture-handler";
+import {
+  DimensionValue,
+  View,
+  Image as RNImage,
+  ImageSourcePropType,
+} from "react-native";
+import { Pressable } from "react-native-gesture-handler";
 import { imagePaths } from "~/assets/imagePath";
 import { Text } from "~/components/ui/text";
 import { cn } from "~/lib/utils";
 import { RootStackScreenProps } from "~/navigation/types";
-import { authAtom } from "~/store/atoms";
+import { authAtom, devModeAtom } from "~/store/atoms";
 import { maskVNDPriceBeforeSale } from "~/utils";
 
 export interface ProductItemProps {
@@ -52,7 +57,7 @@ const ProductItem = ({
   overrideSalePrice,
 }: ProductItemProps) => {
   const navigation = useNavigation<RootStackScreenProps<"DetailProduct">>();
-
+  const devMode = useAtomValue(devModeAtom);
   const auth = useAtomValue(authAtom);
 
   const hasDiscount = !!discount && discount > 0;
@@ -98,13 +103,34 @@ const ProductItem = ({
       >
         <View className="w-full bg-neutral-100 aspect-square">
           <Image
-            source={image}
+            source={
+              devMode.enableOptimalProductImage
+                ? "https://picsum.photos/200/300"
+                : image
+            }
             style={{ width: "100%", height: "100%" }}
             contentFit="cover"
             placeholder={imagePaths.placeholder}
             placeholderContentFit="contain"
             cachePolicy={"memory-disk"}
+            allowDownscaling={true}
           />
+          {/* <RNImage
+            // source={
+            //   devMode.enableOptimalProductImage
+            //     ? "https://picsum.photos/200/300"
+            //     : image
+            // }
+            source={{
+              uri: image,
+            }}
+            style={{ width: "100%", height: "100%" }}
+            resizeMode="cover"
+            // contentFit="cover"
+            // placeholder={imagePaths.placeholder}
+            // placeholderContentFit="contain"
+            // cachePolicy={"memory-disk"}
+          /> */}
         </View>
         <View className="p-[10] flex-col gap-[2] flex-1">
           <Text

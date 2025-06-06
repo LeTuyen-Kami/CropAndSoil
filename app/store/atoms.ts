@@ -108,3 +108,25 @@ export const selectedVoucherAtom = atom<IVoucherState>({
   voucher: null,
   canSelect: false,
 });
+
+type DevMode = {
+  showNetworkLogger: boolean;
+  enableSentry: boolean;
+  enableOptimalProductImage: boolean;
+  networkLoggerSecurityPin: string;
+  networkLoggerUnlocked: boolean;
+};
+
+export const initialDevMode: DevMode = {
+  showNetworkLogger: false,
+  enableSentry: true,
+  enableOptimalProductImage: false,
+  networkLoggerSecurityPin: "2024",
+  networkLoggerUnlocked: false,
+};
+
+export const devModeAtom = atomWithMMKV<DevMode>("devMode", initialDevMode);
+
+export const resetDevMode = () => {
+  jotaiStore.set(devModeAtom, initialDevMode);
+};
