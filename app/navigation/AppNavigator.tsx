@@ -53,6 +53,7 @@ import useUpdateFCMToken from "~/hooks/useUpdateFCMToken";
 import ProductByScreen from "~/screens/ProductBy";
 import DevMode from "~/screens/DevMode";
 import useInitSelectedAddress from "~/hooks/useInitSelectedAddress";
+import useSyncDevMode from "~/hooks/useSyncDevMode";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -80,6 +81,7 @@ export const AppNavigator = () => {
   const navigationRef = useNavigationContainerRef();
   useUpdateFCMToken();
   useInitSelectedAddress();
+  useSyncDevMode();
 
   useEffect(() => {
     SplashScreen.setOptions({

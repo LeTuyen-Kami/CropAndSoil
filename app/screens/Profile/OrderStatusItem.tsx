@@ -5,6 +5,8 @@ import { Text } from "~/components/ui/text";
 import Badge from "~/components/common/Badge";
 import { useQuery } from "@tanstack/react-query";
 import { orderService } from "~/services/api/order.service";
+import { authAtom } from "~/store/atoms";
+import { useAtomValue } from "jotai";
 // Order status item component
 const OrderStatusItem = ({
   icon,
@@ -17,8 +19,10 @@ const OrderStatusItem = ({
   onPress: () => void;
   status: string;
 }) => {
+  const auth = useAtomValue(authAtom);
+
   const { data } = useQuery({
-    queryKey: ["my-order", status || ""],
+    queryKey: ["my-order", status || "", auth?.isLoggedIn],
     queryFn: () =>
       orderService.listOrder({
         skip: 0,
@@ -27,6 +31,7 @@ const OrderStatusItem = ({
       }),
     staleTime: 30 * 1000,
     refetchInterval: 60 * 1000 * 5,
+    enabled: auth?.isLoggedIn,
   });
 
   return (

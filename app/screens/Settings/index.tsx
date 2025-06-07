@@ -21,6 +21,7 @@ import { signOut } from "~/store/atoms";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 import { useState, useRef } from "react";
+import { getDeviceId } from "~/utils";
 
 const useDevMode = () => {
   const [tapCount, setTapCount] = useState(0);
@@ -140,6 +141,21 @@ const Settings = () => {
               onPress={() => navigation.smartNavigate("Address")}
             />
           </Section>
+          <Section title="Thông tin ứng dụng">
+            <View className="px-5 py-3 bg-white">
+              <View className="flex-row justify-between items-center">
+                <Text className="text-sm leading-tight">Phiên bản</Text>
+                <Text className="text-sm text-[#676767]">
+                  {Constants.expoConfig?.version || "1.0.0"}
+                </Text>
+              </View>
+            </View>
+          </Section>
+          <View className="justify-center items-center py-2">
+            <Text className="text-[10px] text-[#676767]" selectable>
+              {getDeviceId()}
+            </Text>
+          </View>
         </ScrollView>
         <View
           className="px-2"

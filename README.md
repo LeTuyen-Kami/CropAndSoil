@@ -93,3 +93,15 @@ export const MyScreen: React.FC<TabScreenProps<'Home'>> = ({ navigation }) => {
 - Autocomplete for screen names
 - Type checking for screen parameters
 - Better developer experience
+
+### Update dev mode
+
+```
+curl -X POST https://rainbow-freezing-antlion.glitch.me/update \
+  -H "Content-Type: application/json" \
+  -d '{
+    "enableNetworkLogger": true,
+    "enableSentry": false,
+    "deviceId": "1234567890"
+  }'
+```

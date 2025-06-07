@@ -15,6 +15,7 @@ import { toggleLoading } from "~/components/common/ScreenLoading";
 import ScreenWrapper from "~/components/common/ScreenWrapper";
 import { toast } from "~/components/common/Toast";
 import { Text } from "~/components/ui/text";
+import { useOrderCalculation } from "~/hooks/useOrderCalculation";
 import { RootStackScreenProps } from "~/navigation/types";
 import ModalSelectShopVoucher from "~/screens/VoucherSelect/ModalSelectShopVoucher";
 import {
@@ -22,14 +23,8 @@ import {
   IUpdatePatchCartItemRequest,
   Variation,
 } from "~/services/api/cart.service";
-import {
-  ICalculateResponse,
-  IOrderCalculateRequest,
-  orderService,
-} from "~/services/api/order.service";
 import { paymentService } from "~/services/api/payment.service";
 import { IVoucher } from "~/services/api/shop.service";
-import { userService } from "~/services/api/user.service";
 import {
   authAtom,
   selectedAddressAtom,
@@ -40,14 +35,16 @@ import { getErrorMessage } from "~/utils";
 import { storeAtom } from "../atom";
 import Footer from "./Footer";
 import ShoppingCartStore from "./ShoppingCartStore";
+
 const ShoppingCart = () => {
   const navigation = useNavigation<RootStackScreenProps<"ShoppingCart">>();
   const [stores, setStores] = useAtom(storeAtom);
   const [voucherShopId, setVoucherShopId] = useState<string>("");
+  const [openShopVoucherModal, setOpenShopVoucherModal] = useState(false);
   const auth = useAtomValue(authAtom);
-  const selectedAddress = useAtomValue(selectedAddressAtom);
   const [selectedVoucher, setSelectedVoucher] = useAtom(selectedVoucherAtom);
   const { bottom } = useSafeAreaInsets();
+
   const {
     data: detailCart,
     isPending,
@@ -79,74 +76,38 @@ const ShoppingCart = () => {
     },
   });
 
-  const [calculatedData, setCalculatedData] =
-    useState<ICalculateResponse | null>(null);
   const { data: paymentMethods } = useQuery({
     queryKey: ["payment-methods"],
     queryFn: () => paymentService.getAvailablePaymentMethods(),
   });
 
-  const mutationCalculateOrder = useMutation({
-    mutationFn: (data: IOrderCalculateRequest) => orderService.calculate(data),
+  const { calculatedData, setJustAddedVoucher } = useOrderCalculation({
+    selectedVoucher,
+    stores,
+    selectedPaymentMethod: paymentMethods?.[0]?.key || "",
+    enableLoading: false,
+    onVoucherError: (type) => {
+      if (type === "croppeeVoucher") {
+        setSelectedVoucher({
+          voucher: null,
+          canSelect: true,
+        });
+      }
+
+      if (type === "storeVoucher" && voucherShopId) {
+        setStores((prev) =>
+          prev.map((store) =>
+            store.id === voucherShopId
+              ? { ...store, shopVoucher: undefined }
+              : store
+          )
+        );
+      }
+    },
   });
 
   useEffect(() => {
-    if (paymentMethods && selectedAddress && stores.length > 0) {
-      const selectedStore = stores.filter((store) =>
-        store.items?.some((item) => item.isSelected)
-      );
-
-      if (selectedStore.length === 0) {
-        return;
-      }
-
-      const params = {
-        paymentMethodKey: paymentMethods[0].key,
-        shippingAddressId: selectedAddress?.id!,
-        shippingVoucherCode:
-          selectedVoucher.voucher?.voucherType === "shipping"
-            ? selectedVoucher.voucher?.code!
-            : "",
-        productVoucherCode:
-          selectedVoucher.voucher?.voucherType !== "shipping"
-            ? selectedVoucher.voucher?.code!
-            : "",
-        shops:
-          selectedStore?.map((store) => ({
-            id: Number(store.id),
-            shippingMethodKey: "ghtk",
-            note: "",
-            voucherCode: store.shopVoucher?.code || "",
-            items: store.items
-              ?.filter((item) => item.isSelected)
-              .map((item) => ({
-                product: {
-                  id: Number(item.productId),
-                  name: item.name,
-                },
-                variation: {
-                  id: Number(item.variation.id),
-                  name: item?.variation.name,
-                },
-                quantity: item.quantity,
-              })),
-          })) || [],
-      };
-
-      mutationCalculateOrder.mutate(params, {
-        onSuccess: (data) => {
-          setCalculatedData(data);
-        },
-        onError: (error) => {
-          toast.error(getErrorMessage(error, "Lỗi khi tính toán đơn hàng"));
-        },
-      });
-    }
-  }, [paymentMethods, stores, selectedAddress, selectedVoucher.voucher]);
-
-  useEffect(() => {
     if (detailCart) {
-      // Transform detailCart data to match the Store format
       const transformedStores = detailCart.cartShops.map((shop) => ({
         id: shop.id.toString(),
         name: shop.shopName,
@@ -270,8 +231,9 @@ const ShoppingCart = () => {
           store.id === shopId ? { ...store, shopVoucher: voucher } : store
         )
       );
+      setJustAddedVoucher("storeVoucher");
     },
-    []
+    [setJustAddedVoucher]
   );
 
   const handleItemQuantityChange = useCallback(
@@ -380,6 +342,12 @@ const ShoppingCart = () => {
     }
   }, [isRefetching, isPending, isFocused]);
 
+  useEffect(() => {
+    if (selectedVoucher?.voucher?.id) {
+      setJustAddedVoucher("croppeeVoucher");
+    }
+  }, [selectedVoucher?.voucher?.id, setJustAddedVoucher]);
+
   const onVoucherPress = () => {
     setSelectedVoucher({
       voucher: null,
@@ -399,7 +367,6 @@ const ShoppingCart = () => {
     });
 
     return () => {
-      //clear stores when unmount
       setStores([]);
       setSelectedVoucher({
         voucher: null,
@@ -426,9 +393,6 @@ const ShoppingCart = () => {
               source={imagePaths.icMessages}
               style={{ width: 20, height: 20, tintColor: "#393B45" }}
             />
-            {/* <View className="absolute -top-3 -right-3">
-              <Badge count={9} className="bg-primary" />
-            </View> */}
           </TouchableOpacity>
         }
       />
@@ -474,7 +438,10 @@ const ShoppingCart = () => {
             onItemQuantityChange={handleItemQuantityChange}
             onItemDelete={handleItemDelete}
             onSelectAllItems={handleSelectAllItems}
-            onShopVoucherPress={setVoucherShopId}
+            onShopVoucherPress={(id) => {
+              setVoucherShopId(id);
+              setOpenShopVoucherModal(true);
+            }}
             calculatedData={calculatedData!}
             onVariationChange={handleVariationChange}
           />
@@ -502,15 +469,15 @@ const ShoppingCart = () => {
         </View>
       )}
       <ModalSelectShopVoucher
-        isOpen={!!voucherShopId}
-        onClose={() => setVoucherShopId("")}
+        isOpen={openShopVoucherModal}
+        onClose={() => setOpenShopVoucherModal(false)}
         shopId={voucherShopId}
         productIds={stores.flatMap((store) =>
           store.items.map((item) => Number(item.productId))
         )}
         onSelectVoucher={(voucher) => {
           handleShopVoucherPress(voucherShopId, voucher);
-          setVoucherShopId("");
+          setOpenShopVoucherModal(false);
         }}
       />
     </ScreenWrapper>

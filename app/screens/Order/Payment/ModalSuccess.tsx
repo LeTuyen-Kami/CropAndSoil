@@ -58,10 +58,7 @@ const ModalSuccess = ({
             <Text className="font-medium text-black">Danh sách đơn hàng</Text>
           </Button>
         </View>
-        <LottieView
-          ref={lottieRef}
-          source={require("~/assets/animations/success.json")}
-          loop={false}
+        <View
           style={{
             position: "absolute",
             top: 0,
@@ -70,8 +67,18 @@ const ModalSuccess = ({
             bottom: 0,
             pointerEvents: "none",
           }}
-          resizeMode="cover"
-        />
+        >
+          <LottieView
+            ref={lottieRef}
+            source={require("~/assets/animations/success.json")}
+            loop={false}
+            style={{
+              width: "100%",
+              height: "100%",
+            }}
+            resizeMode="cover"
+          />
+        </View>
       </LinearGradient>
     </Modal>
   );

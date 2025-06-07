@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { useAtom } from "jotai";
 import { useState } from "react";
 import { Switch, View } from "react-native";
@@ -47,7 +48,11 @@ const DevMode = () => {
     key: K,
     value: boolean
   ) => {
-    setDevMode((prev) => ({ ...prev, [key]: value }));
+    setDevMode((prev) => ({
+      ...prev,
+      [key]: value,
+      updatedAt: dayjs().toISOString(),
+    }));
   };
 
   const handleNetworkLoggerToggle = (value: boolean) => {
@@ -61,6 +66,7 @@ const DevMode = () => {
         ...prev,
         showNetworkLogger: false,
         networkLoggerUnlocked: false,
+        updatedAt: dayjs().toISOString(),
       }));
       return;
     }
@@ -74,6 +80,7 @@ const DevMode = () => {
         ...prev,
         showNetworkLogger: true,
         networkLoggerUnlocked: true,
+        updatedAt: dayjs().toISOString(),
       }));
       toast.success("Network Logger unlocked!");
       return true;

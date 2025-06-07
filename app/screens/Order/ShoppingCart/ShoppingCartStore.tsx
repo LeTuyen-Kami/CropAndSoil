@@ -87,6 +87,8 @@ const ShoppingCartStore = ({
     );
   }, [calculatedData]);
 
+  console.log("orderShop", orderShop);
+
   return (
     <View className="overflow-hidden mx-2 bg-white rounded-2xl">
       {/* Store Header */}

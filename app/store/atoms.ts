@@ -4,6 +4,7 @@ import { atomWithMMKV } from "./atomWithMMKV";
 import { jotaiStore } from "./store";
 import { IAddress, User } from "~/services/api/user.service";
 import { IVoucher } from "~/services/api/voucher.service";
+import dayjs from "dayjs";
 
 interface AuthState {
   isLoggedIn: boolean;
@@ -115,6 +116,7 @@ type DevMode = {
   enableOptimalProductImage: boolean;
   networkLoggerSecurityPin: string;
   networkLoggerUnlocked: boolean;
+  updatedAt: string;
 };
 
 export const initialDevMode: DevMode = {
@@ -123,12 +125,16 @@ export const initialDevMode: DevMode = {
   enableOptimalProductImage: false,
   networkLoggerSecurityPin: "2024",
   networkLoggerUnlocked: false,
+  updatedAt: dayjs().toISOString(),
 };
 
 export const devModeAtom = atomWithMMKV<DevMode>("devMode", initialDevMode);
 
 export const resetDevMode = () => {
-  jotaiStore.set(devModeAtom, initialDevMode);
+  jotaiStore.set(devModeAtom, {
+    ...initialDevMode,
+    updatedAt: dayjs().toISOString(),
+  });
 };
 
 export const selectedAddressAtom = atomWithMMKV<IAddress | null>(

@@ -7,9 +7,11 @@ import { imagePaths } from "~/assets/imagePath";
 const ModalFailed = ({
   isOpen,
   onClose,
+  content,
 }: {
   isOpen: boolean;
   onClose: () => void;
+  content?: string;
 }) => {
   return (
     <CenterModal
@@ -27,8 +29,8 @@ const ModalFailed = ({
           Thanh toán thất bại!
         </Text>
         <Text className="mt-1 text-center text-xs text-[#676767]">
-          Có vấn đề với phương thức thanh toán của bạn. Vui lòng chọn phương
-          thức thanh toán khác.
+          {content ||
+            "Có vấn đề với phương thức thanh toán của bạn. Vui lòng chọn phương thức thanh toán khác."}
         </Text>
       </View>
       <View className="pt-4 w-full">

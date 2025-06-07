@@ -23,7 +23,7 @@ const PaymentMethod = ({
 
   // Handle payment method selection
   const handleSelectPaymentMethod = (id: string) => {
-    if (id !== "code") {
+    if (id !== "cod") {
       toast.error("Phương thức thanh toán này tạm không sử dụng được");
       return;
     }

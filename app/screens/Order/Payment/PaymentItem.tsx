@@ -24,8 +24,6 @@ const PaymentItem = ({
   quantity,
   onPress,
 }: PaymentItemProps) => {
-  console.log("price", price, originalPrice);
-
   const formatPrice = (value: number) => {
     return value.toLocaleString() + "đ";
   };

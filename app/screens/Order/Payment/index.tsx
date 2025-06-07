@@ -17,17 +17,16 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
 import useDisclosure from "~/hooks/useDisclosure";
+import { useOrderCalculation } from "~/hooks/useOrderCalculation";
 import { RootStackRouteProp, RootStackScreenProps } from "~/navigation/types";
 import ModalSelectShopVoucher from "~/screens/VoucherSelect/ModalSelectShopVoucher";
 import {
-  ICalculateResponse,
   IOrderCalculateRequest,
   IOrderCheckoutResponse,
   orderService,
 } from "~/services/api/order.service";
 import { paymentService } from "~/services/api/payment.service";
 import { IVoucher } from "~/services/api/shop.service";
-import { userService } from "~/services/api/user.service";
 import { selectedAddressAtom, selectedVoucherAtom } from "~/store/atoms";
 import { getErrorMessage } from "~/utils";
 import { storeAtom } from "../atom";
@@ -38,24 +37,25 @@ import ModalSuccess from "./ModalSuccess";
 import PaymentMenu from "./PaymentMenu";
 import PaymentMethod from "./PaymentMethod";
 import PaymentStore from "./PaymentStore";
+
 const Payment = () => {
   const navigation = useNavigation<RootStackScreenProps<"Payment">>();
   const route = useRoute<RootStackRouteProp<"Payment">>();
   const isClearCart = route.params?.isClearCart;
 
   const [voucherShopId, setVoucherShopId] = useState<string>();
+  const [openShopVoucherModal, setOpenShopVoucherModal] = useState(false);
 
   const [voucherState, setVoucherState] = useAtom(selectedVoucherAtom);
+  const [errorMessage, setErrorMessage] = useState<string>();
   const [checkoutData, setCheckoutData] = useState<IOrderCheckoutResponse>();
-  const isFocused = useIsFocused();
+
   const selectedAddress = useAtomValue(selectedAddressAtom);
   const {
     isOpen: isOpenSuccess,
     onOpen: onOpenSuccess,
     onClose: onCloseSuccess,
   } = useDisclosure();
-  const [calculatedData, setCalculatedData] =
-    useState<ICalculateResponse | null>(null);
 
   const { data: paymentMethods } = useQuery({
     queryKey: ["payment-methods"],
@@ -64,10 +64,6 @@ const Payment = () => {
 
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
     useState<string>("");
-
-  const mutationCalculateOrder = useMutation({
-    mutationFn: (data: IOrderCalculateRequest) => orderService.calculate(data),
-  });
 
   const mutationCheckoutOrder = useMutation({
     mutationFn: (data: IOrderCalculateRequest) => orderService.checkout(data),
@@ -83,66 +79,32 @@ const Payment = () => {
     );
   }, [stores]);
 
-  useEffect(() => {
-    if (!isFocused) {
-      return;
-    }
+  const [storeMessage, setStoreMessage] = useState<Record<string, string>>({});
 
-    if (selectedPaymentMethod && selectedAddress) {
-      toggleLoading(true);
-      mutationCalculateOrder.mutate(
-        {
-          paymentMethodKey: selectedPaymentMethod,
-          shippingAddressId: selectedAddress?.id!,
-          shippingVoucherCode:
-            voucherState?.voucher?.voucherType === "shipping"
-              ? voucherState?.voucher?.code
-              : "",
-          productVoucherCode:
-            voucherState?.voucher?.voucherType !== "shipping"
-              ? voucherState?.voucher?.code!
-              : "",
-          shops:
-            selectedStore?.map((store) => ({
-              id: Number(store.id),
-              shippingMethodKey: "ghtk",
-              note: storeMessage[store.id] || "",
-              voucherCode: store.shopVoucher?.code || "",
-              items: store.items
-                ?.filter((item) => item.isSelected)
-                .map((item) => ({
-                  product: {
-                    id: Number(item.productId),
-                    name: item.name,
-                  },
-                  variation: {
-                    id: Number(item.variation.id),
-                    name: item?.variation.name,
-                  },
-                  quantity: item.quantity,
-                })),
-            })) || [],
-        },
-        {
-          onSuccess: (data) => {
-            setCalculatedData(data);
-          },
-          onSettled: () => {
-            toggleLoading(false);
-          },
-          onError: (error) => {
-            toast.error(getErrorMessage(error, "Lỗi khi tính toán đơn hàng"));
-          },
-        }
-      );
-    }
-  }, [
-    selectedPaymentMethod,
-    voucherState.voucher,
-    selectedAddress,
+  const { calculatedData, setJustAddedVoucher } = useOrderCalculation({
+    selectedVoucher: voucherState,
     stores,
-    isFocused,
-  ]);
+    selectedPaymentMethod: selectedPaymentMethod,
+    storeMessage,
+    onVoucherError: (type) => {
+      if (type === "croppeeVoucher") {
+        setVoucherState({
+          voucher: null,
+          canSelect: true,
+        });
+      }
+
+      if (type === "storeVoucher" && voucherShopId) {
+        setStores((prev) =>
+          prev.map((store) =>
+            store.id === voucherShopId
+              ? { ...store, shopVoucher: undefined }
+              : store
+          )
+        );
+      }
+    },
+  });
 
   const onPressOrder = () => {
     if (!calculatedData) {
@@ -189,7 +151,8 @@ const Payment = () => {
           onOpenSuccess();
         },
         onError: (error) => {
-          toast.error(getErrorMessage(error, "Lỗi khi đặt hàng"));
+          const message = getErrorMessage(error, "Lỗi khi đặt hàng");
+          setErrorMessage(message);
           onOpenFailed();
         },
         onSettled: () => {
@@ -218,7 +181,6 @@ const Payment = () => {
   } = useDisclosure();
 
   const [messageText, setMessageText] = useState("");
-  const [storeMessage, setStoreMessage] = useState<Record<string, string>>({});
   const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null);
 
   const handleOpenMessageModal = (storeId: string) => {
@@ -261,8 +223,10 @@ const Payment = () => {
           store.id === shopId ? { ...store, shopVoucher: voucher } : store
         )
       );
+
+      setJustAddedVoucher("storeVoucher");
     },
-    []
+    [setJustAddedVoucher]
   );
 
   const handlePressViewOrder = () => {
@@ -277,6 +241,12 @@ const Payment = () => {
       ],
     });
   };
+
+  useEffect(() => {
+    if (voucherState?.voucher?.id) {
+      setJustAddedVoucher("croppeeVoucher");
+    }
+  }, [voucherState?.voucher?.id, setJustAddedVoucher]);
 
   return (
     <ScreenWrapper
@@ -301,7 +271,10 @@ const Payment = () => {
             calculatedData={calculatedData!}
             onMessagePress={() => handleOpenMessageModal(store.id)}
             message={storeMessage[store.id]}
-            onShopVoucherPress={() => setVoucherShopId(store.id)}
+            onShopVoucherPress={() => {
+              setVoucherShopId(store.id);
+              setOpenShopVoucherModal(true);
+            }}
           />
         ))}
         <PaymentMethod
@@ -341,9 +314,12 @@ const Payment = () => {
         onContinueOrder={handlePressContinueOrder}
         onViewOrder={handlePressViewOrder}
       />
-      <ModalFailed isOpen={isOpenFailed} onClose={onCloseFailed} />
+      <ModalFailed
+        isOpen={isOpenFailed}
+        onClose={onCloseFailed}
+        content={errorMessage}
+      />
 
-      {/* Message Modal */}
       <ModalBottom isOpen={isMessageModalOpen} onClose={closeMessageModal}>
         <View className="p-4">
           <Text className="mb-2 text-sm text-gray-600">
@@ -365,15 +341,15 @@ const Payment = () => {
         </View>
       </ModalBottom>
       <ModalSelectShopVoucher
-        isOpen={!!voucherShopId}
-        onClose={() => setVoucherShopId("")}
+        isOpen={openShopVoucherModal}
+        onClose={() => setOpenShopVoucherModal(false)}
         shopId={voucherShopId}
         productIds={selectedStore?.flatMap((store) =>
           store.items.map((item) => Number(item.productId))
         )}
         onSelectVoucher={(voucher) => {
           handleShopVoucherPress(voucherShopId!, voucher);
-          setVoucherShopId("");
+          setOpenShopVoucherModal(false);
         }}
       />
     </ScreenWrapper>
