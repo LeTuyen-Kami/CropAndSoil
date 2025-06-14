@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { View } from "react-native";
 import { Text } from "~/components/ui/text";
 import { formatPrice } from "~/utils";
@@ -44,10 +44,20 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   cartDiscount,
   shippingFee,
 }) => {
-  const calculateSubtotal = () => {
+  const subtotal = useMemo(() => {
     if (!items || items.length === 0) return 0;
     return items.reduce((sum, item) => sum + item.subtotal, 0);
-  };
+  }, [items]);
+
+  const shippingDiscount = useMemo(() => {
+    if (!fees || fees.length === 0) return 0;
+    return fees.reduce((sum, fee) => {
+      if (fee.type === "discount_fee_shipping") {
+        return sum + fee.total;
+      }
+      return sum;
+    }, 0);
+  }, [fees]);
 
   return (
     <View>
@@ -56,7 +66,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
       <View className="space-y-2">
         <View className="flex-row justify-between">
           <Text className="text-sm text-gray-500">Tạm tính</Text>
-          <Text className="text-sm">{formatPrice(calculateSubtotal())}</Text>
+          <Text className="text-sm">{formatPrice(subtotal)}</Text>
         </View>
 
         {!!shippingFee && shippingFee > 0 && (
@@ -69,8 +79,17 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
         {!!cartDiscount && cartDiscount > 0 && (
           <View className="flex-row justify-between">
             <Text className="text-sm text-gray-500">Giảm giá</Text>
-            <Text className="text-sm text-green-600">
+            <Text className="text-sm text-red-600">
               -{formatPrice(cartDiscount)}
+            </Text>
+          </View>
+        )}
+
+        {!!shippingDiscount && (
+          <View className="flex-row justify-between">
+            <Text className="text-sm text-gray-500">Giảm giá vận chuyển</Text>
+            <Text className="text-sm text-red-600">
+              {formatPrice(shippingDiscount)}
             </Text>
           </View>
         )}

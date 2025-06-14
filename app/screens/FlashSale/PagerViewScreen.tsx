@@ -42,9 +42,9 @@ const BannerItem = () => {
   return (
     <View className="">
       <Image
-        source={"https://picsum.photos/300/100"}
-        className="w-full aspect-[3/1]"
-        contentFit="contain"
+        source={imagePaths.flashSaleBanner}
+        className="w-full aspect-[5/1]"
+        contentFit="cover"
       />
     </View>
   );

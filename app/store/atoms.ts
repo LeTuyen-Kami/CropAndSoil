@@ -22,6 +22,12 @@ export const authAtom = atomWithMMKV<AuthState>("auth", initialAuthState);
 
 export const signOut = () => {
   jotaiStore.set(authAtom, initialAuthState);
+  jotaiStore.set(selectedVoucherAtom, {
+    voucher: null,
+    canSelect: false,
+  });
+  jotaiStore.set(editAddressAtom, initialAddress);
+  jotaiStore.set(selectedAddressAtom, null);
 };
 
 export const signIn = (data: Partial<AuthState>) => {

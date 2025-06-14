@@ -28,6 +28,7 @@ import Animated, {
 import Badge from "~/components/common/Badge";
 import { cartService } from "~/services/api/cart.service";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
+import { screen } from "~/utils";
 
 const AnimatedFlashList = Animated.createAnimatedComponent(
   FlashList as unknown as React.ComponentType<FlashListProps<any>>

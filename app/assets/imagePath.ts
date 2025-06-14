@@ -135,6 +135,9 @@ import flashSaleBadge from "~/assets/images/flashsale_badge.png";
 import icCamera from "~/assets/icons/camera_icon.png";
 import icVideo from "~/assets/icons/video_camera_icon.png";
 import placeholder from "~/assets/images/placeholder.png";
+
+import flashSaleBanner from "~/assets/images/flashsale_banner.png";
+
 export const imagePaths = {
   //images
   logo: logo,
@@ -273,4 +276,5 @@ export const imagePaths = {
   icVideo: icVideo,
 
   placeholder: placeholder,
+  flashSaleBanner: flashSaleBanner,
 };

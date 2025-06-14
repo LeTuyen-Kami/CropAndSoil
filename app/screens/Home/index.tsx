@@ -10,8 +10,8 @@ import {
   FlatList,
   Pressable,
   RefreshControl,
-  View,
   Image as RNImage,
+  View,
 } from "react-native";
 import Animated, {
   useAnimatedScrollHandler,
@@ -31,7 +31,10 @@ import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 import { commonService } from "~/services/api/common.service";
-import { flashSaleService } from "~/services/api/flashsale.service";
+import {
+  flashSaleService,
+  IFlashSaleProduct,
+} from "~/services/api/flashsale.service";
 import { homeService, ILocalRepeater } from "~/services/api/home.service";
 import { IProduct, productService } from "~/services/api/product.service";
 import { searchService } from "~/services/api/search.services";
@@ -112,6 +115,7 @@ const FlashSale = () => {
                     item?.flashSaleVariation?.thumbnail ||
                     item?.flashSaleProduct?.thumbnail
                   }
+                  width={Math.max((screen.width - 24) / 2.2, 180)}
                   onSale={true}
                   id={item?.id}
                 />
@@ -280,6 +284,40 @@ const SectionProducts = ({ products }: { products: IProduct[] }) => {
   );
 };
 
+// Flash Sale Products component for top_deal sections
+const SectionFlashSaleProducts = ({
+  products,
+}: {
+  products: IFlashSaleProduct[];
+}) => {
+  const navigation = useSmartNavigation();
+
+  return (
+    <View className="flex-row flex-wrap gap-2 px-2 pb-2 bg-white">
+      {products.map((item, index) => (
+        <ProductItem
+          width={(screen.width - 24) / 2}
+          key={item.id || index}
+          name={item?.flashSaleProduct?.name}
+          price={item?.salePrice}
+          originalPrice={item?.flashSaleVariation?.regularPrice}
+          discount={item?.discountPercent}
+          soldCount={item?.bought}
+          totalCount={item?.campaignStock}
+          image={
+            item?.flashSaleVariation?.thumbnail ||
+            item?.flashSaleProduct?.thumbnail
+          }
+          onSale={true}
+          id={item?.id}
+          className="flex-grow"
+          onPress={() => navigation.push("FlashSaleProduct", { id: item?.id })}
+        />
+      ))}
+    </View>
+  );
+};
+
 const HomeCarousel = () => {
   const { data, isLoading } = useQuery({
     queryKey: ["homeCarousel", "home"],
@@ -375,6 +413,7 @@ interface IFlashListData {
   type: string;
   id: string;
   products?: IProduct[];
+  flashSaleProducts?: IFlashSaleProduct[];
   headerTitle?: string;
   headerImage?: string;
   footerUrl?: string;
@@ -479,7 +518,7 @@ export const HomeScreen: React.FC = () => {
       }));
 
       try {
-        let newProducts: IProduct[] = [];
+        let newProducts: IProduct[] | IFlashSaleProduct[] = [];
 
         if (type === "top_deal") {
           const response = await mutateTopDealProducts.mutateAsync({
@@ -498,7 +537,7 @@ export const HomeScreen: React.FC = () => {
         setRepeaterData((prev) =>
           prev.map((item) =>
             item.id === sectionId
-              ? { ...item, products: [...item.products, ...newProducts] }
+              ? { ...item, products: [...item.products, ...newProducts] as any }
               : item
           )
         );
@@ -528,7 +567,7 @@ export const HomeScreen: React.FC = () => {
   // Chuyển đổi dữ liệu BestSeller thành các item cho FlashList
   const processData = useCallback(
     (
-      data: IProduct[] | undefined,
+      data: IProduct[] | IFlashSaleProduct[] | undefined,
       {
         headerTitle,
         headerImage,
@@ -539,6 +578,7 @@ export const HomeScreen: React.FC = () => {
         type,
         hasMore,
         isLoadingMore,
+        isFlashSaleFormat = false,
       }: {
         headerTitle: string;
         headerImage: string;
@@ -549,6 +589,7 @@ export const HomeScreen: React.FC = () => {
         type?: "top_deal" | "top_sale";
         hasMore?: boolean;
         isLoadingMore?: boolean;
+        isFlashSaleFormat?: boolean;
       }
     ) => {
       if (!checkCanRender(data) || data!.length === 0) {
@@ -579,14 +620,24 @@ export const HomeScreen: React.FC = () => {
       }
 
       // Tạo các chunk gồm 2 sản phẩm mỗi chunk
-      const chunkedProducts = chunkArray(data!, 2);
+      const chunkedProducts = chunkArray(data! as any, 2);
 
       // Tạo các item cho FlashList từ chunked products
-      const items = chunkedProducts.map((products, index) => ({
-        id: `product-${id}-${index}`,
-        type: ITEM_TYPES.SECTION_PRODUCTS,
-        products,
-      }));
+      const items = chunkedProducts.map((products, index) => {
+        if (isFlashSaleFormat) {
+          return {
+            id: `product-${id}-${index}`,
+            type: "sectionFlashSaleProducts",
+            flashSaleProducts: products as unknown as IFlashSaleProduct[],
+          };
+        } else {
+          return {
+            id: `product-${id}-${index}`,
+            type: ITEM_TYPES.SECTION_PRODUCTS,
+            products: products as unknown as IProduct[],
+          };
+        }
+      });
 
       // Thêm header và footer
       return [
@@ -646,6 +697,7 @@ export const HomeScreen: React.FC = () => {
           type: item.type,
           hasMore: currentPagination?.hasMore ?? false,
           isLoadingMore: currentPagination?.isLoading ?? false,
+          isFlashSaleFormat: item.type === "top_deal",
         });
         baseItems.push(...processedData);
       });
@@ -694,6 +746,11 @@ export const HomeScreen: React.FC = () => {
 
         case ITEM_TYPES.SECTION_PRODUCTS:
           return <SectionProducts products={item.products ?? []} />;
+
+        case "sectionFlashSaleProducts":
+          return (
+            <SectionFlashSaleProducts products={item.flashSaleProducts ?? []} />
+          );
 
         case "sectionEmpty":
           return <SectionEmpty title={item.headerTitle ?? ""} />;
@@ -752,7 +809,7 @@ export const HomeScreen: React.FC = () => {
               setRepeaterData((prev) => {
                 const newData = [...prev];
                 if (newData[currentIndex]) {
-                  newData[currentIndex].products = response.data;
+                  newData[currentIndex].products = response.data as any;
                 }
                 return newData;
               });

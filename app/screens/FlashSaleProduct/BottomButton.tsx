@@ -24,7 +24,7 @@ import {
   IFlashSaleProduct,
 } from "~/services/api/flashsale.service";
 import { authAtom, selectedVoucherAtom } from "~/store/atoms";
-import { getErrorMessage } from "~/utils";
+import { getErrorMessage, screen } from "~/utils";
 import { storeAtom } from "../Order/atom";
 import SelectVariation from "~/components/common/SelectVariation";
 type Variation = IFlashSaleProduct["flashSaleVariation"];
