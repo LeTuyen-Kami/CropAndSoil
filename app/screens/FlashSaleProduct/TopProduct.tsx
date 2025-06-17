@@ -10,7 +10,7 @@ import { Text } from "~/components/ui/text";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 import { flashSaleService } from "~/services/api/flashsale.service";
 import { productService } from "~/services/api/product.service";
-import { calculateDiscount } from "~/utils";
+import { calculateDiscount, calculateOnSale } from "~/utils";
 
 const TopProduct = ({ id }: { id: string | number }) => {
   const navigation = useSmartNavigation();
@@ -91,6 +91,7 @@ const TopProduct = ({ id }: { id: string | number }) => {
             id={item.id}
             image={item.thumbnail}
             className="flex-1"
+            onSale={calculateOnSale(item)}
           />
         )}
       />

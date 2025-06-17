@@ -27,6 +27,7 @@ import { RootStackParamList, RootStackRouteProp } from "~/navigation/types";
 import { IProduct, productService } from "~/services/api/product.service";
 import {
   calculateDiscount,
+  calculateOnSale,
   getItemWidth,
   preHandleFlashListData,
   screen,
@@ -219,7 +220,7 @@ const TwoProductItem = ({ items }: { items: IProduct[] }) => {
           rating={item?.averageRating}
           soldCount={item?.totalSales}
           image={item?.images[0]}
-          onSale={item?.regularPrice > item?.salePrice}
+          onSale={calculateOnSale(item)}
           id={item?.id}
           location={item?.shop?.shopWarehouseLocation?.province?.name}
         />

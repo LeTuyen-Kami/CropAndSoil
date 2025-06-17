@@ -11,6 +11,7 @@ import { FlashList } from "@shopify/flash-list";
 import ProductItem from "~/components/common/ProductItem";
 import {
   calculateDiscount,
+  calculateOnSale,
   checkCanRender,
   getErrorMessage,
   getItemWidth,
@@ -69,6 +70,7 @@ const MaybeLike = () => {
             id={item.id}
             image={item.thumbnail}
             className="flex-grow"
+            onSale={calculateOnSale(item)}
           />
         ))}
       </View>
@@ -110,6 +112,7 @@ const TwoProductItem = ({
           originalPrice={item?.regularPrice}
           discount={calculateDiscount(item)}
           image={item?.thumbnail}
+          onSale={calculateOnSale(item)}
           footer={
             <View className="flex-row gap-2 justify-between items-center mt-auto">
               <TouchableOpacity

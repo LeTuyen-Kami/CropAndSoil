@@ -6,7 +6,7 @@ import { BREAKPOINTS } from "./contants";
 import dayjs from "dayjs";
 import { IProduct } from "~/services/api/product.service";
 
-export const ENV = {
+const DEV_ENV = {
   EXPO_PUBLIC_BASE_URL: "https://cropee-api.faster.asia/api/v1",
   EXPO_PUBLIC_IDENTITY_BASE_URL: "https://cropee-api.faster.asia/api/v1",
   EXPO_PUBLIC_ENV: "dev",
@@ -14,7 +14,24 @@ export const ENV = {
     "https://bac04b48769b756a71f586d876accab8@o4509072888889344.ingest.de.sentry.io/4509072902914128",
   EXPO_PUBLIC_AGENT_LINK:
     "https://demo-cropee.crinfinity.com/dang-ky/?type=seller",
+  EXPO_PUBLIC_POLICY_LINK: "https://cropee.vn/chinh-sach-bao-mat",
+  EXPO_PUBLIC_TERMS_LINK: "https://cropee.vn/dieu-khoan-su-dung",
+  EXPO_PUBLIC_INTRO_LINK: "https://cropee.vn/gioi-thieu-ve-cropee/",
 };
+
+const PROD_ENV = {
+  EXPO_PUBLIC_BASE_URL: "https://cropee-api.faster.asia/api/v1",
+  EXPO_PUBLIC_IDENTITY_BASE_URL: "https://cropee-api.faster.asia/api/v1",
+  EXPO_PUBLIC_ENV: "prod",
+  EXPO_PUBLIC_SENTRY_DSN:
+    "https://bac04b48769b756a71f586d876accab8@o4509072888889344.ingest.de.sentry.io/4509072902914128",
+  EXPO_PUBLIC_AGENT_LINK: "https://cropee.vn/dang-ky/?type=seller",
+  EXPO_PUBLIC_POLICY_LINK: "https://cropee.vn/chinh-sach-bao-mat",
+  EXPO_PUBLIC_TERMS_LINK: "https://cropee.vn/dieu-khoan-su-dung",
+  EXPO_PUBLIC_INTRO_LINK: "https://cropee.vn/gioi-thieu-ve-cropee/",
+};
+
+export const ENV = PROD_ENV;
 
 export const screen = Dimensions.get("screen");
 
@@ -187,6 +204,8 @@ export const getTimeAgo = (date?: string) => {
 };
 
 export const calculateDiscount = (item: IProduct) => {
+  if (!item?.regularPrice || !item?.salePrice) return undefined;
+
   if (item?.regularPrice > item?.salePrice) {
     return Math.round(
       ((item?.regularPrice - item?.salePrice) / item?.regularPrice) * 100
@@ -194,6 +213,11 @@ export const calculateDiscount = (item: IProduct) => {
   }
 
   return undefined;
+};
+
+export const calculateOnSale = (item: IProduct) => {
+  if (!item?.regularPrice || !item?.salePrice) return false;
+  return item?.regularPrice > item?.salePrice;
 };
 
 export const formatDate = (date?: string, format: string = "DD/MM/YYYY") => {

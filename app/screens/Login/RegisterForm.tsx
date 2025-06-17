@@ -29,6 +29,9 @@ import { authAtom } from "~/store/atoms";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "~/navigation/types";
+import * as WebBrowser from "expo-web-browser";
+import { ENV } from "~/utils";
+
 type IStep = "phone" | "code";
 
 const RegisterForm = () => {
@@ -95,8 +98,11 @@ const RegisterForm = () => {
   };
 
   const handleBecomeSupplier = () => {
-    const value = Math.random().toString(36).substring(2, 9);
-    toast.error("Đăng ký thành công" + value, "top", 3000, "123");
+    WebBrowser.openBrowserAsync(ENV.EXPO_PUBLIC_AGENT_LINK);
+  };
+
+  const handleOpenTerms = () => {
+    WebBrowser.openBrowserAsync(ENV.EXPO_PUBLIC_TERMS_LINK);
   };
 
   const handleGoBack = () => {
@@ -247,8 +253,11 @@ const RegisterForm = () => {
               />
               <Text className="text-[10px] text-[#575964] flex-1">
                 Tôi đã đọc và đồng ý với{" "}
-                <Text className="text-[#159747] text-[10px]">
-                  Điều khoản sử dụng.
+                <Text
+                  className="text-[#159747] text-[10px]"
+                  onPress={handleOpenTerms}
+                >
+                  Điều khoản sử dụng.{" "}
                 </Text>
                 Tôi cam kết có đầy đủ giấy phép cần thiết theo quy định pháp
                 luật.

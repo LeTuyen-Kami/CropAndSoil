@@ -5,7 +5,12 @@ import { authAtom } from "~/store/atoms";
 import ProductItem from "~/components/common/ProductItem";
 import { useQuery } from "@tanstack/react-query";
 import { commonService } from "~/services/api/common.service";
-import { calculateDiscount, checkCanRender } from "~/utils";
+import {
+  calculateDiscount,
+  calculateOnSale,
+  checkCanRender,
+  screen,
+} from "~/utils";
 import { FlatList } from "react-native-gesture-handler";
 import { useIsFocused } from "@react-navigation/native";
 import { useEffect } from "react";
@@ -61,10 +66,11 @@ const RecentProduct = () => {
               rating={product?.averageRating}
               soldCount={product?.totalSales}
               image={product?.images[0]}
-              onSale={product?.regularPrice > product?.salePrice}
+              onSale={calculateOnSale(product)}
               id={product?.id}
               location={product?.shop?.shopWarehouseLocation?.province?.name}
               className="flex-grow"
+              width={Math.max((screen.width - 24) / 2.2, 180)}
             />
           )}
           keyExtractor={(item) => item.id.toString()}

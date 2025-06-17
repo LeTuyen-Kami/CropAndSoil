@@ -41,6 +41,7 @@ import { searchService } from "~/services/api/search.services";
 import { authAtom } from "~/store/atoms";
 import {
   calculateDiscount,
+  calculateOnSale,
   checkCanRender,
   chunkArray,
   isIOS,
@@ -278,6 +279,7 @@ const SectionProducts = ({ products }: { products: IProduct[] }) => {
           id={product.id}
           image={product.thumbnail}
           className="flex-grow"
+          onSale={calculateOnSale(product)}
         />
       ))}
     </View>
@@ -483,7 +485,7 @@ export const HomeScreen: React.FC = () => {
   };
 
   const onPressQuestionCircle = () => {
-    console.log("question circle");
+    navigation.navigate("HelpCenter");
   };
 
   const onRefresh = async () => {

@@ -190,7 +190,7 @@ const BottomButton = ({
         bottom: bottom,
       }}
     >
-      <TouchableOpacity className="flex-row gap-2 items-center py-[10px] px-[20px] border-r border-[#12853E]">
+      {/* <TouchableOpacity className="flex-row gap-2 items-center py-[10px] px-[20px] border-r border-[#12853E]">
         <Image
           source={imagePaths.chatIcon}
           className="size-6"
@@ -201,7 +201,7 @@ const BottomButton = ({
         <Text className="text-sm font-medium leading-tight text-white">
           Chat
         </Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       <TouchableOpacity
         className="flex-row gap-2 items-center py-[10px] px-[20px]"
         onPress={() => handleAction("add")}

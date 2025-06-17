@@ -22,7 +22,12 @@ const OrderStatusItem = ({
   const auth = useAtomValue(authAtom);
 
   const { data } = useQuery({
-    queryKey: ["my-order", status || "", auth?.isLoggedIn],
+    queryKey: [
+      "my-order",
+      status || "",
+      auth?.isLoggedIn,
+      auth?.token?.accessToken,
+    ],
     queryFn: () =>
       orderService.listOrder({
         skip: 0,
@@ -31,7 +36,7 @@ const OrderStatusItem = ({
       }),
     staleTime: 30 * 1000,
     refetchInterval: 60 * 1000 * 5,
-    enabled: auth?.isLoggedIn,
+    enabled: auth?.isLoggedIn && !!auth?.token?.accessToken,
   });
 
   return (

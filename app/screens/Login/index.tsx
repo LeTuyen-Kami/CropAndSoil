@@ -12,11 +12,21 @@ import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
 import ResetPassword from "./ResetPassword";
 import { loginAtom } from "./atom";
+import * as WebBrowser from "expo-web-browser";
+import { ENV } from "~/utils";
 
 const LoginScreen = () => {
   const { top } = useSafeAreaInsets();
   const navigation = useNavigation();
   const [loginState, setLoginState] = useAtom(loginAtom);
+
+  const handleBecomeSupplier = () => {
+    WebBrowser.openBrowserAsync(ENV.EXPO_PUBLIC_AGENT_LINK);
+  };
+
+  const handleOpenHelpCenter = () => {
+    navigation.navigate("HelpCenter");
+  };
 
   useEffect(() => {
     return () => {
@@ -56,7 +66,11 @@ const LoginScreen = () => {
             <View className="flex-1" />
             <View className="flex-row gap-6">
               {loginState.step === "signIn" && (
-                <TouchableOpacity hitSlop={20} className="py-4">
+                <TouchableOpacity
+                  hitSlop={20}
+                  className="py-4"
+                  onPress={handleBecomeSupplier}
+                >
                   <Image
                     source={imagePaths.icShop}
                     style={{ width: 24, height: 24, tintColor: "white" }}
@@ -64,7 +78,11 @@ const LoginScreen = () => {
                   />
                 </TouchableOpacity>
               )}
-              <TouchableOpacity hitSlop={20} className="py-4">
+              <TouchableOpacity
+                hitSlop={20}
+                className="py-4"
+                onPress={handleOpenHelpCenter}
+              >
                 <Image
                   source={imagePaths.icBrokenCircleQuestion}
                   style={{ width: 24, height: 24 }}

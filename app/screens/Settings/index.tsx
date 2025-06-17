@@ -1,27 +1,26 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useMutation } from "@tanstack/react-query";
+import Constants from "expo-constants";
+import { useAtomValue } from "jotai";
+import { useRef, useState } from "react";
 import {
-  View,
-  ScrollView,
-  Linking,
-  TouchableOpacity,
   ActivityIndicator,
   Pressable,
+  ScrollView,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { Image } from "expo-image";
-import { Ionicons } from "@expo/vector-icons";
-import Constants from "expo-constants";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Header from "~/components/common/Header";
-import ScreenContainer from "~/components/common/ScreenContainer";
 import ScreenWrapper from "~/components/common/ScreenWrapper";
 import { toast } from "~/components/common/Toast";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
-import { authService } from "~/services/api/auth.service";
-import { signOut } from "~/store/atoms";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
-import { useState, useRef } from "react";
-import { getDeviceId } from "~/utils";
+import { authService } from "~/services/api/auth.service";
+import { authAtom, signOut } from "~/store/atoms";
+import { ENV, getDeviceId } from "~/utils";
+import * as WebBrowser from "expo-web-browser";
 
 const useDevMode = () => {
   const [tapCount, setTapCount] = useState(0);
@@ -94,6 +93,7 @@ const Settings = () => {
   const { bottom } = useSafeAreaInsets();
   const [loading, setLoading] = useState(false);
   const { handleTap: handleDevModeTap } = useDevMode();
+  const auth = useAtomValue(authAtom);
 
   const mutateLogout = useMutation({
     mutationFn: authService.logout,
@@ -118,29 +118,59 @@ const Settings = () => {
     navigation.smartNavigate("ChangePassword");
   };
 
+  const handleOpenPolicy = () => {
+    WebBrowser.openBrowserAsync(ENV.EXPO_PUBLIC_POLICY_LINK);
+  };
+
+  const handleOpenTerms = () => {
+    WebBrowser.openBrowserAsync(ENV.EXPO_PUBLIC_TERMS_LINK);
+  };
+
+  const handleOpenIntro = () => {
+    WebBrowser.openBrowserAsync(ENV.EXPO_PUBLIC_INTRO_LINK);
+  };
+
   return (
     <ScreenWrapper hasGradient={true} hasSafeBottom={false}>
       <Header
-        title="Thiết lập tài khoản"
+        title={auth?.isLoggedIn ? "Thiết lập tài khoản" : "Cài đặt"}
         hasSafeTop={false}
         className="bg-transparent border-0"
         textColor="#fff"
       />
       <View className="flex-1 bg-[#EEE] rounded-t-3xl">
         <ScrollView showsVerticalScrollIndicator={false}>
-          <Section title="Tài khoản của tôi" onPressTitle={handleDevModeTap}>
+          {auth?.isLoggedIn && (
+            <Section title="Tài khoản của tôi">
+              <SettingItem
+                title="Tài khoản"
+                onPress={() => navigation.smartNavigate("EditProfile")}
+              />
+              <SettingItem title="Đổi mật khẩu" onPress={changePassword} />
+            </Section>
+          )}
+
+          {auth?.isLoggedIn && (
+            <Section title="Thông tin">
+              <SettingItem
+                title="Sổ địa chỉ"
+                onPress={() => navigation.smartNavigate("Address")}
+              />
+            </Section>
+          )}
+
+          <Section title="Về chúng tôi" onPressTitle={handleDevModeTap}>
+            <SettingItem title="Giới thiệu" onPress={handleOpenIntro} />
             <SettingItem
-              title="Tài khoản"
-              onPress={() => navigation.smartNavigate("EditProfile")}
+              title="Điều khoản và điều kiện"
+              onPress={handleOpenTerms}
             />
-            <SettingItem title="Đổi mật khẩu" onPress={changePassword} />
-          </Section>
-          <Section title="Thông tin">
             <SettingItem
-              title="Sổ địa chỉ"
-              onPress={() => navigation.smartNavigate("Address")}
+              title="Chính sách bảo mật"
+              onPress={handleOpenPolicy}
             />
           </Section>
+
           <Section title="Thông tin ứng dụng">
             <View className="px-5 py-3 bg-white">
               <View className="flex-row justify-between items-center">
@@ -157,20 +187,22 @@ const Settings = () => {
             </Text>
           </View>
         </ScrollView>
-        <View
-          className="px-2"
-          style={{
-            paddingBottom: bottom,
-          }}
-        >
-          <Button onPress={onPressLogout} className="bg-[#FCBA26] ">
-            {loading ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Text>Đăng xuất</Text>
-            )}
-          </Button>
-        </View>
+        {auth?.isLoggedIn && (
+          <View
+            className="px-2"
+            style={{
+              paddingBottom: bottom,
+            }}
+          >
+            <Button onPress={onPressLogout} className="bg-[#FCBA26] ">
+              {loading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text>Đăng xuất</Text>
+              )}
+            </Button>
+          </View>
+        )}
       </View>
     </ScreenWrapper>
   );

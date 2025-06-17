@@ -3,7 +3,12 @@ import { View } from "react-native";
 import { FlatList } from "react-native";
 import ProductItem from "~/components/common/ProductItem";
 import { IProduct } from "~/services/api/product.service";
-import { calculateDiscount, checkCanRender, screen } from "~/utils";
+import {
+  calculateDiscount,
+  calculateOnSale,
+  checkCanRender,
+  screen,
+} from "~/utils";
 
 const ListProduct = ({ data }: { data: IProduct[] }) => {
   if (!checkCanRender(data)) return null;
@@ -25,6 +30,7 @@ const ListProduct = ({ data }: { data: IProduct[] }) => {
             location={item?.shop?.shopWarehouseLocation?.province?.name}
             width={screen.width / 2.5 - 16}
             className="flex-1"
+            onSale={calculateOnSale(item)}
           />
         )}
         keyExtractor={(item) => item.id.toString()}

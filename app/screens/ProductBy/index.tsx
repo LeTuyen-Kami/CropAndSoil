@@ -11,7 +11,13 @@ import { Text } from "~/components/ui/text";
 import { COLORS } from "~/constants/theme";
 import { RootStackRouteProp } from "~/navigation/types";
 import { IProduct, productService } from "~/services/api/product.service";
-import { calculateDiscount, chunkArray, getItemWidth, screen } from "~/utils";
+import {
+  calculateDiscount,
+  calculateOnSale,
+  chunkArray,
+  getItemWidth,
+  screen,
+} from "~/utils";
 
 type ProductByParams = {
   productIds: string[];
@@ -40,7 +46,7 @@ const RenderTwoProduct = ({ items }: { items: IProduct[] }) => {
           soldCount={item.totalSales}
           id={item.id}
           image={item.thumbnail}
-          onSale={item.regularPrice > item.salePrice}
+          onSale={calculateOnSale(item)}
           location={item.shop?.shopWarehouseLocation?.province?.name}
           height={"100%"}
         />

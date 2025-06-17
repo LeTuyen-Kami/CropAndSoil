@@ -6,7 +6,7 @@ import { View } from "react-native";
 import ProductItem from "~/components/common/ProductItem";
 import { Text } from "~/components/ui/text";
 import { cn } from "~/lib/utils";
-import { calculateDiscount, screen } from "~/utils";
+import { calculateDiscount, calculateOnSale, screen } from "~/utils";
 import { productService } from "~/services/api/product.service";
 import { useAtomValue } from "jotai";
 import { authAtom } from "~/store/atoms";
@@ -43,6 +43,7 @@ const MaybeLike = ({ id }: { id: string | number }) => {
             location={item.shop?.shopWarehouseLocation?.province?.name}
             id={item.id}
             image={item.thumbnail}
+            onSale={calculateOnSale(item)}
             className="flex-grow"
           />
         ))}

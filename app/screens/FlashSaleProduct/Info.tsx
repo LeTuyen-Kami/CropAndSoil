@@ -312,6 +312,7 @@ const Info = ({ id }: { id: string | number }) => {
                 )}
           </Text>
           {productDetail?.flashSaleVariation?.[0]?.salePrice &&
+            productDetail?.flashSaleVariation?.[0]?.regularPrice &&
             productDetail?.flashSaleVariation?.[0]?.salePrice <
               productDetail?.flashSaleVariation?.[0]?.regularPrice && (
               <Text style={styles.originalPrice}>

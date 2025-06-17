@@ -1,6 +1,5 @@
 import { Image } from "expo-image";
 import { TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { imagePaths } from "~/assets/imagePath";
 
 interface HeaderProps {

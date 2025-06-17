@@ -8,7 +8,13 @@ import {
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import ProductItem from "~/components/common/ProductItem";
-import { calculateDiscount, checkCanRender, isIOS, screen } from "~/utils";
+import {
+  calculateDiscount,
+  calculateOnSale,
+  checkCanRender,
+  isIOS,
+  screen,
+} from "~/utils";
 import SectionTitle from "./SectionTitlte";
 import { searchService } from "~/services/api/search.services";
 import { useQuery } from "@tanstack/react-query";
@@ -125,10 +131,11 @@ const PrivateOffer = () => {
             rating={product?.averageRating}
             soldCount={product?.totalSales}
             image={product?.images[0]}
-            onSale={product?.regularPrice > product?.salePrice}
+            onSale={calculateOnSale(product)}
             id={product?.id}
             location={product?.shop?.shopWarehouseLocation?.province?.name}
             className="flex-grow"
+            width={Math.max((screen.width - 24) / 2.2, 180)}
           />
         )}
         keyExtractor={(item) => item.id.toString()}

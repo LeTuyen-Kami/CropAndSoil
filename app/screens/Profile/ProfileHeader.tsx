@@ -12,15 +12,21 @@ import { ENV } from "~/utils";
 const ProfileHeader = () => {
   const navigation = useSmartNavigation();
 
+  const handleOpenAgentLink = () => {
+    WebBrowser.openBrowserAsync(ENV.EXPO_PUBLIC_AGENT_LINK);
+  };
+
+  const handleOpenSettings = () => {
+    navigation.navigate("Settings");
+  };
+
   return (
     <View className="flex-row justify-between items-center pr-4">
       <View className="flex-1">
         {/* Seller section */}
         <TouchableOpacity
           className="bg-[#EFF8F2] flex-row items-center rounded-r-full w-auto self-start h-8 pl-2 pr-4"
-          onPress={() => {
-            WebBrowser.openBrowserAsync(ENV.EXPO_PUBLIC_AGENT_LINK);
-          }}
+          onPress={handleOpenAgentLink}
         >
           <Image source={imagePaths.icShop} style={{ width: 14, height: 14 }} />
           <Text className="ml-1 text-xs font-medium text-[#159747]">
@@ -38,7 +44,7 @@ const ProfileHeader = () => {
       <View className="flex-row">
         <TouchableOpacity
           // className="mr-6"
-          onPress={() => navigation.smartNavigate("Settings")}
+          onPress={handleOpenSettings}
         >
           <Image
             source={imagePaths.icSettings}

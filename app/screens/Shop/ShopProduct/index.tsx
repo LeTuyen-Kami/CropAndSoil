@@ -11,6 +11,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import ProductItem from "~/components/common/ProductItem";
 import {
   calculateDiscount,
+  calculateOnSale,
   getItemWidth,
   preHandleFlashListData,
   screen,
@@ -103,7 +104,7 @@ const RenderTwoProduct = ({ items }: { items: IProduct[] }) => {
           soldCount={item.reviewCount}
           id={item.id}
           image={item.thumbnail}
-          onSale={item.regularPrice > item.salePrice}
+          onSale={calculateOnSale(item)}
           location={item.shop?.shopWarehouseLocation?.province?.name}
           height={"100%"}
         />

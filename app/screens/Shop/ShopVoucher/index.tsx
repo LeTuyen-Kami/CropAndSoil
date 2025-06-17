@@ -9,6 +9,7 @@ import { usePagination } from "~/hooks/usePagination";
 import { IProduct, productService } from "~/services/api/product.service";
 import { IVoucher, shopService } from "~/services/api/shop.service";
 import {
+  calculateOnSale,
   checkCanRender,
   convertToK,
   formatDate,
@@ -73,6 +74,7 @@ const RenderTwoProduct = memo(
             height={"100%"}
             image={item.thumbnail}
             location={item.shop?.shopWarehouseLocation?.province?.name}
+            onSale={calculateOnSale(item)}
           />
         ))}
       </View>

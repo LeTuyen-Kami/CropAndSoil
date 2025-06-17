@@ -7,7 +7,7 @@ import ProductItem from "~/components/common/ProductItem";
 import { Text } from "~/components/ui/text";
 import { productService } from "~/services/api/product.service";
 import { authAtom } from "~/store/atoms";
-import { calculateDiscount, screen } from "~/utils";
+import { calculateDiscount, calculateOnSale, screen } from "~/utils";
 
 const MaybeLike = ({ id }: { id: string | number }) => {
   const auth = useAtomValue(authAtom);
@@ -40,6 +40,7 @@ const MaybeLike = ({ id }: { id: string | number }) => {
             location={item.shop?.shopWarehouseLocation?.province?.name}
             id={item.id}
             image={item.thumbnail}
+            onSale={calculateOnSale(item)}
             className="flex-grow"
           />
         ))}

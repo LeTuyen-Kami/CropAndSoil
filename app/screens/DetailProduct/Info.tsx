@@ -13,7 +13,7 @@ import { IProduct, productService } from "~/services/api/product.service";
 import { shopService } from "~/services/api/shop.service";
 import { wishlistService } from "~/services/api/wishlist.service";
 import { authAtom } from "~/store/atoms";
-import { formatPrice, maskVNDPriceBeforeSale } from "~/utils";
+import { calculateOnSale, formatPrice, maskVNDPriceBeforeSale } from "~/utils";
 
 const BrandBadge = () => {
   return (
@@ -279,6 +279,7 @@ const Info = ({ id }: { id: string | number }) => {
                 )}
           </Text>
           {productDetail?.regularPrice &&
+            productDetail?.salePrice &&
             productDetail?.regularPrice > productDetail?.salePrice && (
               <Text style={styles.originalPrice}>
                 {auth?.isLoggedIn
