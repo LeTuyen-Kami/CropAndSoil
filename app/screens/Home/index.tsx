@@ -62,7 +62,7 @@ const FlashSale = () => {
   const navigation = useSmartNavigation();
 
   const { data, isLoading } = useQuery({
-    queryKey: ["flashSale", "home"],
+    queryKey: ["flash-sale", "home"],
     queryFn: () =>
       flashSaleService.getFlashSale({
         skip: 0,
@@ -494,7 +494,8 @@ export const HomeScreen: React.FC = () => {
       queryClient.invalidateQueries({
         predicate: (query) =>
           query.queryKey.includes("home") ||
-          query.queryKey.includes("categories"),
+          query.queryKey.includes("categories") ||
+          query.queryKey.includes("flash-sale"),
       }),
     ]);
     setIsRefreshing(false);

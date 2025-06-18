@@ -135,7 +135,12 @@ export const useOrderCalculation = ({
       onError: (error) => {
         const message = getErrorMessage(error, "Lỗi khi tính toán đơn hàng");
 
-        if (message?.includes("Voucher") || message?.includes("voucher")) {
+        if (
+          message?.includes("Voucher") ||
+          message?.includes("voucher") ||
+          message?.includes("khuyến mãi") ||
+          message?.includes("khuyến mãi")
+        ) {
           console.log("error", justAddedVoucher.current);
 
           if (justAddedVoucher.current === "croppeeVoucher") {

@@ -3,7 +3,7 @@ import {
   useNavigation,
   useRoute,
 } from "@react-navigation/native";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAtom, useAtomValue } from "jotai";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ScrollView, View } from "react-native";
@@ -61,6 +61,8 @@ const Payment = () => {
     queryKey: ["payment-methods"],
     queryFn: () => paymentService.getAvailablePaymentMethods(),
   });
+
+  const queryClient = useQueryClient();
 
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
     useState<string>("");
@@ -149,6 +151,13 @@ const Payment = () => {
         onSuccess: (data) => {
           setCheckoutData(data);
           onOpenSuccess();
+          queryClient.invalidateQueries({
+            predicate: (query) =>
+              query.queryKey.includes("flash-sale") ||
+              query.queryKey.includes("home") ||
+              query.queryKey.includes("private-offer-products") ||
+              query.queryKey.includes("recently-viewed-products"),
+          });
         },
         onError: (error) => {
           const message = getErrorMessage(error, "Lỗi khi đặt hàng");

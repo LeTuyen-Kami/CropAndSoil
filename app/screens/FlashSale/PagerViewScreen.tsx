@@ -1,7 +1,7 @@
 import { FlashList } from "@shopify/flash-list";
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   RefreshControl,
@@ -37,6 +37,7 @@ import TabItem from "./TabItem";
 import Header from "./Header";
 import dayjs from "dayjs";
 import { COLORS } from "~/constants/theme";
+import { useIsFocused } from "@react-navigation/native";
 
 const BannerItem = () => {
   return (
@@ -183,6 +184,9 @@ const BottomItem = () => {
 };
 
 const PagerViewScreen = ({ timeSlot }: { timeSlot: string }) => {
+  const isFocused = useIsFocused();
+  const flashListRef = useRef<FlashList<any>>(null);
+
   const { data, isLoading, isRefresh, refresh, hasNextPage, fetchNextPage } =
     usePagination(
       (data) => {
@@ -193,6 +197,13 @@ const PagerViewScreen = ({ timeSlot }: { timeSlot: string }) => {
         enabled: !!timeSlot,
       }
     );
+
+  useEffect(() => {
+    if (isFocused) {
+      flashListRef.current?.scrollToOffset({ offset: 0 });
+      refresh();
+    }
+  }, [isFocused]);
 
   const renderItem = ({ item }: { item: any }) => {
     if (item.type === "banner") {
@@ -255,6 +266,7 @@ const PagerViewScreen = ({ timeSlot }: { timeSlot: string }) => {
 
   return (
     <FlashList
+      ref={flashListRef}
       renderItem={renderItem}
       estimatedItemSize={250}
       data={flashlistData}

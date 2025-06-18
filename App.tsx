@@ -52,8 +52,6 @@ const enableSentry = jotaiStore.get(devModeAtom)?.enableSentry ?? false;
 if (enableSentry) {
   Sentry.init({
     dsn: ENV.EXPO_PUBLIC_SENTRY_DSN,
-    replaysOnErrorSampleRate: 1.0,
-    replaysSessionSampleRate: 0.1,
   });
 }
 const Boundary = withErrorBoundary(App);
