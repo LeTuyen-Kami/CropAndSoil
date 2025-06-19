@@ -388,7 +388,7 @@ const ShoppingCart = () => {
         leftClassName="w-10"
         className="border-0"
         rightComponent={
-          <TouchableOpacity className="relative flex-row justify-end w-10">
+          <TouchableOpacity className="relative flex-row justify-end w-10 opacity-0">
             <Image
               source={imagePaths.icMessages}
               style={{ width: 20, height: 20, tintColor: "#393B45" }}

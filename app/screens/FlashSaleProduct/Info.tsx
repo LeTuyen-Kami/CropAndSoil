@@ -183,7 +183,6 @@ const Info = ({ id }: { id: string | number }) => {
   } = useQuery({
     queryKey: ["flash-sale-product-detail", id],
     queryFn: () => flashSaleService.getFlashItemDetail(id),
-    staleTime: 1000 * 60 * 5,
     enabled: !!id,
     select: (data) => {
       return {
@@ -332,10 +331,12 @@ const Info = ({ id }: { id: string | number }) => {
             productDetail?.flashSaleVariation?.[0]?.salePrice && (
             <View style={styles.discountBadge}>
               <Text style={styles.discountText}>
-                {((productDetail?.flashSaleVariation?.[0]?.regularPrice -
-                  productDetail?.flashSaleVariation?.[0]?.salePrice) /
-                  productDetail?.flashSaleVariation?.[0]?.regularPrice) *
-                  100}
+                {Math.round(
+                  ((productDetail?.flashSaleVariation?.[0]?.regularPrice -
+                    productDetail?.flashSaleVariation?.[0]?.salePrice) /
+                    productDetail?.flashSaleVariation?.[0]?.regularPrice) *
+                    100
+                )}
                 %
               </Text>
             </View>

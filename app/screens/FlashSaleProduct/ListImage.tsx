@@ -5,7 +5,7 @@ import { Pressable } from "react-native";
 import { FlatList } from "react-native";
 
 import { useNavigation } from "@react-navigation/native";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { deepEqual } from "fast-equals";
 import { View } from "react-native";
 import Gallery, { GalleryItem } from "~/components/common/Galery";
@@ -20,6 +20,7 @@ const ListImage = ({ id }: { id: string | number }) => {
   const [images, setImages] = useState<GalleryItem[]>([]);
   const flatListRef = useRef<FlatList>(null);
   const navigation = useNavigation();
+  const queryClient = useQueryClient();
   const { data: productDetail, error } = useQuery({
     queryKey: ["flash-sale-product-detail", id],
     queryFn: () => flashSaleService.getFlashItemDetail(id),
@@ -71,6 +72,11 @@ const ListImage = ({ id }: { id: string | number }) => {
     if (error) {
       const errorMessage = getErrorMessage(error, "Sản phẩm không tồn tại");
       toast.error(errorMessage);
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          query.queryKey.includes("flash-sale") ||
+          query.queryKey.includes("home"),
+      });
       navigation.goBack();
     }
   }, [error]);

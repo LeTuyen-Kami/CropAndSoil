@@ -28,7 +28,7 @@ import {
 import { paymentService } from "~/services/api/payment.service";
 import { IVoucher } from "~/services/api/shop.service";
 import { selectedAddressAtom, selectedVoucherAtom } from "~/store/atoms";
-import { getErrorMessage } from "~/utils";
+import { ENV, getErrorMessage } from "~/utils";
 import { storeAtom } from "../atom";
 import AddressItem from "./AddressItem";
 import DetailPayment from "./DetailPayment";
@@ -37,6 +37,7 @@ import ModalSuccess from "./ModalSuccess";
 import PaymentMenu from "./PaymentMenu";
 import PaymentMethod from "./PaymentMethod";
 import PaymentStore from "./PaymentStore";
+import * as WebBrowser from "expo-web-browser";
 
 const Payment = () => {
   const navigation = useNavigation<RootStackScreenProps<"Payment">>();
@@ -273,15 +274,15 @@ const Payment = () => {
         contentContainerStyle={{ paddingBottom: 140 }}
       >
         <AddressItem address={selectedAddress!} />
-        {selectedStore?.map((store) => (
+        {calculatedData?.orderShops?.map((store) => (
           <PaymentStore
-            key={store.id}
+            key={store?.shop?.id}
             store={store}
             calculatedData={calculatedData!}
-            onMessagePress={() => handleOpenMessageModal(store.id)}
-            message={storeMessage[store.id]}
+            onMessagePress={() => handleOpenMessageModal(store?.shop?.id + "")}
+            message={storeMessage[store?.shop?.id + ""]}
             onShopVoucherPress={() => {
-              setVoucherShopId(store.id);
+              setVoucherShopId(store?.shop?.id + "");
               setOpenShopVoucherModal(true);
             }}
           />
@@ -298,7 +299,7 @@ const Payment = () => {
             <Text
               className="text-sm leading-tight text-primary"
               onPress={() => {
-                console.log("pressed");
+                WebBrowser.openBrowserAsync(ENV.EXPO_PUBLIC_TERMS_LINK);
               }}
             >
               Điều khoản Cropee.

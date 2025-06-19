@@ -147,9 +147,9 @@ const ProductItem = ({
             )}
           </View>
           {!!(hasSoldCount || hasRating) && (
-            <View className="flex-row justify-between items-center">
+            <View className="flex-row flex-grow justify-between items-center mt-1">
               {!!hasSoldCount && (
-                <View className="flex-1 mt-1">
+                <View className="flex-1 mt-auto">
                   <View className="bg-secondary-100 rounded-full h-[14] w-full overflow-hidden">
                     <View
                       className="h-full rounded-full bg-secondary-500"

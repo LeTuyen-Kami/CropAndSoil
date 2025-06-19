@@ -1,10 +1,15 @@
 import { AntDesign } from "@expo/vector-icons";
 import { ResizeMode, Video } from "expo-av";
 import { Image } from "expo-image";
-import React, { useCallback, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import {
   Dimensions,
-  FlatList,
   Modal,
   StatusBar,
   StyleSheet,
@@ -15,17 +20,23 @@ import {
   Gesture,
   GestureDetector,
   GestureHandlerRootView,
+  FlatList,
+  NativeGesture,
 } from "react-native-gesture-handler";
 import Animated, {
+  clamp,
   interpolate,
   runOnJS,
+  runOnUI,
+  SharedValue,
+  useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text } from "~/components/ui/text";
-import { screen } from "~/utils";
+import { isIOS, screen } from "~/utils";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -55,20 +66,16 @@ const Gallery = ({
   const translateY = useSharedValue(0);
   const insets = useSafeAreaInsets();
   const videoRefs = useRef<{ [key: number]: Video | null }>({});
+  const [scrollEnabled, setScrollEnabled] = useState(true);
+  const resetRef = useRef<any>(null);
 
+  const currentImageScale = useSharedValue(1);
   // Reset values when gallery is opened
   React.useEffect(() => {
     if (visible) {
       translateY.value = 0;
       setCurrentIndex(initialIndex);
-
-      // Scroll to the initial item
-      if (flatListRef.current) {
-        flatListRef.current.scrollToIndex({
-          index: initialIndex,
-          animated: false,
-        });
-      }
+      currentImageScale.value = 1;
     }
   }, [visible, initialIndex]);
 
@@ -111,7 +118,19 @@ const Gallery = ({
         // Return to position if not swiped enough to dismiss
         translateY.value = withTiming(0);
       }
-    });
+    })
+    .enabled(currentImageScale.value === 1);
+
+  useAnimatedReaction(
+    () => currentImageScale.value,
+    (scale) => {
+      if (scale === 1) {
+        runOnJS(setScrollEnabled)(true);
+      } else {
+        runOnJS(setScrollEnabled)(false);
+      }
+    }
+  );
 
   const backgroundOpacity = useAnimatedStyle(() => {
     return {
@@ -128,7 +147,11 @@ const Gallery = ({
   const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
     if (viewableItems.length > 0) {
       setCurrentIndex(viewableItems[0].index);
+      console.log("viewableItems", viewableItems[0].index);
+
       onChangeIndex?.(viewableItems[0].index);
+
+      currentImageScale.value = 1;
 
       Object.values(videoRefs.current).forEach((videoRef) => {
         if (videoRef) {
@@ -138,14 +161,15 @@ const Gallery = ({
     }
   }).current;
 
-  if (!visible) return null;
-
   return (
-    <GestureHandlerRootView style={[StyleSheet.absoluteFill, { zIndex: 1000 }]}>
-      <Modal visible={visible} transparent={true}>
+    <Modal
+      visible={visible}
+      transparent={true}
+      animationType="fade"
+      statusBarTranslucent
+    >
+      <GestureHandlerRootView>
         <Animated.View style={[styles.container, backgroundOpacity]}>
-          <StatusBar hidden />
-
           <TouchableOpacity
             style={[styles.closeButton, { top: insets.top }]}
             onPress={() => handleClose(true)}
@@ -168,6 +192,7 @@ const Gallery = ({
                   index: currentIndex - 1,
                   animated: true,
                 });
+                resetRef.current?.reset();
               }}
             >
               <AntDesign name="left" size={30} color="white" />
@@ -183,6 +208,7 @@ const Gallery = ({
                   index: currentIndex + 1,
                   animated: true,
                 });
+                resetRef.current?.reset();
               }}
             >
               <AntDesign name="right" size={30} color="white" />
@@ -191,42 +217,60 @@ const Gallery = ({
 
           <GestureDetector gesture={panGesture}>
             <Animated.View style={[styles.scrollContainer, translateStyle]}>
-              <FlatList
-                ref={flatListRef}
-                data={images}
-                horizontal
-                pagingEnabled
-                initialNumToRender={4}
-                maxToRenderPerBatch={4}
-                windowSize={3}
-                showsHorizontalScrollIndicator={false}
-                initialScrollIndex={initialIndex}
-                onViewableItemsChanged={onViewableItemsChanged}
-                viewabilityConfig={{
-                  itemVisiblePercentThreshold: 50,
-                }}
-                getItemLayout={(_, index) => ({
-                  length: SCREEN_WIDTH,
-                  offset: SCREEN_WIDTH * index,
-                  index,
-                })}
-                keyExtractor={(_, index) => index.toString()}
-                renderItem={({ item, index }) => (
-                  <View style={styles.slideContainer}>
-                    {item.type === "image" ? (
-                      <GalleryImageItem url={item.url} onClose={handleClose} />
-                    ) : (
-                      <GalleryVideoItem
-                        url={item.url}
-                        thumbnail={item.thumbnail}
-                        ref={(ref) => {
-                          videoRefs.current[index] = ref;
-                        }}
-                      />
-                    )}
-                  </View>
-                )}
-              />
+              {visible && (
+                <FlatList
+                  onContentSizeChange={() => {
+                    flatListRef.current?.scrollToIndex({
+                      index: initialIndex,
+                      animated: true,
+                    });
+                  }}
+                  ref={flatListRef}
+                  data={images}
+                  scrollEnabled={scrollEnabled}
+                  horizontal
+                  pagingEnabled
+                  initialNumToRender={4}
+                  maxToRenderPerBatch={4}
+                  windowSize={3}
+                  initialScrollIndex={initialIndex}
+                  onScrollToIndexFailed={() => {
+                    console.log("scroll to index failed");
+                  }}
+                  showsHorizontalScrollIndicator={false}
+                  onViewableItemsChanged={onViewableItemsChanged}
+                  viewabilityConfig={{
+                    itemVisiblePercentThreshold: 50,
+                    // waitForInteraction: true,
+                  }}
+                  getItemLayout={(_, index) => ({
+                    length: SCREEN_WIDTH,
+                    offset: SCREEN_WIDTH * index,
+                    index,
+                  })}
+                  keyExtractor={(_, index) => index.toString()}
+                  renderItem={({ item, index }) => (
+                    <View style={styles.slideContainer}>
+                      {item.type === "image" ? (
+                        <GalleryImageItem
+                          url={item.url}
+                          onClose={handleClose}
+                          onScaleChange={currentImageScale}
+                          resetRef={resetRef}
+                        />
+                      ) : (
+                        <GalleryVideoItem
+                          url={item.url}
+                          thumbnail={item.thumbnail}
+                          ref={(ref) => {
+                            videoRefs.current[index] = ref;
+                          }}
+                        />
+                      )}
+                    </View>
+                  )}
+                />
+              )}
             </Animated.View>
           </GestureDetector>
 
@@ -252,36 +296,54 @@ const Gallery = ({
             ))}
           </View>
         </Animated.View>
-      </Modal>
-    </GestureHandlerRootView>
+      </GestureHandlerRootView>
+    </Modal>
   );
 };
 
 interface GalleryImageItemProps {
   url: string;
   onClose: () => void;
+  onScaleChange: SharedValue<number>;
+  resetRef: React.RefObject<any>;
 }
 
-const GalleryImageItem = ({ url, onClose }: GalleryImageItemProps) => {
+const GalleryImageItem = ({
+  url,
+  onClose,
+  onScaleChange,
+  resetRef,
+}: GalleryImageItemProps) => {
   const scale = useSharedValue(1);
   const savedScale = useSharedValue(1);
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
+  const prevTranslationX = useSharedValue(0);
+  const prevTranslationY = useSharedValue(0);
+  const [enabled, setEnabled] = useState(false);
+
+  React.useEffect(() => {
+    onScaleChange.value = scale.value;
+  }, []);
 
   // Pinch gesture for zooming
   const pinchGesture = Gesture.Pinch()
     .onUpdate((e) => {
       scale.value = savedScale.value * e.scale;
+      onScaleChange.value = scale.value;
     })
     .onEnd(() => {
       if (scale.value < 1) {
         scale.value = withTiming(1);
         savedScale.value = 1;
+        onScaleChange.value = 1;
       } else if (scale.value > 3) {
         scale.value = withTiming(3);
         savedScale.value = 3;
+        onScaleChange.value = 3;
       } else {
         savedScale.value = scale.value;
+        onScaleChange.value = scale.value;
       }
     });
 
@@ -294,13 +356,67 @@ const GalleryImageItem = ({ url, onClose }: GalleryImageItemProps) => {
         savedScale.value = 1;
         translateX.value = withTiming(0);
         translateY.value = withTiming(0);
+        onScaleChange.value = 1;
       } else {
         scale.value = withTiming(2);
         savedScale.value = 2;
+        onScaleChange.value = 2;
       }
     });
 
-  const gestures = Gesture.Simultaneous(pinchGesture, doubleTapGesture);
+  useAnimatedReaction(
+    () => scale.value,
+    (value) => {
+      runOnJS(setEnabled)(value > 1);
+    }
+  );
+
+  useImperativeHandle(resetRef, () => ({
+    reset: () => {
+      scale.value = withTiming(1);
+      savedScale.value = 1;
+      translateX.value = withTiming(0);
+      translateY.value = withTiming(0);
+      onScaleChange.value = 1;
+    },
+  }));
+
+  const panGesture = Gesture.Pan()
+    .minDistance(1)
+    .enabled(enabled)
+    .onStart(() => {
+      if (scale.value === 1) {
+        return;
+      }
+
+      prevTranslationX.value = translateX.value;
+      prevTranslationY.value = translateY.value;
+    })
+    .onUpdate((event) => {
+      if (scale.value === 1) {
+        return;
+      }
+
+      const maxTranslateX = screen.width / 2 - 50;
+      const maxTranslateY = screen.height / 2 - 50;
+
+      translateX.value = clamp(
+        prevTranslationX.value + event.translationX,
+        -maxTranslateX,
+        maxTranslateX
+      );
+      translateY.value = clamp(
+        prevTranslationY.value + event.translationY,
+        -maxTranslateY,
+        maxTranslateY
+      );
+    });
+
+  const gestures = Gesture.Simultaneous(
+    pinchGesture,
+    doubleTapGesture,
+    panGesture
+  );
 
   const animatedStyle = useAnimatedStyle(() => {
     return {

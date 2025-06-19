@@ -107,7 +107,7 @@ const FlashSale = () => {
                   }
                   key={item.id}
                   name={item?.flashSaleProduct?.name}
-                  price={item?.salePrice}
+                  price={item?.salePrice || item?.flashSaleVariation?.salePrice}
                   originalPrice={item?.flashSaleVariation?.regularPrice}
                   discount={item?.discountPercent}
                   soldCount={item?.bought}
@@ -119,6 +119,7 @@ const FlashSale = () => {
                   width={Math.max((screen.width - 24) / 2.2, 180)}
                   onSale={true}
                   id={item?.id}
+                  className="flex-grow"
                 />
               )}
               ItemSeparatorComponent={() => <View className="w-2" />}
@@ -322,7 +323,7 @@ const SectionFlashSaleProducts = ({
 
 const HomeCarousel = () => {
   const { data, isLoading } = useQuery({
-    queryKey: ["homeCarousel", "home"],
+    queryKey: ["home"],
     queryFn: () => homeService.getHome(),
     staleTime: 1000 * 60 * 5,
     select: (data) => data.sliders,
@@ -480,6 +481,7 @@ export const HomeScreen: React.FC = () => {
   >({});
 
   const navigation = useNavigation();
+
   const onPressMessages = () => {
     console.log("messages");
   };

@@ -12,11 +12,10 @@ import { Feather } from "@expo/vector-icons";
 import { imagePaths } from "~/assets/imagePath";
 import ScreenContainer from "~/components/common/ScreenContainer";
 import PaymentItem from "./PaymentItem";
-import { Store } from "../types";
 import { useNavigation } from "@react-navigation/native";
 import { RootStackRouteProp, RootStackScreenProps } from "~/navigation/types";
 import { cn } from "~/lib/utils";
-import { ICalculateResponse } from "~/services/api/order.service";
+import { ICalculateResponse, OrderShop } from "~/services/api/order.service";
 import { convertToK } from "~/utils";
 import { deepEqual } from "fast-equals";
 
@@ -27,7 +26,7 @@ const PaymentStore = ({
   onShopVoucherPress,
   calculatedData,
 }: {
-  store: Store;
+  store: OrderShop;
   onMessagePress: () => void;
   message: string;
   onShopVoucherPress: () => void;
@@ -36,7 +35,7 @@ const PaymentStore = ({
   const navigation = useNavigation<RootStackScreenProps<"Payment">>();
 
   const products = useMemo(() => {
-    return store.items.filter((item) => item.isSelected);
+    return store?.items;
   }, [store]);
 
   const formatPrice = (value: number) => {
@@ -49,13 +48,13 @@ const PaymentStore = ({
   );
 
   const totalPrice = products.reduce(
-    (acc, product) => acc + product.price * product.quantity,
+    (acc, product) => acc + product?.subtotal * product.quantity,
     0
   );
 
   const totalPriceWithVoucher = useMemo(() => {
     const calculatedOrderShop = calculatedData?.orderShops?.find(
-      (orderShop) => orderShop.shop.id + "" === store.id + ""
+      (orderShop) => orderShop.shop.id + "" === store?.shop?.id + ""
     );
 
     const originalPrice = calculatedOrderShop?.subtotal || 0;
@@ -66,10 +65,10 @@ const PaymentStore = ({
       (calculatedOrderShop?.shopShippingVoucherDiscount || 0);
 
     return Math.max(finalPrice, 0);
-  }, [calculatedData, store?.id]);
+  }, [calculatedData, store?.shop?.id]);
 
   const navigationToShop = () => {
-    navigation.navigate("Shop", { id: store.id });
+    navigation.navigate("Shop", { id: store?.shop?.id });
   };
 
   const navigationToProduct = (productId: string) => {
@@ -78,7 +77,7 @@ const PaymentStore = ({
 
   const orderShop = useMemo(() => {
     return calculatedData?.orderShops?.find(
-      (orderShop) => orderShop.shop.id + "" === store.id + ""
+      (orderShop) => orderShop.shop.id + "" === store?.shop?.id + ""
     );
   }, [calculatedData]);
 
@@ -97,7 +96,7 @@ const PaymentStore = ({
             className="font-medium text-sm text-[#383B45]"
             numberOfLines={1}
           >
-            {store.name}
+            {store?.shop?.shopName}
           </Text>
         </Pressable>
       </View>
@@ -106,15 +105,14 @@ const PaymentStore = ({
       <View className="gap-4 py-4">
         {products.map((product) => (
           <PaymentItem
-            key={product.id}
-            id={product.id}
+            key={product.productId}
             name={product.name}
-            image={product.image}
+            image={product?.variation?.thumbnail || product?.product?.thumbnail}
             price={product?.variation?.salePrice || 0}
             originalPrice={product?.variation?.regularPrice || 0}
             type={product?.variation?.name || ""}
             quantity={product.quantity}
-            onPress={() => navigationToProduct(product.productId)}
+            onPress={() => navigationToProduct(product.productId + "")}
           />
         ))}
       </View>

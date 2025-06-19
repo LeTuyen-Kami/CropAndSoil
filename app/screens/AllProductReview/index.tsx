@@ -52,6 +52,7 @@ const RatingFilter = ({
       <FlashList
         horizontal
         data={items}
+        extraData={selectedItem}
         renderItem={({ item }) => (
           <TouchableOpacity
             key={item.id}

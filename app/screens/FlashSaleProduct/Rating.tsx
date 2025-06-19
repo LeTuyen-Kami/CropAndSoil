@@ -77,6 +77,10 @@ const Rating: React.FC<RatingProps> = ({ id }) => {
     });
   };
 
+  if (!productDetail?.averageRating || !productDetail?.reviewCount) {
+    return null;
+  }
+
   return (
     <View className="mt-2 w-full bg-white rounded-3xl">
       {/* <AllMedia /> */}

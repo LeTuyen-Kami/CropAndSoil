@@ -12,6 +12,7 @@ import {
 } from "~/services/api/order.service";
 import { selectedAddressAtom } from "~/store/atoms";
 import { getErrorMessage } from "~/utils";
+import { ERROR_CODE } from "~/utils/contants";
 
 interface PaymentMethod {
   key: string;
@@ -132,15 +133,11 @@ export const useOrderCalculation = ({
           setLoading(false);
         }
       },
-      onError: (error) => {
+      onError: (error: any) => {
         const message = getErrorMessage(error, "Lỗi khi tính toán đơn hàng");
+        const code = error?.response?.data?.code;
 
-        if (
-          message?.includes("Voucher") ||
-          message?.includes("voucher") ||
-          message?.includes("khuyến mãi") ||
-          message?.includes("khuyến mãi")
-        ) {
+        if (code === ERROR_CODE.MINIMUM_AMOUNT_APPLYING_VOUCHER) {
           console.log("error", justAddedVoucher.current);
 
           if (justAddedVoucher.current === "croppeeVoucher") {

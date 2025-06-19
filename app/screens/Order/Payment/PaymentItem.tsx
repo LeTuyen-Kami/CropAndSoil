@@ -4,7 +4,6 @@ import { Text } from "~/components/ui/text";
 import { Image } from "expo-image";
 
 interface PaymentItemProps {
-  id: string;
   name: string;
   image: any;
   type: string;
@@ -15,7 +14,6 @@ interface PaymentItemProps {
 }
 
 const PaymentItem = ({
-  id,
   name,
   image,
   type,

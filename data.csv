@@ -1,0 +1,34 @@
+botle code,request,response
+"HTTPS://ST4.CH/Q/U5GBPNASSL0918MPOG2GA0R78YZE4UK5","{
+  ""searchCode"": ""HTTPS://ST4.CH/Q/U5GBPNASSL0918MPOG2GA0R78YZE4UK5"",
+  ""queryType"": 1
+}","{
+  ""code"": 200,
+  ""message"": ""success"",
+  ""data"": {
+    ""searchCode"": null,
+    ""cartonCode"": null,
+    ""capCode"": null,
+    ""allCapCode"": null,
+    ""productNo"": null,
+    ""productName"": null,
+    ""batchNo"": null,
+    ""productionTime"": null,
+    ""organizationNo"": null,
+    ""organizationName"": null,
+    ""outboundNo"": null,
+    ""outboundTime"": null,
+    ""warehouseNo"": null,
+    ""warehouseName"": null,
+    ""distributorNo"": null,
+    ""distributorName"": null,
+    ""retailerNo"": null,
+    ""retailerName"": null,
+    ""deliveryTime_DT"": null
+  },
+  ""timestamp"": 1750236396226,
+  ""traceId"": ""f6ab48de0e6e4a94a9a63ebd4d2aad7d.135.17502363960696237"",
+  ""exception"": null,
+  ""meta"": null,
+  ""ext"": null
+}"

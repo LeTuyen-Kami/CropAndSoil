@@ -11,8 +11,6 @@ interface FlashSaleBadgeProps {
 }
 
 const FlashSaleBadge = ({ expiredTime, onExpire }: FlashSaleBadgeProps) => {
-  console.log("expiredTime", expiredTime);
-
   if (!expiredTime) return null;
 
   const isExpired = dayjs(expiredTime).isBefore(dayjs());

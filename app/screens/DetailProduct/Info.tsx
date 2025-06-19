@@ -175,7 +175,6 @@ const Info = ({ id }: { id: string | number }) => {
   } = useQuery({
     queryKey: ["product-detail", id],
     queryFn: () => productService.getProductDetail(id),
-    staleTime: 1000 * 60 * 5,
     enabled: !!id,
   });
 
@@ -293,9 +292,11 @@ const Info = ({ id }: { id: string | number }) => {
           productDetail?.regularPrice > productDetail?.salePrice && (
             <View style={styles.discountBadge}>
               <Text style={styles.discountText}>
-                {((productDetail?.regularPrice - productDetail?.salePrice) /
-                  productDetail?.regularPrice) *
-                  100}
+                {Math.round(
+                  ((productDetail?.regularPrice - productDetail?.salePrice) /
+                    productDetail?.regularPrice) *
+                    100
+                )}
                 %
               </Text>
             </View>
