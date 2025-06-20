@@ -17,6 +17,7 @@ const DEV_ENV = {
   EXPO_PUBLIC_POLICY_LINK: "https://cropee.vn/chinh-sach-bao-mat",
   EXPO_PUBLIC_TERMS_LINK: "https://cropee.vn/dieu-khoan-su-dung",
   EXPO_PUBLIC_INTRO_LINK: "https://cropee.vn/gioi-thieu-ve-cropee/",
+  EXPO_PUBLIC_HELP_CENTER_LINK: "https://cropee.vn/lien-he/",
 };
 
 const PROD_ENV = {
@@ -29,6 +30,7 @@ const PROD_ENV = {
   EXPO_PUBLIC_POLICY_LINK: "https://cropee.vn/chinh-sach-bao-mat",
   EXPO_PUBLIC_TERMS_LINK: "https://cropee.vn/dieu-khoan-su-dung",
   EXPO_PUBLIC_INTRO_LINK: "https://cropee.vn/gioi-thieu-ve-cropee/",
+  EXPO_PUBLIC_HELP_CENTER_LINK: "https://cropee.vn/lien-he/",
 };
 
 export const ENV = PROD_ENV;

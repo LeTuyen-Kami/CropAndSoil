@@ -44,6 +44,7 @@ import {
   calculateOnSale,
   checkCanRender,
   chunkArray,
+  ENV,
   isIOS,
   screen,
 } from "~/utils";
@@ -487,7 +488,11 @@ export const HomeScreen: React.FC = () => {
   };
 
   const onPressQuestionCircle = () => {
-    navigation.navigate("HelpCenter");
+    // WebBrowser.openBrowserAsync(ENV.EXPO_PUBLIC_HELP_CENTER_LINK);
+    // navigation.navigate("HelpCenter");
+    navigation.navigate("WebViewScreen", {
+      url: ENV.EXPO_PUBLIC_HELP_CENTER_LINK,
+    });
   };
 
   const onRefresh = async () => {

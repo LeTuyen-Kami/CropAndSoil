@@ -54,6 +54,7 @@ import ProductByScreen from "~/screens/ProductBy";
 import DevMode from "~/screens/DevMode";
 import useInitSelectedAddress from "~/hooks/useInitSelectedAddress";
 import useSyncDevMode from "~/hooks/useSyncDevMode";
+import WebViewScreen from "~/screens/WebViewScreen";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -171,6 +172,7 @@ export const AppNavigator = () => {
             presentation: "modal",
           }}
         />
+        <Stack.Screen name="WebViewScreen" component={WebViewScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

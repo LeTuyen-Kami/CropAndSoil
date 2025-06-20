@@ -91,6 +91,9 @@ export type RootStackParamList = {
     title: string;
   };
   DevMode: undefined;
+  WebViewScreen: {
+    url: string;
+  };
 };
 
 // Create a type for the navigation prop for stack screens

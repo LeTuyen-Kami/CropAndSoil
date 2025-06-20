@@ -25,7 +25,11 @@ const LoginScreen = () => {
   };
 
   const handleOpenHelpCenter = () => {
-    navigation.navigate("HelpCenter");
+    // WebBrowser.openBrowserAsync(ENV.EXPO_PUBLIC_HELP_CENTER_LINK);
+    // navigation.navigate("HelpCenter");
+    navigation.navigate("WebViewScreen", {
+      url: ENV.EXPO_PUBLIC_HELP_CENTER_LINK,
+    });
   };
 
   useEffect(() => {
