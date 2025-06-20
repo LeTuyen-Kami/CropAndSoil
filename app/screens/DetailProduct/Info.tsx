@@ -292,10 +292,13 @@ const Info = ({ id }: { id: string | number }) => {
           productDetail?.regularPrice > productDetail?.salePrice && (
             <View style={styles.discountBadge}>
               <Text style={styles.discountText}>
-                {Math.round(
-                  ((productDetail?.regularPrice - productDetail?.salePrice) /
-                    productDetail?.regularPrice) *
-                    100
+                -
+                {Math.abs(
+                  Math.round(
+                    ((productDetail?.regularPrice - productDetail?.salePrice) /
+                      productDetail?.regularPrice) *
+                      100
+                  )
                 )}
                 %
               </Text>

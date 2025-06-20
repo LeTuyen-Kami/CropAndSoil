@@ -331,11 +331,14 @@ const Info = ({ id }: { id: string | number }) => {
             productDetail?.flashSaleVariation?.[0]?.salePrice && (
             <View style={styles.discountBadge}>
               <Text style={styles.discountText}>
-                {Math.round(
-                  ((productDetail?.flashSaleVariation?.[0]?.regularPrice -
-                    productDetail?.flashSaleVariation?.[0]?.salePrice) /
-                    productDetail?.flashSaleVariation?.[0]?.regularPrice) *
-                    100
+                -
+                {Math.abs(
+                  Math.round(
+                    ((productDetail?.flashSaleVariation?.[0]?.regularPrice -
+                      productDetail?.flashSaleVariation?.[0]?.salePrice) /
+                      productDetail?.flashSaleVariation?.[0]?.regularPrice) *
+                      100
+                  )
                 )}
                 %
               </Text>
