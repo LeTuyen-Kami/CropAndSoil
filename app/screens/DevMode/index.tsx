@@ -9,6 +9,7 @@ import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 import { devModeAtom, resetDevMode } from "~/store/atoms";
+import { getDeviceId } from "~/utils";
 
 const DevModeItem = ({
   title,
@@ -169,6 +170,11 @@ const DevMode = () => {
             >
               <Text className="text-red-600">Reset to Default</Text>
             </Button>
+          </View>
+          <View className="justify-center items-center py-2">
+            <Text className="text-[10px] text-[#676767]" selectable>
+              {getDeviceId()}
+            </Text>
           </View>
         </KeyboardAwareScrollView>
       </View>

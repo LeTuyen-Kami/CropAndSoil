@@ -11,10 +11,10 @@ const SupportSection = () => {
 
   const onPressHelpCenter = () => {
     // navigation.navigate("HelpCenter");
-    // WebBrowser.openBrowserAsync(ENV.EXPO_PUBLIC_HELP_CENTER_LINK);
-    navigation.navigate("WebViewScreen", {
-      url: ENV.EXPO_PUBLIC_HELP_CENTER_LINK,
-    });
+    WebBrowser.openBrowserAsync(ENV.EXPO_PUBLIC_HELP_CENTER_LINK);
+    // navigation.navigate("WebViewScreen", {
+    //   url: ENV.EXPO_PUBLIC_HELP_CENTER_LINK,
+    // });
   };
 
   const onPressTalkWithCropee = () => {

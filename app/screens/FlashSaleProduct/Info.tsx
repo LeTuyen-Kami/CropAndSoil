@@ -176,6 +176,8 @@ const Info = ({ id }: { id: string | number }) => {
   const navigation = useSmartNavigation();
   const [isLiked, setIsLiked] = useState(false);
 
+  const isMaskPrice = auth?.isLoggedIn && auth?.user?.isApproved;
+
   const {
     data: productDetail,
     refetch,
@@ -300,7 +302,7 @@ const Info = ({ id }: { id: string | number }) => {
       <View style={styles.priceContainer}>
         <View style={styles.priceContent}>
           <Text style={styles.discountedPrice}>
-            {auth?.isLoggedIn
+            {isMaskPrice
               ? formatPrice(
                   productDetail?.flashSaleVariation?.[0]?.salePrice ||
                     productDetail?.flashSaleVariation?.[0]?.regularPrice
@@ -315,7 +317,7 @@ const Info = ({ id }: { id: string | number }) => {
             productDetail?.flashSaleVariation?.[0]?.salePrice <
               productDetail?.flashSaleVariation?.[0]?.regularPrice && (
               <Text style={styles.originalPrice}>
-                {auth?.isLoggedIn
+                {isMaskPrice
                   ? formatPrice(
                       productDetail?.flashSaleVariation?.[0]?.regularPrice
                     )

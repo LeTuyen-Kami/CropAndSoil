@@ -173,10 +173,12 @@ const Info = ({ id }: { id: string | number }) => {
     refetch,
     isLoading,
   } = useQuery({
-    queryKey: ["product-detail", id],
+    queryKey: ["productDetail", id],
     queryFn: () => productService.getProductDetail(id),
     enabled: !!id,
   });
+
+  const isMaskPrice = auth?.isLoggedIn && auth?.user?.isApproved;
 
   const { data: voucher } = useQuery({
     queryKey: ["vouchers", (productDetail?.shop?.id || "")?.toString()],
@@ -269,7 +271,7 @@ const Info = ({ id }: { id: string | number }) => {
       <View style={styles.priceContainer}>
         <View style={styles.priceContent}>
           <Text style={styles.discountedPrice}>
-            {auth?.isLoggedIn
+            {isMaskPrice
               ? formatPrice(
                   productDetail?.salePrice || productDetail?.regularPrice
                 )
@@ -281,7 +283,7 @@ const Info = ({ id }: { id: string | number }) => {
             productDetail?.salePrice &&
             productDetail?.regularPrice > productDetail?.salePrice && (
               <Text style={styles.originalPrice}>
-                {auth?.isLoggedIn
+                {isMaskPrice
                   ? formatPrice(productDetail?.regularPrice)
                   : maskVNDPriceBeforeSale(productDetail?.regularPrice)}
               </Text>

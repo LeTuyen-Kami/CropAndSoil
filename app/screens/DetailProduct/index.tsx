@@ -29,6 +29,10 @@ import ShopInfo from "./ShopInfo";
 import TopProduct from "./TopProduct";
 import { cartService } from "~/services/api/cart.service";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
+import { useAtomValue } from "jotai";
+import { authAtom } from "~/store/atoms";
+import { toast } from "~/components/common/Toast";
+import { INVALID_ACCOUNT_MESSAGE } from "~/utils/contants";
 
 const AnimatedFlashList = Animated.createAnimatedComponent(
   FlashList as unknown as React.ComponentType<FlashListProps<any>>
@@ -40,6 +44,9 @@ const AnimatedTouchableOpacity =
 const Header = ({ scrollY }: { scrollY: SharedValue<number> }) => {
   const { top } = useSafeAreaInsets();
   const navigation = useSmartNavigation();
+  const auth = useAtomValue(authAtom);
+
+  const isApproved = auth?.isLoggedIn && auth?.user?.isApproved;
 
   const { data: detailCart } = useQuery({
     queryKey: ["detail-cart"],
@@ -56,15 +63,15 @@ const Header = ({ scrollY }: { scrollY: SharedValue<number> }) => {
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
-      opacity: interpolate(scrollY.value, [0, screen.width], [0, 1], "clamp"),
+      opacity: interpolate(scrollY.get(), [0, screen.width], [0, 1], "clamp"),
     };
   });
 
   const buttonAnimatedStyle = useAnimatedStyle(() => {
     return {
-      opacity: interpolate(scrollY.value, [0, screen.width], [0.9, 1], "clamp"),
+      opacity: interpolate(scrollY.get(), [0, screen.width], [0.9, 1], "clamp"),
       backgroundColor: interpolateColor(
-        scrollY.value,
+        scrollY.get(),
         [0, screen.width],
         ["#F5F5F5", "#fff"]
       ),
@@ -72,6 +79,10 @@ const Header = ({ scrollY }: { scrollY: SharedValue<number> }) => {
   });
 
   const onPressCart = () => {
+    if (!isApproved) {
+      toast.error(INVALID_ACCOUNT_MESSAGE);
+      return;
+    }
     navigation.smartNavigate("ShoppingCart");
   };
 
@@ -199,7 +210,7 @@ const DetailProduct = () => {
   };
 
   const scrollHandler = useAnimatedScrollHandler((event) => {
-    scrollY.value = event.contentOffset.y;
+    scrollY.set(event.contentOffset.y);
   });
 
   return (

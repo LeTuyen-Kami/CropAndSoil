@@ -27,6 +27,7 @@ import { authAtom, selectedVoucherAtom } from "~/store/atoms";
 import { getErrorMessage, screen } from "~/utils";
 import { storeAtom } from "../Order/atom";
 import SelectVariation from "~/components/common/SelectVariation";
+import { INVALID_ACCOUNT_MESSAGE } from "~/utils/contants";
 type Variation = IFlashSaleProduct["flashSaleVariation"];
 
 const BottomButton = ({
@@ -47,6 +48,8 @@ const BottomButton = ({
   const setStores = useSetAtom(storeAtom);
   const setVoucherState = useSetAtom(selectedVoucherAtom);
   const modalRef = useRef<ModalAddToCartAnimationRef>(null);
+
+  const isApproved = auth?.isLoggedIn && auth?.user?.isApproved;
 
   const { data: flashSaleProductDetail } = useQuery({
     queryKey: ["flash-sale-product-detail", flashSaleProductId],
@@ -118,6 +121,11 @@ const BottomButton = ({
   const handleAction = (type: "add" | "buy") => {
     if (!auth?.isLoggedIn) {
       navigation.smartNavigate("Login");
+      return;
+    }
+
+    if (!isApproved) {
+      toast.error(INVALID_ACCOUNT_MESSAGE);
       return;
     }
 

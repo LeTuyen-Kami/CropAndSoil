@@ -16,6 +16,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { imagePaths } from "~/assets/imagePath";
 import Gallery from "~/components/common/Galery";
+import ModalReport from "~/components/common/ModalReport";
 import useDisclosure from "~/hooks/useDisclosure";
 import { AntDesign, Feather } from "@expo/vector-icons";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
@@ -23,6 +24,7 @@ import { Video, ResizeMode } from "expo-av";
 import RenderVideo from "./RenderVideo";
 import { deepEqual } from "fast-equals";
 import { isIOS } from "~/utils";
+import { toast } from "./Toast";
 
 type ReviewMedia = {
   type: "image" | "video";
@@ -55,6 +57,8 @@ export type ReviewItemProps = {
   isLikeButtonInBottom?: boolean;
   onPressEdit?: () => void;
   onPressLike?: () => void;
+  onReport?: (reason: string, customReason?: string) => void;
+  isReportButtonInBottom?: boolean;
 };
 
 const ReviewItem: React.FC<ReviewItemProps> = ({
@@ -69,14 +73,17 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
   sellerResponse,
   product,
   isLikeButtonInBottom = false,
+  isReportButtonInBottom = true,
   onPressEdit,
   onPressLike,
+  onReport,
 }) => {
   const { isOpen, onOpen, onClose, openValue } = useDisclosure({
     initialOpenValue: 0,
   });
   const navigation = useSmartNavigation();
   const [sallerCollapsed, setSallerCollapsed] = useState(true);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const rotate = useSharedValue(0);
 
   // Render stars based on rating
@@ -98,12 +105,12 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
 
   const handleSallerCollapsed = () => {
     setSallerCollapsed(!sallerCollapsed);
-    rotate.value = withTiming(sallerCollapsed ? 90 : 0);
+    rotate.set(withTiming(sallerCollapsed ? 90 : 0));
   };
 
   const rotateArrow = useAnimatedStyle(() => {
     return {
-      transform: [{ rotate: `${rotate.value}deg` }],
+      transform: [{ rotate: `${rotate.get()}deg` }],
     };
   });
 
@@ -130,7 +137,20 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
         {/* Review Content */}
         <View className="flex-1">
           {/* Reviewer Name */}
-          <Text className="text-[#000000] text-sm">{reviewer.name}</Text>
+          <View className="flex-row justify-between">
+            <Text className="text-[#000000] text-sm flex-1" numberOfLines={2}>
+              {reviewer.name}
+            </Text>
+            {/* Report Button */}
+            {isReportButtonInBottom && (
+              <TouchableOpacity
+                hitSlop={20}
+                onPress={() => setIsReportModalOpen(true)}
+              >
+                <Feather name="flag" size={18} color="#9CA3AF" />
+              </TouchableOpacity>
+            )}
+          </View>
           {/* Star Rating */}
           <View className="flex-row items-center mt-1">{renderStars()}</View>
           {/* Quality */}
@@ -195,24 +215,7 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
               />
             </View>
           )}
-          {/* Like Button */}
-          {/* {!isLikeButtonInBottom && (
-            <View className="flex-row items-center mt-1.5">
-              <TouchableOpacity
-                className="flex-row items-center"
-                onPress={onPressLike}
-              >
-                <AntDesign
-                  name="like1"
-                  size={20}
-                  color="#AEAEAE"
-                  style={{ marginRight: 4 }}
-                />
-                <Text className="text-[#AEAEAE] text-sm">{likes}</Text>
-              </TouchableOpacity>
-            </View>
-          )} */}
-          {/* Seller Response */}
+
           {sellerResponse && (
             <Pressable onPress={handleSallerCollapsed}>
               <Animated.View
@@ -300,6 +303,7 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
                 />
                 <Text className="text-[#AEAEAE] text-sm">{likes}</Text> */}
               </TouchableOpacity>
+
               <TouchableOpacity
                 className="flex-row gap-2 items-center"
                 hitSlop={20}
@@ -327,6 +331,14 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
         }
         onClose={onClose}
         initialIndex={openValue}
+      />
+
+      <ModalReport
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        onSubmit={(reason, customReason) => {
+          toast.success("Báo cáo thành công");
+        }}
       />
     </View>
   );

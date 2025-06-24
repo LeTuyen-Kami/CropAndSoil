@@ -19,9 +19,9 @@ const HeaderLogging = () => {
   const [auth, setAuth] = useAtom(authAtom);
 
   const { data: profile } = useQuery({
-    queryKey: ["profile"],
+    queryKey: ["profile", auth?.user?.id, auth?.token?.accessToken],
     queryFn: () => userService.getProfile(),
-    enabled: auth?.isLoggedIn,
+    enabled: auth?.isLoggedIn && !!auth?.user?.id && !!auth?.token?.accessToken,
     staleTime: 1000 * 60 * 5,
   });
 

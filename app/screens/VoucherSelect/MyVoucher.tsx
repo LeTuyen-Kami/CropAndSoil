@@ -53,7 +53,7 @@ const ShippingVoucher = ({
         isBestChoice={false}
         title={"Mã vận chuyển"}
         description={voucher.description}
-        minOrder={`Đơn tối thiểu ${convertToK(voucher.minimumAmount)}đ`}
+        minOrder={`Đơn tối thiểu ₫${convertToK(voucher.minimumAmount)}k`}
         expiryDate={formatDate(voucher.expiryDate)}
         usagePercent={Math.round(
           (voucher.usedCount / (voucher.usageLimit || 1)) * 100
@@ -84,7 +84,7 @@ export const ProductVoucher = ({
           shadowBorderColor="#FEEBC1"
           image={imagePaths.bag}
           title="Voucher toàn sàn"
-          minOrder={`Đơn tối thiểu ${convertToK(voucher.minimumAmount)}đ`}
+          minOrder={`Đơn tối thiểu ₫${convertToK(voucher.minimumAmount)}k`}
           expiryDate={formatDate(voucher.expiryDate)}
           description={voucher.description}
           usagePercent={Math.round(

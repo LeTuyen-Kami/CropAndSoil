@@ -9,7 +9,7 @@ import Empty from "~/components/common/Empty";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 import { useSetAtom } from "jotai";
 import { confirmAtom } from "~/store/atoms";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "~/components/common/Toast";
 import { toggleLoading } from "~/components/common/ScreenLoading";
 import {
@@ -19,6 +19,9 @@ import {
 } from "~/utils/contants";
 const ListOrder = ({ status }: { status?: string }) => {
   const navigation = useSmartNavigation();
+
+  const queryClient = useQueryClient();
+
   const {
     data,
     isLoading,
@@ -56,6 +59,11 @@ const ListOrder = ({ status }: { status?: string }) => {
           onSuccess: () => {
             toast.success("Đơn hàng đã được hủy");
             refresh();
+            queryClient.invalidateQueries({
+              predicate: (query) =>
+                query.queryKey?.includes("home") ||
+                query.queryKey?.includes("flash-sale"),
+            });
           },
           onError: (error) => {
             toast.error(getErrorMessage(error, "Lỗi khi hủy đơn hàng"));

@@ -25,6 +25,7 @@ import ModalAddToCartAnimation, {
   ModalAddToCartAnimationRef,
 } from "~/components/common/ModalAddToCartAnimation";
 import { Store } from "../Order/types";
+import { INVALID_ACCOUNT_MESSAGE } from "~/utils/contants";
 type Variation = IProduct["variations"][0];
 
 const BottomButton = ({ productId }: { productId: number | string }) => {
@@ -41,6 +42,8 @@ const BottomButton = ({ productId }: { productId: number | string }) => {
   const setStores = useSetAtom(storeAtom);
   const setVoucherState = useSetAtom(selectedVoucherAtom);
   const modalRef = useRef<ModalAddToCartAnimationRef>(null);
+
+  const isApproved = auth?.isLoggedIn && auth?.user?.isApproved;
 
   const { data: productDetail } = useQuery({
     queryKey: ["productDetail", productId],
@@ -78,6 +81,11 @@ const BottomButton = ({ productId }: { productId: number | string }) => {
   const handleAction = (type: "add" | "buy") => {
     if (!auth?.isLoggedIn) {
       navigation.smartNavigate("Login");
+      return;
+    }
+
+    if (!isApproved) {
+      toast.error(INVALID_ACCOUNT_MESSAGE);
       return;
     }
 

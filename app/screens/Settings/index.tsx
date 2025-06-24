@@ -100,6 +100,8 @@ const Settings = () => {
   });
 
   const onPressLogout = () => {
+    if (loading) return;
+
     setLoading(true);
     mutateLogout.mutate(undefined, {
       onSuccess: () => {
@@ -110,7 +112,6 @@ const Settings = () => {
     setTimeout(() => {
       signOut();
       navigation.smartGoBack();
-      setLoading(false);
     }, 1000);
   };
 
@@ -181,11 +182,11 @@ const Settings = () => {
               </View>
             </View>
           </Section>
-          <View className="justify-center items-center py-2">
+          {/* <View className="justify-center items-center py-2">
             <Text className="text-[10px] text-[#676767]" selectable>
               {getDeviceId()}
             </Text>
-          </View>
+          </View> */}
         </ScrollView>
         {auth?.isLoggedIn && (
           <View

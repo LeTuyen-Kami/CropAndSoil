@@ -123,6 +123,7 @@ const ListRated = () => {
               image: item?.product?.thumbnail,
             }}
             comment={item.comment}
+            isReportButtonInBottom={false}
           />
         </View>
       );

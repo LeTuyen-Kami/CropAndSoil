@@ -73,17 +73,19 @@ const Gallery = ({
   // Reset values when gallery is opened
   React.useEffect(() => {
     if (visible) {
-      translateY.value = 0;
+      translateY.set(0);
       setCurrentIndex(initialIndex);
-      currentImageScale.value = 1;
+      currentImageScale.set(1);
     }
   }, [visible, initialIndex]);
 
   const handleClose = useCallback(
     (immediate = false) => {
-      translateY.value = immediate
-        ? translateY.value
-        : withTiming(screen.height, { duration: 200 });
+      translateY.set(
+        immediate
+          ? translateY.get()
+          : withTiming(screen.height, { duration: 200 })
+      );
       setTimeout(
         () => {
           // Stop all videos when closing
@@ -107,22 +109,22 @@ const Gallery = ({
       // Only allow vertical panning (for dismiss)
       if (e.translationY > 0) {
         // Only allow downward swipe
-        translateY.value = e.translationY;
+        translateY.set(e.translationY);
       }
     })
     .onEnd((e) => {
-      if (Math.abs(translateY.value) > 100) {
+      if (Math.abs(translateY.get()) > 100) {
         // Dismiss the gallery if swiped down enough
         runOnJS(handleClose)();
       } else {
         // Return to position if not swiped enough to dismiss
-        translateY.value = withTiming(0);
+        translateY.set(withTiming(0));
       }
     })
-    .enabled(currentImageScale.value === 1);
+    .enabled(currentImageScale.get() === 1);
 
   useAnimatedReaction(
-    () => currentImageScale.value,
+    () => currentImageScale.get(),
     (scale) => {
       if (scale === 1) {
         runOnJS(setScrollEnabled)(true);
@@ -134,13 +136,13 @@ const Gallery = ({
 
   const backgroundOpacity = useAnimatedStyle(() => {
     return {
-      opacity: interpolate(translateY.value, [0, 200], [1, 0.5], "clamp"),
+      opacity: interpolate(translateY.get(), [0, 200], [1, 0.5], "clamp"),
     };
   });
 
   const translateStyle = useAnimatedStyle(() => {
     return {
-      transform: [{ translateY: translateY.value }],
+      transform: [{ translateY: translateY.get() }],
     };
   });
 
@@ -151,7 +153,7 @@ const Gallery = ({
 
       onChangeIndex?.(viewableItems[0].index);
 
-      currentImageScale.value = 1;
+      currentImageScale.set(1);
 
       Object.values(videoRefs.current).forEach((videoRef) => {
         if (videoRef) {
@@ -323,27 +325,27 @@ const GalleryImageItem = ({
   const [enabled, setEnabled] = useState(false);
 
   React.useEffect(() => {
-    onScaleChange.value = scale.value;
+    onScaleChange.set(scale.get());
   }, []);
 
   // Pinch gesture for zooming
   const pinchGesture = Gesture.Pinch()
     .onUpdate((e) => {
-      scale.value = savedScale.value * e.scale;
-      onScaleChange.value = scale.value;
+      scale.set(savedScale.get() * e.scale);
+      onScaleChange.set(scale.get());
     })
     .onEnd(() => {
-      if (scale.value < 1) {
-        scale.value = withTiming(1);
-        savedScale.value = 1;
-        onScaleChange.value = 1;
-      } else if (scale.value > 3) {
-        scale.value = withTiming(3);
-        savedScale.value = 3;
-        onScaleChange.value = 3;
+      if (scale.get() < 1) {
+        scale.set(withTiming(1));
+        savedScale.set(1);
+        onScaleChange.set(1);
+      } else if (scale.get() > 3) {
+        scale.set(withTiming(3));
+        savedScale.set(3);
+        onScaleChange.set(3);
       } else {
-        savedScale.value = scale.value;
-        onScaleChange.value = scale.value;
+        savedScale.set(scale.get());
+        onScaleChange.set(scale.get());
       }
     });
 
@@ -351,21 +353,21 @@ const GalleryImageItem = ({
   const doubleTapGesture = Gesture.Tap()
     .numberOfTaps(2)
     .onEnd((e) => {
-      if (scale.value > 1) {
-        scale.value = withTiming(1);
-        savedScale.value = 1;
-        translateX.value = withTiming(0);
-        translateY.value = withTiming(0);
-        onScaleChange.value = 1;
+      if (scale.get() > 1) {
+        scale.set(withTiming(1));
+        savedScale.set(1);
+        translateX.set(withTiming(0));
+        translateY.set(withTiming(0));
+        onScaleChange.set(1);
       } else {
-        scale.value = withTiming(2);
-        savedScale.value = 2;
-        onScaleChange.value = 2;
+        scale.set(withTiming(2));
+        savedScale.set(2);
+        onScaleChange.set(2);
       }
     });
 
   useAnimatedReaction(
-    () => scale.value,
+    () => scale.get(),
     (value) => {
       runOnJS(setEnabled)(value > 1);
     }
@@ -373,11 +375,11 @@ const GalleryImageItem = ({
 
   useImperativeHandle(resetRef, () => ({
     reset: () => {
-      scale.value = withTiming(1);
-      savedScale.value = 1;
-      translateX.value = withTiming(0);
-      translateY.value = withTiming(0);
-      onScaleChange.value = 1;
+      scale.set(withTiming(1));
+      savedScale.set(1);
+      translateX.set(withTiming(0));
+      translateY.set(withTiming(0));
+      onScaleChange.set(1);
     },
   }));
 
@@ -385,30 +387,34 @@ const GalleryImageItem = ({
     .minDistance(1)
     .enabled(enabled)
     .onStart(() => {
-      if (scale.value === 1) {
+      if (scale.get() === 1) {
         return;
       }
 
-      prevTranslationX.value = translateX.value;
-      prevTranslationY.value = translateY.value;
+      prevTranslationX.set(translateX.get());
+      prevTranslationY.set(translateY.get());
     })
     .onUpdate((event) => {
-      if (scale.value === 1) {
+      if (scale.get() === 1) {
         return;
       }
 
       const maxTranslateX = screen.width / 2 - 50;
       const maxTranslateY = screen.height / 2 - 50;
 
-      translateX.value = clamp(
-        prevTranslationX.value + event.translationX,
-        -maxTranslateX,
-        maxTranslateX
+      translateX.set(
+        clamp(
+          prevTranslationX.get() + event.translationX,
+          -maxTranslateX,
+          maxTranslateX
+        )
       );
-      translateY.value = clamp(
-        prevTranslationY.value + event.translationY,
-        -maxTranslateY,
-        maxTranslateY
+      translateY.set(
+        clamp(
+          prevTranslationY.get() + event.translationY,
+          -maxTranslateY,
+          maxTranslateY
+        )
       );
     });
 
@@ -421,9 +427,9 @@ const GalleryImageItem = ({
   const animatedStyle = useAnimatedStyle(() => {
     return {
       transform: [
-        { translateX: translateX.value },
-        { translateY: translateY.value },
-        { scale: scale.value },
+        { translateX: translateX.get() },
+        { translateY: translateY.get() },
+        { scale: scale.get() },
       ],
     };
   });

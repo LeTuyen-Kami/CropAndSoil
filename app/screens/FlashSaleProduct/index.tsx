@@ -29,6 +29,10 @@ import Badge from "~/components/common/Badge";
 import { cartService } from "~/services/api/cart.service";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 import { screen } from "~/utils";
+import { authAtom } from "~/store/atoms";
+import { useAtomValue } from "jotai";
+import { toast } from "~/components/common/Toast";
+import { INVALID_ACCOUNT_MESSAGE } from "~/utils/contants";
 
 const AnimatedFlashList = Animated.createAnimatedComponent(
   FlashList as unknown as React.ComponentType<FlashListProps<any>>
@@ -40,6 +44,9 @@ const AnimatedTouchableOpacity =
 const Header = ({ scrollY }: { scrollY: SharedValue<number> }) => {
   const { top } = useSafeAreaInsets();
   const navigation = useSmartNavigation();
+  const auth = useAtomValue(authAtom);
+
+  const isApproved = auth?.isLoggedIn && auth?.user?.isApproved;
 
   const { data: detailCart } = useQuery({
     queryKey: ["detail-cart"],
@@ -72,6 +79,10 @@ const Header = ({ scrollY }: { scrollY: SharedValue<number> }) => {
   });
 
   const onPressCart = () => {
+    if (!isApproved) {
+      toast.error(INVALID_ACCOUNT_MESSAGE);
+      return;
+    }
     navigation.smartNavigate("ShoppingCart");
   };
 

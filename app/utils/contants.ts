@@ -96,3 +96,6 @@ export const ERROR_CODE = {
   FORBIDDEN_REVIEW: "forbidden_review",
   TOO_MANY_REQUEST: "too_many_request",
 };
+
+export const INVALID_ACCOUNT_MESSAGE =
+  "Tài khoản của bạn chưa được kích hoạt.\nVui lòng bổ sung thông tin doanh nghiệp để kích hoạt và mua hàng.";

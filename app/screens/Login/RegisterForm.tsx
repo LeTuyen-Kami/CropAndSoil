@@ -22,7 +22,7 @@ import {
 } from "~/utils";
 import { loginAtom } from "./atom";
 import { authService, SendSmsOtpResponse } from "~/services/api/auth.service";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "~/components/common/Toast";
 import { toggleLoading } from "~/components/common/ScreenLoading";
 import { authAtom } from "~/store/atoms";
@@ -31,6 +31,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "~/navigation/types";
 import * as WebBrowser from "expo-web-browser";
 import { ENV } from "~/utils";
+import { userService } from "~/services/api/user.service";
 
 type IStep = "phone" | "code";
 
@@ -48,7 +49,7 @@ const RegisterForm = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const setAuthState = useSetAtom(authAtom);
-
+  const queryClient = useQueryClient();
   const mutationRegisterSendOtp = useMutation({
     mutationFn: authService.registerSendOtp,
   });
@@ -135,6 +136,10 @@ const RegisterForm = () => {
             navigation.reset({
               index: 0,
               routes: [{ name: "MainTabs" }],
+            });
+            queryClient?.prefetchQuery({
+              queryKey: ["profile", data.id, data.token.accessToken],
+              queryFn: () => userService.getProfile(),
             });
           },
           onError: (error) => {

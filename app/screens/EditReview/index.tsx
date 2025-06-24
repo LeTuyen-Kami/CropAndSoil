@@ -629,7 +629,12 @@ const EditReview = () => {
           {/* Anonymous Option */}
           <View className="flex-row justify-between items-center py-2">
             <View className="flex-row items-center mr-2">
-              <Text className="text-[#575964] text-sm mr-2">Ẩn danh</Text>
+              <Text
+                onPress={() => setIsAnonymous(!isAnonymous)}
+                className="text-[#575964] text-sm mr-2"
+              >
+                Ẩn danh
+              </Text>
               <Checkbox
                 value={isAnonymous}
                 onValueChange={setIsAnonymous}
@@ -642,8 +647,14 @@ const EditReview = () => {
                 }}
               />
             </View>
-            <Text className="text-[#676767] text-xs flex-1" numberOfLines={1}>
-              Tên của bạn sẽ được hiển thị là {hideName(auth?.user?.name)}
+            <Text
+              className="text-[#676767] text-xs flex-1 text-right"
+              numberOfLines={1}
+            >
+              Tên của bạn sẽ được hiển thị là{" "}
+              <Text className="text-[#159747] text-xs">
+                {hideName(auth?.user?.name)}
+              </Text>
             </Text>
           </View>
         </View>

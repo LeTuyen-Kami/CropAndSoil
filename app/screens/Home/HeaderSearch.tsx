@@ -4,15 +4,24 @@ import { useAtomValue } from "jotai";
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { imagePaths } from "~/assets/imagePath";
+import { toast } from "~/components/common/Toast";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 import { RootStackScreenProps } from "~/navigation/types";
 import { authAtom } from "~/store/atoms";
+import { INVALID_ACCOUNT_MESSAGE } from "~/utils/contants";
 
 const HeaderSearch = () => {
   const navigation = useSmartNavigation();
   const auth = useAtomValue(authAtom);
 
+  const isApproved = auth?.isLoggedIn && auth?.user?.isApproved;
+
   const navigateCart = () => {
+    if (!isApproved) {
+      toast.error(INVALID_ACCOUNT_MESSAGE);
+      return;
+    }
+
     navigation.smartNavigate("ShoppingCart");
   };
 
@@ -25,7 +34,7 @@ const HeaderSearch = () => {
               Hello {auth?.user?.name || auth?.user?.phone},{" "}
             </Text>
           )}
-          Hôm nay bạn cần tìm gì ?
+          Hôm nay bạn cần tìm gì?
         </Text>
       </View>
       <View className="flex-row gap-[10] px-2">

@@ -8,6 +8,8 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAtomValue } from "jotai";
 import { authAtom } from "~/store/atoms";
+import { toast } from "~/components/common/Toast";
+import { INVALID_ACCOUNT_MESSAGE } from "~/utils/contants";
 
 const CustomTabBar = ({
   state,
@@ -114,6 +116,11 @@ const CustomTabBar = ({
               <TouchableOpacity
                 onPress={() => {
                   if (auth?.isLoggedIn) {
+                    if (!auth?.user?.isApproved) {
+                      toast.error(INVALID_ACCOUNT_MESSAGE);
+                      return;
+                    }
+
                     navigation.navigate("ShoppingCart");
                   } else {
                     navigation.navigate("Login");

@@ -157,7 +157,7 @@ const Toast = ({ toast, onHide }: { toast: ToastData; onHide: () => void }) => {
       onTouchStart={onHide}
     >
       <View style={styles.iconContainer}>{getToastIcon(toast.type)}</View>
-      <Text style={styles.message} numberOfLines={3}>
+      <Text style={styles.message} numberOfLines={5}>
         {toast.message}
       </Text>
       {/* {onHide && (

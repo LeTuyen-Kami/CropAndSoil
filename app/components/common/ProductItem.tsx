@@ -55,6 +55,8 @@ const ProductItem = ({
   const devMode = useAtomValue(devModeAtom);
   const auth = useAtomValue(authAtom);
 
+  const isMaskPrice = auth?.isLoggedIn && auth?.user?.isApproved;
+
   const hasDiscount = !!discount && discount > 0;
   const hasSoldCount =
     typeof soldCount === "number" && typeof totalCount === "number";
@@ -134,13 +136,13 @@ const ProductItem = ({
             <Text className="text-sm font-bold leading-tight text-error-500">
               {!!overrideSalePrice
                 ? overrideSalePrice
-                : auth?.isLoggedIn
+                : isMaskPrice
                 ? formatPrice(price || originalPrice || 0)
                 : maskVNDPriceBeforeSale(price || originalPrice || 0)}
             </Text>
             {onSale && originalPrice && (
               <Text className="text-xs tracking-tight line-through text-neutral-400">
-                {auth?.isLoggedIn
+                {isMaskPrice
                   ? formatPrice(originalPrice)
                   : maskVNDPriceBeforeSale(originalPrice)}
               </Text>

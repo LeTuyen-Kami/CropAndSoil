@@ -10,11 +10,12 @@ import { useSetAtom } from "jotai";
 import { loginAtom } from "./atom";
 import { authService } from "~/services/api/auth.service";
 import { toggleLoading } from "~/components/common/ScreenLoading";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "~/components/common/Toast";
 import { getErrorMessage, validatePhoneNumber } from "~/utils";
 import { authAtom } from "~/store/atoms";
 import { useNavigation } from "@react-navigation/native";
+import { userService } from "~/services/api/user.service";
 const LoginForm = () => {
   const setAuthState = useSetAtom(authAtom);
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -22,6 +23,7 @@ const LoginForm = () => {
   const [togglePassword, setTogglePassword] = useState(false);
   const setLoginState = useSetAtom(loginAtom);
   const navigation = useNavigation();
+  const queryClient = useQueryClient();
 
   const mutationLogin = useMutation({
     mutationFn: authService.login,
@@ -67,6 +69,10 @@ const LoginForm = () => {
           navigation.reset({
             index: 0,
             routes: [{ name: "MainTabs" }],
+          });
+          queryClient?.prefetchQuery({
+            queryKey: ["profile", data.id, data.token.accessToken],
+            queryFn: () => userService.getProfile(),
           });
         },
         onError: (error) => {

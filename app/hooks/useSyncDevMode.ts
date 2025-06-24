@@ -48,6 +48,9 @@ const useSyncDevMode = () => {
             });
           }
         }
+      })
+      .catch((err) => {
+        console.log("err", err);
       });
   }, []);
 };
