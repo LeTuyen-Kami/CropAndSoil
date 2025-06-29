@@ -18,11 +18,13 @@ import { useEffect } from "react";
 import { toast } from "~/components/common/Toast";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function useFCMNavigation(
   navigationRef: NavigationContainerRef<any>
 ) {
   const app = getApp();
+  const queryClient = useQueryClient();
   const messaging = getMessaging(app);
 
   const handle = async (msg: FirebaseMessagingTypes.RemoteMessage | null) => {
@@ -78,10 +80,12 @@ export default function useFCMNavigation(
   useEffect(
     () =>
       onMessage(messaging, (msg) => {
-        console.log("msg", msg);
-
         if (msg.notification?.body) {
           toast.info(msg.notification?.body);
+          queryClient.invalidateQueries({
+            queryKey: ["my-order"],
+            exact: false,
+          });
         }
       }),
     [messaging]

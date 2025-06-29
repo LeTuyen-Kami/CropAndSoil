@@ -1,26 +1,27 @@
 import { FlashList } from "@shopify/flash-list";
-import ProductCart from "./ProductCart";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSetAtom } from "jotai";
 import { ActivityIndicator, View } from "react-native";
 import { RefreshControl } from "react-native-gesture-handler";
-import { usePagination } from "~/hooks/usePagination";
-import { orderService } from "~/services/api/order.service";
-import { formatPrice, getErrorMessage } from "~/utils";
 import Empty from "~/components/common/Empty";
-import { useSmartNavigation } from "~/hooks/useSmartNavigation";
-import { useSetAtom } from "jotai";
-import { confirmAtom } from "~/store/atoms";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "~/components/common/Toast";
 import { toggleLoading } from "~/components/common/ScreenLoading";
+import { toast } from "~/components/common/Toast";
+import { usePagination } from "~/hooks/usePagination";
+import { useSmartNavigation } from "~/hooks/useSmartNavigation";
+import { orderService } from "~/services/api/order.service";
+import { confirmAtom } from "~/store/atoms";
+import { formatPrice, getErrorMessage } from "~/utils";
 import {
   ORDER_STATUS,
   ORDER_STATUS_COLOR,
   ORDER_STATUS_TEXT,
 } from "~/utils/contants";
+import ProductCart from "./ProductCart";
+import { modalRefundAtom } from "./atoms";
 const ListOrder = ({ status }: { status?: string }) => {
   const navigation = useSmartNavigation();
-
   const queryClient = useQueryClient();
+  const setModalRefund = useSetAtom(modalRefundAtom);
 
   const {
     data,
@@ -100,6 +101,7 @@ const ListOrder = ({ status }: { status?: string }) => {
         ListEmptyComponent={() => (
           <Empty title="Không có đơn hàng" isLoading={isLoading} />
         )}
+        keyExtractor={(item, index) => item?.id?.toString() || index.toString()}
         showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={() => <View className="h-2.5" />}
         renderItem={({ item }) => (
@@ -123,13 +125,32 @@ const ListOrder = ({ status }: { status?: string }) => {
             onCancelOrder={
               status === ORDER_STATUS.PENDING ||
               status === ORDER_STATUS.PROCESSING ||
-              ORDER_STATUS.PENDING?.includes(item?.status || "123123123") ||
-              ORDER_STATUS.PROCESSING?.includes(item?.status || "123123123")
+              ORDER_STATUS.PENDING?.includes(item?.status) ||
+              ORDER_STATUS.PROCESSING?.includes(item?.status)
                 ? () => handleCancelOrder(item.id)
                 : undefined
             }
             onViewDetails={() => onViewDetails(item.id)}
             shopId={item.shop?.id}
+            onReturnOrder={
+              item?.status &&
+              (status === ORDER_STATUS.DELIVERED ||
+                ORDER_STATUS.DELIVERED?.includes(item?.status)) &&
+              item?.isRefundable
+                ? () => {
+                    setModalRefund({
+                      visible: true,
+                      orderId: item.id,
+                      onSuccess: () => {
+                        refresh();
+                        queryClient.invalidateQueries({
+                          queryKey: ["my-order", ORDER_STATUS.RETURNED],
+                        });
+                      },
+                    });
+                  }
+                : undefined
+            }
           />
         )}
         refreshControl={

@@ -95,7 +95,7 @@ const DevMode = () => {
   };
 
   return (
-    <View className="flex-1">
+    <View className="max-w-[500px] flex-1">
       <View className="flex-row justify-between items-center px-5 py-4 bg-white border-b border-gray-100">
         <Text className="text-lg font-medium">Developer Mode</Text>
       </View>

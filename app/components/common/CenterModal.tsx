@@ -9,6 +9,7 @@ import {
 import { AntDesign } from "@expo/vector-icons";
 import { cn } from "~/lib/utils";
 import Animated, { FadeInUp, SlideInUp } from "react-native-reanimated";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 
 interface CenterModalProps {
   visible: boolean;
@@ -17,6 +18,7 @@ interface CenterModalProps {
   wrapperClassName?: string;
   hasCloseButton?: boolean;
   canCloseOnTouchOutside?: boolean;
+  footer?: ReactNode;
 }
 
 const CenterModal: React.FC<CenterModalProps> = ({
@@ -26,6 +28,7 @@ const CenterModal: React.FC<CenterModalProps> = ({
   wrapperClassName,
   hasCloseButton = true,
   canCloseOnTouchOutside = true,
+  footer,
 }) => {
   return (
     <Modal
@@ -57,6 +60,7 @@ const CenterModal: React.FC<CenterModalProps> = ({
               )}
             </View>
           </TouchableWithoutFeedback>
+          {footer}
         </View>
       </TouchableWithoutFeedback>
     </Modal>

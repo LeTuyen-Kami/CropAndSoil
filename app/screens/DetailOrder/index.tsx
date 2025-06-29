@@ -8,8 +8,9 @@ import {
 import Header from "~/components/common/Header";
 import ScreenWrapper from "~/components/common/ScreenWrapper";
 import { Text } from "~/components/ui/text";
+import { Button } from "~/components/ui/button";
 import { userService } from "~/services/api/user.service";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRoute } from "@react-navigation/native";
 import { RootStackRouteProp } from "~/navigation/types";
 import { orderService } from "~/services/api/order.service";
@@ -19,10 +20,18 @@ import OrderSummary from "./OrderSummary";
 import PaymentInfo from "./PaymentInfo";
 import ShippingInfo from "./ShippingInfo";
 import AddressItem from "./AddressItem";
-import { formatDate } from "~/utils";
+import { formatDate, getErrorMessage } from "~/utils";
 import { Image } from "expo-image";
 import { imagePaths } from "~/assets/imagePath";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
+import { ORDER_STATUS } from "~/utils/contants";
+import { useMemo, useState } from "react";
+import ModalOrderRefund from "~/components/common/ModalOrderRefund";
+import { confirmAtom } from "~/store/atoms";
+import { useSetAtom } from "jotai";
+import { toast } from "~/components/common/Toast";
+import { toggleLoading } from "~/components/common/ScreenLoading";
+
 const DetailOrder = () => {
   const route = useRoute<RootStackRouteProp<"DetailOrder">>();
   const { orderId } = route.params;
@@ -38,6 +47,12 @@ const DetailOrder = () => {
     queryFn: () => orderService.detail(orderId!.toString()),
     enabled: !!orderId,
   });
+  const [isVisibleModalRefund, setIsVisibleModalRefund] = useState(false);
+  const setConfirmState = useSetAtom(confirmAtom);
+
+  const mutationCancelOrder = useMutation({
+    mutationFn: (orderId: number) => orderService.cancel(orderId.toString()),
+  });
 
   const navigationToShop = () => {
     navigation.navigate("Shop", { id: order?.shop?.id });
@@ -46,6 +61,75 @@ const DetailOrder = () => {
   const navigationToProduct = (productId: string) => {
     navigation.navigate("DetailProduct", { id: productId });
   };
+
+  const handleCancelOrder = () => {
+    setConfirmState({
+      title: "Hủy đơn hàng",
+      message: "Bạn có chắc chắn muốn hủy đơn hàng này không?",
+      onConfirm: () => {
+        toggleLoading(true);
+        mutationCancelOrder.mutate(orderId, {
+          onSuccess: () => {
+            toast.success("Đơn hàng đã được hủy");
+            refetchOrder();
+          },
+          onError: (error) => {
+            toast.error(getErrorMessage(error, "Lỗi khi hủy đơn hàng"));
+          },
+          onSettled: () => {
+            toggleLoading(false);
+          },
+        });
+      },
+      onCancel: () => {
+        console.log("Cancel order");
+      },
+      isOpen: true,
+    });
+  };
+
+  const handleReturnOrder = () => {
+    setIsVisibleModalRefund(true);
+  };
+
+  // Helper function to determine which buttons to show based on order status
+  const actionButtons = useMemo(() => {
+    const buttons = [];
+
+    // Show cancel button for pending/processing orders
+    if (
+      (order?.status && ORDER_STATUS.PENDING?.includes(order.status)) ||
+      (order?.status && ORDER_STATUS.PROCESSING?.includes(order.status))
+    ) {
+      buttons.push({
+        key: "cancel",
+        title: "Hủy đơn hàng",
+        onPress: handleCancelOrder,
+        variant: "outline" as const,
+        className: "border-red-500 active:bg-red-50",
+        textClassName: "text-red-500",
+      });
+    }
+
+    // Show return button for delivered orders (check if refundable)
+    if (
+      order?.status &&
+      ORDER_STATUS.DELIVERED?.includes(order.status) &&
+      order?.isRefundable
+    ) {
+      buttons.push({
+        key: "return",
+        title: "Đổi trả",
+        onPress: handleReturnOrder,
+        variant: "outline" as const,
+        className: "border-orange-500 active:bg-orange-50",
+        textClassName: "text-orange-500",
+      });
+    }
+
+    return buttons;
+  }, [order]);
+
   const renderLoadingScreen = () => (
     <View className="rounded-t-[16px] overflow-hidden bg-white flex-1 items-center justify-center pt-10">
       <ActivityIndicator size="large" color="#2D946E" />
@@ -67,6 +151,7 @@ const DetailOrder = () => {
       ) : (
         <ScrollView
           className="rounded-t-[16px] overflow-hidden bg-white flex-1"
+          showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
               refreshing={isRefetching}
@@ -157,9 +242,42 @@ const DetailOrder = () => {
               shippingFee={order?.shippingMethod?.total}
             />
           </View>
+
+          {/* Action Buttons */}
+          {actionButtons.length > 0 && (
+            <View className="p-4 bg-white border-t border-gray-100">
+              <View className="flex-row justify-end items-center gap-1.5">
+                {actionButtons.map((button) => (
+                  <Button
+                    key={button.key}
+                    variant={button.variant}
+                    onPress={button.onPress}
+                    className={button.className}
+                  >
+                    <Text
+                      className={`text-sm font-medium leading-[20px] text-center ${button.textClassName}`}
+                    >
+                      {button.title}
+                    </Text>
+                  </Button>
+                ))}
+              </View>
+            </View>
+          )}
+
           <View className="h-[100px]" />
         </ScrollView>
       )}
+      <ModalOrderRefund
+        visible={isVisibleModalRefund}
+        onClose={() => {
+          setIsVisibleModalRefund(false);
+        }}
+        orderId={orderId!}
+        onSuccess={() => {
+          refetchOrder();
+        }}
+      />
     </ScreenWrapper>
   );
 };

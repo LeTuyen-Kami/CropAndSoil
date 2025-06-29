@@ -35,7 +35,7 @@ export const ORDER_STATUS = {
   PROCESSING: "wc-wait-pickup,wc-failed-pickup,wc-payment-success",
   SHIPPED: "wc-transport,wc-failed-delivery",
   DELIVERED: "wc-completed,wc-delivered",
-  RETURNED: "wc-refunded",
+  RETURNED: "wc-refunded,wc-claim-refund",
   CANCELLED: "wc-cancelled,wc-failed,wc-failed-pickup,wc-failed-delivery",
 };
 

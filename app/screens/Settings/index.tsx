@@ -18,9 +18,10 @@ import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 import { authService } from "~/services/api/auth.service";
-import { authAtom, signOut } from "~/store/atoms";
+import { authAtom, showModalConfirm, signOut } from "~/store/atoms";
 import { ENV, getDeviceId } from "~/utils";
 import * as WebBrowser from "expo-web-browser";
+import { cn } from "~/lib/utils";
 
 const useDevMode = () => {
   const [tapCount, setTapCount] = useState(0);
@@ -73,15 +74,19 @@ const Section = ({
 const SettingItem = ({
   title,
   onPress,
+  titleClassName,
 }: {
   title: string;
   subtitle?: string;
   onPress?: () => void;
+  titleClassName?: string;
 }) => {
   return (
     <TouchableOpacity onPress={onPress}>
       <View className="flex-row justify-between items-center px-5 py-3 bg-white">
-        <Text className="text-sm leading-tight">{title}</Text>
+        <Text className={cn("text-sm leading-tight", titleClassName)}>
+          {title}
+        </Text>
         <Ionicons name="chevron-forward" size={20} color="#ccc" />
       </View>
     </TouchableOpacity>
@@ -131,6 +136,16 @@ const Settings = () => {
     WebBrowser.openBrowserAsync(ENV.EXPO_PUBLIC_INTRO_LINK);
   };
 
+  const handleDeleteAccount = () => {
+    showModalConfirm({
+      title: "Xóa tài khoản",
+      message: "Bạn sẽ được chuyển đến trang web để xoá tài khoản. Tiếp tục?",
+      onConfirm: () => {
+        WebBrowser.openBrowserAsync("https://www.google.com");
+      },
+    });
+  };
+
   return (
     <ScreenWrapper hasGradient={true} hasSafeBottom={false}>
       <Header
@@ -148,6 +163,11 @@ const Settings = () => {
                 onPress={() => navigation.smartNavigate("EditProfile")}
               />
               <SettingItem title="Đổi mật khẩu" onPress={changePassword} />
+              <SettingItem
+                title="Xóa tài khoản"
+                onPress={handleDeleteAccount}
+                titleClassName="text-red-500"
+              />
             </Section>
           )}
 

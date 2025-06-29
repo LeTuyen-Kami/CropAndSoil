@@ -448,6 +448,7 @@ export interface IOrder {
   vouchers: Voucher[];
   shop: Shop;
   shippingMethod: ShippingMethod;
+  isRefundable: boolean;
 }
 
 export interface Order {
@@ -476,6 +477,20 @@ export interface Payload {
 }
 
 export interface IOrderCheckoutResponse {
+  message: string;
+  payload: Payload;
+}
+
+export interface IRefundRequest {
+  reason: string;
+  images: {
+    uri: string;
+    type: string;
+    name: string;
+  }[];
+}
+
+export interface IRefundResponse {
   message: string;
   payload: Payload;
 }
@@ -511,6 +526,28 @@ class OrderService {
 
   async cancel(orderId: string) {
     return typedAxios.put(`/orders/${orderId}/cancel`);
+  }
+
+  async refund(orderId: string, data: IRefundRequest) {
+    const formData = new FormData();
+    formData.append("reason", data.reason);
+    data.images.forEach((image, index) => {
+      formData.append("images", {
+        uri: image.uri,
+        type: image.type,
+        name: image.name || `image_${index}.jpg`,
+      } as any);
+    });
+
+    return typedAxios.put<IRefundResponse>(
+      `/orders/${orderId}/request-refund`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
   }
 }
 

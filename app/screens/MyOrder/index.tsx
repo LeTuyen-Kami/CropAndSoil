@@ -10,6 +10,7 @@ import { Text } from "~/components/ui/text";
 import { RootStackRouteProp, RootStackScreenProps } from "~/navigation/types";
 import { ORDER_STATUS } from "~/utils/contants";
 import ListOrder from "./ListOrder";
+import ModalOrderRefundWithAtom from "./ModalOrderRefund";
 const MyOrderScreen = () => {
   const route = useRoute<RootStackRouteProp<"MyOrder">>();
   const tabIndex = route.params?.tabIndex || 0;
@@ -59,7 +60,7 @@ const MyOrderScreen = () => {
         titleClassName="font-bold"
         leftClassName="w-10"
         rightComponent={
-          <TouchableOpacity className="flex-row justify-end w-10">
+          <TouchableOpacity className="flex-row justify-end w-10 opacity-0">
             <Image
               source={imagePaths.icMessages}
               style={{ width: 24, height: 24 }}
@@ -91,6 +92,7 @@ const MyOrderScreen = () => {
           onViewDetails={handleViewDetails}
         /> */}
       </View>
+      <ModalOrderRefundWithAtom />
     </GradientBackground>
   );
 };

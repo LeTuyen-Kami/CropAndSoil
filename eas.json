@@ -16,7 +16,7 @@
     "production": {
       "autoIncrement": true,
       "env": {
-        "SENTRY_AUTH_TOKEN": "***" //TODO
+        "SENTRY_AUTH_TOKEN": "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"
       }
     }
   },

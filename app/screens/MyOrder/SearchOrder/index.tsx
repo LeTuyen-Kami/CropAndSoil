@@ -26,8 +26,11 @@ import { toast } from "~/components/common/Toast";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 import { useSetAtom } from "jotai";
 import { confirmAtom } from "~/store/atoms";
+import ModalOrderRefund from "~/components/common/ModalOrderRefund";
 const SearchOrder = () => {
   const [search, setSearch] = useState("");
+  const [isVisibleModalRefund, setIsVisibleModalRefund] = useState(false);
+  const [orderId, setOrderId] = useState<number | null>(null);
 
   const debouncedSearch = useDebounce(search, 500);
   const navigation = useSmartNavigation();
@@ -105,7 +108,7 @@ const SearchOrder = () => {
         className="bg-transparent border-0"
         textColor="white"
         rightComponent={
-          <TouchableOpacity className="flex-row justify-end w-10">
+          <TouchableOpacity className="flex-row justify-end w-10 opacity-0">
             <Image
               source={imagePaths.icMessages}
               style={{ width: 24, height: 24 }}
@@ -148,12 +151,22 @@ const SearchOrder = () => {
               totalPrice={formatPrice(item.orderTotal)}
               quantity={item.items.length}
               onCancelOrder={
-                ORDER_STATUS.PENDING?.includes(item?.status || "123123123") ||
-                ORDER_STATUS.PROCESSING?.includes(item?.status || "123123123")
+                ORDER_STATUS.PENDING?.includes(item?.status) ||
+                ORDER_STATUS.PROCESSING?.includes(item?.status)
                   ? () => handleCancelOrder(item.id)
                   : undefined
               }
               onViewDetails={() => onViewDetails(item.id)}
+              onReturnOrder={
+                item?.status &&
+                ORDER_STATUS.DELIVERED?.includes(item?.status) &&
+                item?.isRefundable
+                  ? () => {
+                      setIsVisibleModalRefund(true);
+                      setOrderId(item.id);
+                    }
+                  : undefined
+              }
               shopId={item.shop.id}
             />
           )}
@@ -170,6 +183,17 @@ const SearchOrder = () => {
           onEndReachedThreshold={0.5}
         />
       </View>
+      <ModalOrderRefund
+        visible={isVisibleModalRefund}
+        onClose={() => {
+          setIsVisibleModalRefund(false);
+          setOrderId(null);
+        }}
+        orderId={orderId!}
+        onSuccess={() => {
+          refresh();
+        }}
+      />
     </ScreenWrapper>
   );
 };

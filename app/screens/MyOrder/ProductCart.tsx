@@ -4,6 +4,7 @@ import { AntDesign } from "@expo/vector-icons";
 import { imagePaths } from "~/assets/imagePath";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 import { isIOS } from "~/utils";
+import { Button } from "~/components/ui/button";
 
 interface ProductItemProps {
   name: string;
@@ -25,6 +26,7 @@ interface ProductCartProps {
   quantity?: number;
   statusColor?: string;
   shopId: string | number;
+  onReturnOrder?: () => void;
 }
 
 const ProductItem = ({
@@ -114,6 +116,7 @@ const ProductCart = ({
   totalPrice,
   onCancelOrder,
   onViewDetails,
+  onReturnOrder,
   quantity,
   status,
   statusColor,
@@ -175,30 +178,39 @@ const ProductCart = ({
       )}
 
       <View className="flex-row justify-end items-center gap-1.5 py-1.5 pb-3">
-        {onCancelOrder && (
-          <TouchableOpacity
-            className="px-[22px] h-11 justify-center items-center border border-[#676767] rounded-full"
+        {!!onCancelOrder && (
+          <Button
+            variant="outline"
             onPress={onCancelOrder}
+            className="border-red-500 active:bg-red-50"
           >
-            <View className="flex-row justify-center items-center gap-1.5">
-              <Text className="text-[#676767] text-sm font-medium leading-[20px] text-center">
-                Hủy đơn hàng
-              </Text>
-            </View>
-          </TouchableOpacity>
+            <Text className="text-red-500 text-sm font-medium leading-[20px] text-center">
+              Hủy đơn hàng
+            </Text>
+          </Button>
         )}
 
-        {onViewDetails && (
-          <TouchableOpacity
-            className="px-[22px] h-11 justify-center items-center border border-[#676767] rounded-full"
-            onPress={onViewDetails}
+        {!!onReturnOrder && (
+          <Button
+            variant="outline"
+            onPress={onReturnOrder}
+            className="border-orange-500 active:bg-orange-50"
           >
-            <View className="flex-row justify-center items-center gap-1.5">
-              <Text className="text-[#676767] text-sm font-medium leading-[20px] text-center">
-                Xem chi tiết
-              </Text>
-            </View>
-          </TouchableOpacity>
+            <Text className="text-orange-500 text-sm font-medium leading-[20px] text-center">
+              Đổi trả
+            </Text>
+          </Button>
+        )}
+
+        {!!onViewDetails && (
+          <Button
+            onPress={onViewDetails}
+            className="bg-primary active:bg-primary/90"
+          >
+            <Text className="text-white text-sm font-medium leading-[20px] text-center">
+              Xem chi tiết
+            </Text>
+          </Button>
         )}
       </View>
     </View>

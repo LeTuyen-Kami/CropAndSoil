@@ -170,6 +170,10 @@ export const AppNavigator = () => {
           component={DevMode}
           options={{
             presentation: "modal",
+            contentStyle: {
+              width: "100%",
+              flex: 1,
+            },
           }}
         />
         <Stack.Screen name="WebViewScreen" component={WebViewScreen} />
