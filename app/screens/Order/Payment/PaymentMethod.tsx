@@ -3,6 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { useState } from "react";
 import { TouchableOpacity, View } from "react-native";
+import { twMerge } from "tailwind-merge";
 import { imagePaths } from "~/assets/imagePath";
 import { toast } from "~/components/common/Toast";
 import { Text } from "~/components/ui/text";
@@ -31,6 +32,8 @@ const PaymentMethod = ({
     onSelectPaymentMethod(id);
   };
 
+  console.log("paymentMethods", JSON.stringify(paymentMethods, null, 2));
+
   return (
     <View className="mt-4 bg-white rounded-2xl">
       <View className="flex-row justify-between items-center p-3 border-b border-[#F5F5F5]">
@@ -47,11 +50,15 @@ const PaymentMethod = ({
         {paymentMethods?.map((option, index) => (
           <TouchableOpacity
             key={option.key}
-            className={`flex-row justify-between items-center px-3`}
+            className={twMerge(
+              "flex-row justify-between items-center px-3",
+              index !== paymentMethods?.length - 1 &&
+                "border-b border-[#F5F5F5]"
+            )}
             onPress={() => handleSelectPaymentMethod(option.key)}
             activeOpacity={0.7}
           >
-            <View className="flex-row items-center">
+            <View className={twMerge("flex-row flex-1 items-center")}>
               <View className="justify-center items-center mr-2 size-10">
                 <Image
                   source={imagePaths.icDollar}
@@ -59,7 +66,7 @@ const PaymentMethod = ({
                   contentFit="contain"
                 />
               </View>
-              <View>
+              <View className="flex-1 py-2">
                 <Text className="text-[14px] text-[#383B45]">
                   {option.title}
                 </Text>

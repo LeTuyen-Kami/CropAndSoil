@@ -132,6 +132,9 @@ export const UnavailableVoucher = ({ voucher }: { voucher: IVoucher }) => {
           usagePercent={Math.round(
             (voucher.usedCount / (voucher.usageLimit || 1)) * 100
           )}
+          onPress={() => {
+            toast.error("Voucher không khả dụng");
+          }}
         />
       </View>
     </WrapperVoucher>

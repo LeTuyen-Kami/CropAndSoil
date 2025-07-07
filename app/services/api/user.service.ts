@@ -150,6 +150,17 @@ class UserService {
       message: string;
     }>(`/account/addresses/${wooId}`);
   }
+
+  async requestDeleteAccount(payload: {
+    reason: string;
+    email: string;
+    phone: string;
+  }) {
+    return typedAxios.put<{
+      code: string;
+      message: string;
+    }>("/account/request-delete-account", payload);
+  }
 }
 
 export const userService = new UserService();

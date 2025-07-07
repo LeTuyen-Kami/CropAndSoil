@@ -19,9 +19,11 @@ import { Text } from "~/components/ui/text";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 import { authService } from "~/services/api/auth.service";
 import { authAtom, showModalConfirm, signOut } from "~/store/atoms";
-import { ENV, getDeviceId } from "~/utils";
+import { ENV, getDeviceId, getErrorMessage } from "~/utils";
 import * as WebBrowser from "expo-web-browser";
 import { cn } from "~/lib/utils";
+import { userService } from "~/services/api/user.service";
+import { toggleLoading } from "~/components/common/ScreenLoading";
 
 const useDevMode = () => {
   const [tapCount, setTapCount] = useState(0);
@@ -41,7 +43,7 @@ const useDevMode = () => {
       // Activate dev mode
       setTapCount(0);
       toast.success("Dev Mode activated!");
-      navigation.smartNavigate("DevMode");
+      navigation.navigate("DevMode");
       return;
     }
 
@@ -139,9 +141,26 @@ const Settings = () => {
   const handleDeleteAccount = () => {
     showModalConfirm({
       title: "Xóa tài khoản",
-      message: "Bạn sẽ được chuyển đến trang web để xoá tài khoản. Tiếp tục?",
+      message:
+        "Bạn có chắc chắn muốn xóa tài khoản không? Sau khi xóa tài khoản, bạn sẽ không thể đăng nhập lại vào hệ thống.",
       onConfirm: () => {
-        WebBrowser.openBrowserAsync("https://www.google.com");
+        toggleLoading(true);
+        userService
+          .requestDeleteAccount({
+            reason: "Không có nhu cầu sử dụng nữa",
+            email: auth?.user?.email || "",
+            phone: auth?.user?.phone || "",
+          })
+          .then(() => {
+            toast.success("Yêu cầu xóa tài khoản đã được gửi");
+            onPressLogout();
+          })
+          .catch((error) => {
+            toast.error(getErrorMessage(error, "Lỗi khi xóa tài khoản"));
+          })
+          .finally(() => {
+            toggleLoading(false);
+          });
       },
     });
   };
