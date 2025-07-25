@@ -331,9 +331,9 @@ const RegisterForm = () => {
               <Text className="text-xs font-bold text-[#159747]">
                 {countdown}
               </Text>{" "}
-              giây để nhận lại mã xác thực.{"\n"}Lưu ý: Kiểm tra thông báo của
-              Zalo để nhận Mã kịp thời Nếu bạn chưa có tài khoản Zalo, hãy nhấn
-              mũi tên trở lại để chọn phương thức khác
+              giây để nhận lại mã xác thực.{"\n"}Lưu ý: Kiểm tra thông báo SMS
+              để nhận Mã kịp thời Nếu bạn chưa có tài khoản Zalo, hãy nhấn mũi
+              tên trở lại để chọn phương thức khác
             </Text>
           ) : (
             <TouchableOpacity

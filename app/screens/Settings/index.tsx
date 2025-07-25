@@ -113,13 +113,16 @@ const Settings = () => {
     mutateLogout.mutate(undefined, {
       onSuccess: () => {
         toast.success("Đăng xuất thành công");
+        signOut();
+        navigation.smartGoBack();
+      },
+      onError: (error) => {
+        toast.error(getErrorMessage(error, "Lỗi khi đăng xuất"));
+      },
+      onSettled: () => {
+        setLoading(false);
       },
     });
-
-    setTimeout(() => {
-      signOut();
-      navigation.smartGoBack();
-    }, 1000);
   };
 
   const changePassword = () => {

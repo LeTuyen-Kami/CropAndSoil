@@ -207,8 +207,8 @@ const ResetPassword = () => {
           {step === "phone"
             ? "Vui lòng nhập SĐT của bạn để nhận mã xác thực từ SMS."
             : step === "code"
-              ? "Vui lòng nhập mã xác thực được gửi tới SĐT của bạn."
-              : "Vui lòng đặt mật khẩu mới cho tài khoản của bạn."}
+            ? "Vui lòng nhập mã xác thực được gửi tới SĐT của bạn."
+            : "Vui lòng đặt mật khẩu mới cho tài khoản của bạn."}
         </Text>
       </View>
 
@@ -288,8 +288,8 @@ const ResetPassword = () => {
               <Text className="text-xs font-bold text-[#159747]">
                 {countdown}
               </Text>{" "}
-              giây để nhận lại mã xác thực.{"\n"}Lưu ý: Kiểm tra thông báo của
-              Zalo để nhận mã kịp thời.
+              giây để nhận lại mã xác thực.{"\n"}Lưu ý: Kiểm tra thông báo SMS
+              để nhận mã kịp thời.
             </Text>
           ) : (
             <TouchableOpacity

@@ -21,8 +21,8 @@ const DEV_ENV = {
 };
 
 const PROD_ENV = {
-  EXPO_PUBLIC_BASE_URL: "https://cropee-api.faster.asia/api/v1",
-  EXPO_PUBLIC_IDENTITY_BASE_URL: "https://cropee-api.faster.asia/api/v1",
+  EXPO_PUBLIC_BASE_URL: "https://api.cropee.vn/api/v1",
+  EXPO_PUBLIC_IDENTITY_BASE_URL: "https://api.cropee.vn/api/v1",
   EXPO_PUBLIC_ENV: "prod",
   EXPO_PUBLIC_SENTRY_DSN:
     "https://bac04b48769b756a71f586d876accab8@o4509072888889344.ingest.de.sentry.io/4509072902914128",

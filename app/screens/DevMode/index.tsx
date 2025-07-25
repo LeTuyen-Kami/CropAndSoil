@@ -1,14 +1,15 @@
 import dayjs from "dayjs";
 import { useAtom } from "jotai";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Switch, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import SecurityPinModal from "~/components/common/SecurityPinModal";
 import { toast } from "~/components/common/Toast";
 import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
-import { devModeAtom, resetDevMode } from "~/store/atoms";
+import { authAtom, devModeAtom, resetDevMode } from "~/store/atoms";
 import { getDeviceId } from "~/utils";
 
 const DevModeItem = ({
@@ -44,6 +45,9 @@ const DevMode = () => {
   const navigation = useSmartNavigation();
   const [devMode, setDevMode] = useAtom(devModeAtom);
   const [showSecurityModal, setShowSecurityModal] = useState(false);
+  const [auth, setAuth] = useAtom(authAtom);
+  const [accessToken, setAccessToken] = useState(auth?.token?.accessToken);
+  const [refreshToken, setRefreshToken] = useState(auth?.token?.refreshToken);
 
   const updateDevModeSetting = <K extends keyof typeof devMode>(
     key: K,
@@ -94,6 +98,11 @@ const DevMode = () => {
     toast.success("Dev mode settings reset!");
   };
 
+  useEffect(() => {
+    setAccessToken(auth?.token?.accessToken);
+    setRefreshToken(auth?.token?.refreshToken);
+  }, [auth]);
+
   return (
     <View className="max-w-[500px] flex-1">
       <View className="flex-row justify-between items-center px-5 py-4 bg-white border-b border-gray-100">
@@ -105,7 +114,7 @@ const DevMode = () => {
           testing only.
         </Text>
         <KeyboardAwareScrollView showsVerticalScrollIndicator={false}>
-          <View className="mt-4">
+          <View>
             <Text className="text-xs font-medium tracking-tight text-[#676767] px-5 py-3">
               NETWORK & DEBUGGING
             </Text>
@@ -134,7 +143,7 @@ const DevMode = () => {
             </View>
           </View>
 
-          <View className="mt-6">
+          <View>
             <Text className="text-xs font-medium tracking-tight text-[#676767] px-5 py-3">
               ERROR TRACKING
             </Text>
@@ -147,8 +156,55 @@ const DevMode = () => {
               }
             />
           </View>
+          <View>
+            <Text className="text-xs font-medium tracking-tight text-[#676767] px-5 py-3">
+              AUTH
+            </Text>
+            <View>
+              <Input
+                value={accessToken}
+                onChangeText={(text) => setAccessToken(text)}
+                placeholder="Access Token"
+                className="px-5 py-4 bg-white border border-gray-100 rounded-lg"
+              />
+              <Button
+                onPress={() => {
+                  setAuth({
+                    ...auth,
+                    token: {
+                      ...auth.token,
+                      accessToken: accessToken ?? "",
+                      refreshToken: auth.token?.refreshToken ?? "",
+                    },
+                  });
+                }}
+              >
+                <Text>Set Access Token</Text>
+              </Button>
+              <Input
+                value={refreshToken}
+                onChangeText={(text) => setRefreshToken(text)}
+                placeholder="Refresh Token"
+                className="px-5 py-4 bg-white border border-gray-100 rounded-lg"
+              />
+              <Button
+                onPress={() => {
+                  setAuth({
+                    ...auth,
+                    token: {
+                      ...auth?.token,
+                      accessToken: auth?.token?.accessToken ?? "",
+                      refreshToken: refreshToken ?? "",
+                    },
+                  });
+                }}
+              >
+                <Text>Set Refresh Token</Text>
+              </Button>
+            </View>
+          </View>
 
-          <View className="mt-6">
+          <View>
             <Text className="text-xs font-medium tracking-tight text-[#676767] px-5 py-3">
               PERFORMANCE
             </Text>

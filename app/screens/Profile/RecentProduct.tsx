@@ -27,10 +27,10 @@ const RecentProduct = () => {
   });
 
   useEffect(() => {
-    if (isFocused) {
+    if (isFocused && auth?.isLoggedIn) {
       refetch();
     }
-  }, [isFocused]);
+  }, [isFocused, auth?.isLoggedIn]);
 
   if (!checkCanRender(recentlyViewedProducts)) return null;
 

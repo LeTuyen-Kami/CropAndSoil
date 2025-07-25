@@ -20,6 +20,8 @@ const MaybeLike = ({ id }: { id: string | number }) => {
     enabled: !!auth?.isLoggedIn,
   });
 
+  if (!recommendedProduct?.length) return null;
+
   return (
     <View className="mt-4">
       <View className="flex-row justify-between items-center px-4">
