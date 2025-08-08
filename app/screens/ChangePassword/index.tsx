@@ -77,6 +77,9 @@ const ChangePassword = () => {
             className="mx-2"
             value={newPassword}
             onChangeText={setNewPassword}
+            style={{
+              color: "black",
+            }}
             textInputClassName="text-sm leading-4"
             secureTextEntry={!toggleNewPassword}
             rightIcon={
@@ -107,6 +110,9 @@ const ChangePassword = () => {
             className="mx-2"
             value={confirmPassword}
             onChangeText={setConfirmPassword}
+            style={{
+              color: "black",
+            }}
             textInputClassName="text-sm leading-4"
             secureTextEntry={!toggleConfirmPassword}
             rightIcon={

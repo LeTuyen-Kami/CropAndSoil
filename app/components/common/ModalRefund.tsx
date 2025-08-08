@@ -18,6 +18,7 @@ import { Text } from "../ui/text";
 import { toast } from "./Toast";
 import { imagePaths } from "~/assets/imagePath";
 import { screen } from "~/utils";
+import { MAX_IMAGE_SIZE } from "~/utils/contants";
 
 type MediaAsset = {
   uri: string;
@@ -33,7 +34,6 @@ interface ModalRefundProps {
   isLoading?: boolean;
 }
 
-const MAX_IMAGE_SIZE = 1.5 * 1024 * 1024; // 1.5MB
 const MAX_IMAGES = 5;
 
 const ModalRefund: React.FC<ModalRefundProps> = ({
@@ -79,7 +79,7 @@ const ModalRefund: React.FC<ModalRefundProps> = ({
         const fileInfo = await getFileInfo(fileUri);
 
         if (fileInfo.size > MAX_IMAGE_SIZE) {
-          toast.error(`Kích thước ảnh không được vượt quá 1.5MB`);
+          toast.error(`Kích thước ảnh không được vượt quá 10MB`);
           return;
         }
 
@@ -123,7 +123,7 @@ const ModalRefund: React.FC<ModalRefundProps> = ({
         const fileInfo = await getFileInfo(fileUri);
 
         if (fileInfo.size > MAX_IMAGE_SIZE) {
-          toast.error(`Kích thước ảnh không được vượt quá 1.5MB`);
+          toast.error(`Kích thước ảnh không được vượt quá 10MB`);
           return;
         }
 

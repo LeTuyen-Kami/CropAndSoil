@@ -30,7 +30,9 @@ export const useSmartNavigation = () => {
     replace: (screenName: string, params?: any) =>
       navigation.replace(screenName, params),
     smartGoBack: () => {
-      navigation.goBack(); // thường không cần auth, nhưng để đây cho đầy đủ
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+      }
     },
     reset: (params: any) => {
       navigation.reset(params);

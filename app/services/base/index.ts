@@ -49,6 +49,9 @@ const identityInstance = axios.create({
 
 let isRefreshing = false;
 let failedQueue: any[] = [];
+let count = 0;
+const MAX_COUNT = 3;
+let expiredTime = new Date();
 
 const processQueue = (error: any = null) => {
   failedQueue.forEach((prom) => {
@@ -72,6 +75,20 @@ const refreshTokenFn = async () => {
         code: 999,
         message: "Phiên đăng nhập hết hạn, vui lòng đăng nhập lại",
       };
+
+    if (Date.now() > expiredTime.getTime()) {
+      expiredTime = new Date(new Date().getTime() + 1000 * 60 * 60);
+      count = 0;
+    }
+
+    count++;
+
+    if (count > MAX_COUNT) {
+      throw {
+        code: 999,
+        message: "Phiên đăng nhập hết hạn, vui lòng đăng nhập lại",
+      };
+    }
 
     const response = await identityInstance.post(
       "/auth/extend",
@@ -104,6 +121,8 @@ const refreshTokenFn = async () => {
       toast.warning("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại");
     }
     signOut();
+    count = 0;
+    expiredTime = new Date();
     throw error;
   }
 };

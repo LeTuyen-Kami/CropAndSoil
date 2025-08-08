@@ -146,6 +146,9 @@ const LoginForm = () => {
                 />
               </TouchableOpacity>
             }
+            style={{
+              color: "black",
+            }}
             className="bg-[#F5F5F5]"
           />
         </View>

@@ -100,6 +100,9 @@ const SecurityPinModal = ({
               keyboardType="numeric"
               className="px-4 py-3 mb-3 text-base rounded-lg border border-gray-300"
               autoFocus
+              style={{
+                color: "black",
+              }}
               onSubmitEditing={handleVerify}
             />
 

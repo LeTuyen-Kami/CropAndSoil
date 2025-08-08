@@ -62,7 +62,7 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({
           </Text>
           <Text className="text-xs text-[#676767] text-center mt-1">
             Định dạng hình ảnh JPG, PNG hoặc PDF, và kích thước không vượt quá
-            5MB.
+            10MB.
           </Text>
         </View>
         <TouchableOpacity

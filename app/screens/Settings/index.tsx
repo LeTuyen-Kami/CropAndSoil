@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation } from "@tanstack/react-query";
 import Constants from "expo-constants";
-import { useAtomValue } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -101,6 +101,7 @@ const Settings = () => {
   const [loading, setLoading] = useState(false);
   const { handleTap: handleDevModeTap } = useDevMode();
   const auth = useAtomValue(authAtom);
+  const setAuth = useSetAtom(authAtom);
 
   const mutateLogout = useMutation({
     mutationFn: authService.logout,
@@ -110,6 +111,14 @@ const Settings = () => {
     if (loading) return;
 
     setLoading(true);
+    // setAuth({
+    //   ...auth,
+    //   token: {
+    //     ...auth?.token,
+    //     accessToken: "",
+    //     refreshToken: auth?.token?.refreshToken ?? "",
+    //   },
+    // });
     mutateLogout.mutate(undefined, {
       onSuccess: () => {
         toast.success("Đăng xuất thành công");
@@ -124,6 +133,30 @@ const Settings = () => {
       },
     });
   };
+
+  // const onPressLogout = () => {
+  //   if (loading) return;
+
+  //   setAuth({
+  //     ...auth,
+  //     token: {
+  //       ...auth?.token,
+  //       accessToken: "",
+  //       refreshToken: auth?.token?.refreshToken ?? "",
+  //     },
+  //   });
+  //   setLoading(true);
+  //   mutateLogout.mutate(undefined, {
+  //     onSuccess: () => {
+  //       toast.success("Đăng xuất thành công");
+  //     },
+  //   });
+
+  //   setTimeout(() => {
+  //     signOut();
+  //     navigation.smartGoBack();
+  //   }, 1000);
+  // };
 
   const changePassword = () => {
     navigation.smartNavigate("ChangePassword");

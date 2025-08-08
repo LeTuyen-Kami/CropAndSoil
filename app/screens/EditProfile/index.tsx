@@ -214,7 +214,7 @@ const EditProfileScreen = () => {
         result.assets[0]?.fileSize &&
         result.assets[0]?.fileSize > MAX_IMAGE_SIZE
       ) {
-        toast.error("Kích thước ảnh không được vượt quá 2MB");
+        toast.error("Kích thước ảnh không được vượt quá 10MB");
         return;
       }
 

@@ -20,6 +20,7 @@ import FallBackUI from "~/components/common/FallbackUI";
 import { withErrorBoundary } from "~/hooks/withErrorBoundary";
 import { jotaiStore } from "~/store/store";
 import { devModeAtom } from "~/store/atoms";
+import { Appearance } from "react-native";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -27,6 +28,10 @@ cssInterop(Image, {
   className: "style",
 });
 function App() {
+  // useEffect(() => {
+  //   Appearance.setColorScheme("light");
+  // }, []);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <KeyboardProvider>

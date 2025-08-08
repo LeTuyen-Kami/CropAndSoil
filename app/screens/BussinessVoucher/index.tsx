@@ -21,6 +21,7 @@ import ModalBottom from "~/components/common/ModalBottom";
 import { UpdateUserPayload, userService } from "~/services/api/user.service";
 import { useMutation } from "@tanstack/react-query";
 import { getErrorMessage } from "~/utils";
+import { MAX_IMAGE_SIZE } from "~/utils/contants";
 // Define a type for our document
 type DocumentAsset = {
   name?: string;
@@ -67,11 +68,10 @@ const BusinessVoucherScreen = () => {
 
       // Check file size (5MB limit)
       const fileSize = result.assets[0].fileSize || 0;
-      const maxSize = 5 * 1024 * 1024; // 5MB
 
-      if (fileSize > maxSize) {
+      if (fileSize > MAX_IMAGE_SIZE) {
         toast.error(
-          "Kích thước tệp không được vượt quá 5MB. Vui lòng chọn tệp khác."
+          "Kích thước tệp không được vượt quá 10MB. Vui lòng chọn tệp khác."
         );
         return;
       }
@@ -102,11 +102,10 @@ const BusinessVoucherScreen = () => {
 
       // Check file size (5MB limit)
       const fileSize = result.assets[0].size || 0;
-      const maxSize = 5 * 1024 * 1024; // 5MB
 
-      if (fileSize > maxSize) {
+      if (fileSize > MAX_IMAGE_SIZE) {
         toast.error(
-          "Kích thước tệp không được vượt quá 5MB. Vui lòng chọn tệp khác."
+          "Kích thước tệp không được vượt quá 10MB. Vui lòng chọn tệp khác."
         );
         return;
       }

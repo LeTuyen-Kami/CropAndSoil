@@ -35,6 +35,7 @@ import {
 } from "~/services/api/review.service";
 import { authAtom } from "~/store/atoms";
 import { getErrorMessage, screen } from "~/utils";
+import { MAX_IMAGE_SIZE, MAX_VIDEO_SIZE } from "~/utils/contants";
 
 // Define types for the images/videos
 type MediaAsset = {
@@ -49,8 +50,6 @@ type MediaAsset = {
 const RATING_OPTIONS = ["Tốt", "Bình thường", "Kém"];
 
 // Media constraints
-const MAX_IMAGE_SIZE = 1.5 * 1024 * 1024; // 1.5MB in bytes
-const MAX_VIDEO_SIZE = 25 * 1024 * 1024; // 25MB in bytes
 const MAX_IMAGES = 5;
 const MAX_VIDEOS = 1;
 
@@ -177,11 +176,9 @@ const EditReview = () => {
         const fileUri = result.assets[0].uri;
         const fileInfo = await getFileInfo(fileUri);
 
-        console.log("fileInfo", fileInfo);
-
         // Check file size
         if (fileInfo.type === "image" && fileInfo.size > MAX_IMAGE_SIZE) {
-          toast.error(`Kích thước ảnh không được vượt quá 2MB`);
+          toast.error(`Kích thước ảnh không được vượt quá 10MB`);
           return;
         }
 
@@ -229,13 +226,6 @@ const EditReview = () => {
       if (!result.canceled && result.assets[0]) {
         const fileUri = result.assets[0].uri;
         const fileInfo = await getFileInfo(fileUri);
-
-        console.log("fileInfo", fileInfo.size);
-
-        if (fileInfo.size > MAX_IMAGE_SIZE) {
-          toast.error(`Kích thước ảnh không được vượt quá 1.5MB`);
-          return;
-        }
 
         const newAsset: MediaAsset = {
           uri: fileUri,

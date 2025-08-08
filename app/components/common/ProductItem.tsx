@@ -10,7 +10,7 @@ import { Text } from "~/components/ui/text";
 import { cn } from "~/lib/utils";
 import { RootStackScreenProps } from "~/navigation/types";
 import { authAtom, devModeAtom } from "~/store/atoms";
-import { isIOS, maskVNDPriceBeforeSale } from "~/utils";
+import { formatPrice, isIOS, maskVNDPriceBeforeSale } from "~/utils";
 
 export interface ProductItemProps {
   image?: string;
@@ -62,10 +62,6 @@ const ProductItem = ({
     typeof soldCount === "number" && typeof totalCount === "number";
 
   const hasRating = typeof rating === "number";
-
-  const formatPrice = (value: number) => {
-    return value.toLocaleString() + "đ";
-  };
 
   const calculateSoldPercentage = () => {
     if (!hasSoldCount || totalCount === 0) return 0;

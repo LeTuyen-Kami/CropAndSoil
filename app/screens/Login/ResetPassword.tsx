@@ -326,6 +326,9 @@ const ResetPassword = () => {
             value={password}
             onChangeText={setPassword}
             secureTextEntry={!togglePassword}
+            style={{
+              color: "black",
+            }}
             leftIcon={
               <Image
                 source={imagePaths.icLock}
