@@ -1,5 +1,6 @@
 import { PaginatedResponse, PaginationRequests } from "~/types";
 import { typedAxios } from "../base";
+import mime from "mime";
 
 export interface Province {
   id: string;
@@ -337,7 +338,7 @@ class ReviewService {
     data.images.forEach((image, index) => {
       formData.append("images", {
         uri: image.uri,
-        type: image.type,
+        type: mime.getType(image.name) || "image/jpeg",
         name: image.name || `image_${index}.jpg`,
       } as any);
     });
@@ -345,7 +346,7 @@ class ReviewService {
     if (data.video?.uri) {
       formData.append("video", {
         uri: data.video.uri,
-        type: data.video.type,
+        type: mime.getType(data.video.name) || "video/mp4",
         name: data.video.name || "video.mp4",
       } as any);
     }
@@ -376,7 +377,7 @@ class ReviewService {
     data.images.forEach((image, index) => {
       formData.append("images", {
         uri: image.uri,
-        type: image.type,
+        type: mime.getType(image.name) || "image/jpeg",
         name: image.name || `image_${index}.jpg`,
       } as any);
     });
@@ -384,7 +385,7 @@ class ReviewService {
     if (data.video?.uri) {
       formData.append("video", {
         uri: data.video.uri,
-        type: data.video.type,
+        type: mime.getType(data.video.name) || "video/mp4",
         name: data.video.name || "video.mp4",
       } as any);
     }

@@ -9,8 +9,8 @@ import { Text } from "~/components/ui/text";
 import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 import { flashSaleService } from "~/services/api/flashsale.service";
 const Detail = ({ id }: { id: string | number }) => {
-  const [expanded, setExpanded] = useState(false);
-  const [showAllProperties, setShowAllProperties] = useState(false);
+  const [expanded, setExpanded] = useState(true);
+  const [showAllProperties, setShowAllProperties] = useState(true);
   const navigation = useSmartNavigation();
 
   const { data: productDescription } = useQuery({

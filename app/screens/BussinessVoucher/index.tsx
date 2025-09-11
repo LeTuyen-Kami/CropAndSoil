@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Alert,
   Modal,
+  Text as RNText,
   ActivityIndicator,
 } from "react-native";
 import { Text } from "~/components/ui/text";
@@ -19,9 +20,12 @@ import { FontAwesome } from "@expo/vector-icons";
 import { toast } from "~/components/common/Toast";
 import ModalBottom from "~/components/common/ModalBottom";
 import { UpdateUserPayload, userService } from "~/services/api/user.service";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getErrorMessage } from "~/utils";
 import { MAX_IMAGE_SIZE } from "~/utils/contants";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { RootStackParamList, RootStackRouteProp } from "~/navigation/types";
 // Define a type for our document
 type DocumentAsset = {
   name?: string;
@@ -34,10 +38,14 @@ type DocumentAsset = {
 
 const BusinessVoucherScreen = () => {
   const { bottom } = useSafeAreaInsets();
+  const route = useRoute<RootStackRouteProp<"BusinessVoucher">>();
+  const { fullName, phone, email, gender, birthDate, taxId, avatar } =
+    route?.params || {};
   const [taxCode, setTaxCode] = useState("");
   const [document, setDocument] = useState<DocumentAsset | null>(null);
   const [showTypeSelector, setShowTypeSelector] = useState(false);
-
+  const queryClient = useQueryClient();
+  const navigation = useNavigation();
   const mutationUploadDocument = useMutation({
     mutationFn: (payload: UpdateUserPayload) => {
       return userService.updateProfile(payload);
@@ -147,10 +155,26 @@ const BusinessVoucherScreen = () => {
           type: "File",
           name: document.name || "",
         },
+
+        name: fullName,
+        phone: phone,
+        email: email,
+        gender: gender,
+        birthday: birthDate,
+        avatarFile:
+          avatar && avatar.uri
+            ? {
+                uri: avatar?.uri || "",
+                type: avatar?.mimeType || "image/jpeg",
+                name: avatar?.fileName || "",
+              }
+            : undefined,
       },
       {
         onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ["profile"] });
           toast.success("Đã lưu thông tin chứng từ kinh doanh");
+          navigation.goBack();
         },
         onError: (error) => {
           const message = getErrorMessage(
@@ -173,56 +197,58 @@ const BusinessVoucherScreen = () => {
         titleClassName="font-bold"
       />
 
-      <View className="bg-white rounded-t-[40px] pt-10 overflow-hidden flex-1">
-        <Text className="text-sm mx-5 my-2 font-medium text-[#383B45]">
-          Mã số thuế
-        </Text>
+      <View className="bg-white rounded-t-[40px] pt-4 overflow-hidden flex-1">
+        <KeyboardAwareScrollView>
+          <Text className="text-sm mx-5 my-2 font-medium text-[#383B45]">
+            Mã số thuế
+          </Text>
 
-        <View className="px-2 pb-2.5 flex-row items-center justify-between">
-          <View className="flex-1">
-            <Input
-              placeholder="Nhập ký tự"
-              className="bg-white border-[#F0F0F0]"
-              maxLength={14}
-              value={taxCode}
-              onChangeText={setTaxCode}
-              keyboardType="number-pad"
-              rightIcon={
-                <Text className="text-sm text-[#AEAEAE] ml-2">
-                  {taxCode.length}/14
-                </Text>
-              }
-            />
+          <View className="px-2 pb-2.5 flex-row items-center justify-between">
+            <View className="flex-1">
+              <Input
+                placeholder="Nhập ký tự"
+                className="bg-white border-[#F0F0F0]"
+                maxLength={14}
+                value={taxCode}
+                onChangeText={setTaxCode}
+                keyboardType="number-pad"
+                rightIcon={
+                  <Text className="text-sm text-[#AEAEAE] pl-2">
+                    {taxCode.length}/14
+                  </Text>
+                }
+              />
+            </View>
           </View>
-        </View>
 
-        <Text className="text-sm font-medium text-[#383B45] mt-1.5 mx-5 mb-2">
-          Chứng từ kinh doanh
-        </Text>
+          <Text className="text-sm font-medium text-[#383B45] mt-1.5 mx-5 mb-2">
+            Chứng từ kinh doanh
+          </Text>
 
-        <DocumentUploader
-          hasDocument={!!document}
-          documentName={getDocumentName(document)}
-          onUpload={handleUploadDocument}
-          onRemove={handleRemoveDocument}
-          className="mx-2.5"
-        />
+          <DocumentUploader
+            hasDocument={!!document}
+            documentName={getDocumentName(document)}
+            onUpload={handleUploadDocument}
+            onRemove={handleRemoveDocument}
+            className="mx-2.5"
+          />
 
-        <View
-          className="px-2 py-[12px] items-center mt-auto"
-          style={{ paddingBottom: bottom }}
-        >
-          <TouchableOpacity
-            className="w-full h-11 bg-[#FCBA27] rounded-full items-center justify-center"
-            onPress={handleSave}
+          <View
+            className="px-2 py-[12px] items-center mt-auto"
+            style={{ paddingBottom: bottom }}
           >
-            {mutationUploadDocument.isPending ? (
-              <ActivityIndicator size="small" color="white" />
-            ) : (
-              <Text className="text-base font-medium text-white">Lưu</Text>
-            )}
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity
+              className="w-full h-11 bg-[#FCBA27] rounded-full items-center justify-center"
+              onPress={handleSave}
+            >
+              {mutationUploadDocument.isPending ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <Text className="text-base font-medium text-white">Lưu</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </KeyboardAwareScrollView>
       </View>
 
       {/* <ModalBottom

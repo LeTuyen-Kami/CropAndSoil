@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   Modal,
   Platform,
@@ -78,7 +78,20 @@ const BottomButton = ({ productId }: { productId: number | string }) => {
     },
   });
 
+  const isSoldOut = useMemo(() => {
+    const totalStock = productDetail?.variations?.reduce(
+      (acc, variation) => acc + (variation.stock ?? 0),
+      0
+    );
+    return totalStock === 0;
+  }, [productDetail]);
+
   const handleAction = (type: "add" | "buy") => {
+    if (isSoldOut) {
+      toast.error("Sản phẩm đã hết hàng");
+      return;
+    }
+
     if (!auth?.isLoggedIn) {
       navigation.smartNavigate("Login");
       return;

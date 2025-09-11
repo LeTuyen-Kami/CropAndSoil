@@ -175,7 +175,7 @@ const EditProfileScreen = () => {
           profileForm.avatar && profileForm.avatar.uri
             ? {
                 uri: profileForm.avatar?.uri || "",
-                type: profileForm.avatar?.type || "",
+                type: profileForm.avatar?.mimeType || "image/jpeg",
                 name: profileForm.avatar?.fileName || "",
               }
             : undefined,
@@ -217,8 +217,6 @@ const EditProfileScreen = () => {
         toast.error("Kích thước ảnh không được vượt quá 10MB");
         return;
       }
-
-      console.log("fileSize", result.assets[0]?.fileSize);
 
       // Handle the image upload here
       toast.success("Ảnh đã được chọn");
@@ -374,8 +372,6 @@ const EditProfileScreen = () => {
                       DateTimePickerAndroid.open({
                         value: new Date(profileForm.birthDate),
                         onChange: (event, date) => {
-                          console.log("date", date);
-
                           setProfileForm((prev) => ({
                             ...prev,
                             birthDate: date?.toISOString() || "",
@@ -383,7 +379,7 @@ const EditProfileScreen = () => {
                         },
                         maximumDate: new Date(),
                         mode: "date",
-                        display: "calendar",
+                        display: "spinner",
                       });
                     } else {
                       handleEditField(
@@ -409,7 +405,15 @@ const EditProfileScreen = () => {
                   placeholder="Nhập thông tin & tải lên tệp bắt buộc để hoàn tất"
                   onPress={() => {
                     if (!profileForm.taxId) {
-                      navigation.navigate("BusinessVoucher");
+                      navigation.navigate("BusinessVoucher", {
+                        fullName: profileForm.fullName,
+                        phone: profileForm.phone,
+                        email: profileForm.email,
+                        gender: profileForm.gender,
+                        birthDate: profileForm.birthDate,
+                        taxId: profileForm.taxId,
+                        avatar: profileForm.avatar,
+                      });
                     } else {
                       toast.info("Bạn đã tải lên chứng từ kinh doanh");
                     }

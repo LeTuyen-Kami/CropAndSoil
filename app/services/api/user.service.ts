@@ -1,5 +1,6 @@
 import { PaginatedResponse, PaginationRequests } from "~/types";
 import { typedAxios } from "../base";
+import mime from "mime";
 export interface User {
   id: string;
   wooId: number;
@@ -86,6 +87,7 @@ class UserService {
 
   async updateProfile(payload: UpdateUserPayload) {
     const formData = new FormData();
+
     payload.name && formData.append("name", payload.name);
     payload.phone && formData.append("phone", payload.phone);
     payload.email && formData.append("email", payload.email);
@@ -95,14 +97,16 @@ class UserService {
     if (payload.avatarFile) {
       formData.append("avatarFile", {
         uri: payload.avatarFile.uri,
-        type: payload.avatarFile.type,
+        type: mime.getType(payload.avatarFile.name) || "image/jpeg",
         name: payload.avatarFile.name,
       } as any);
     }
     if (payload.taxCertificateFile) {
       formData.append("taxCertificateFile", {
         uri: payload.taxCertificateFile.uri,
-        type: payload.taxCertificateFile.type,
+        type:
+          mime.getType(payload.taxCertificateFile.name) ||
+          payload.taxCertificateFile.type,
         name: payload.taxCertificateFile.name,
       } as any);
     }

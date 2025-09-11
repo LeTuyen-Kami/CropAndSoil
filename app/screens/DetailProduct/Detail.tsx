@@ -10,8 +10,8 @@ import { useSmartNavigation } from "~/hooks/useSmartNavigation";
 import { productService } from "~/services/api/product.service";
 
 const Detail = ({ id }: { id: string | number }) => {
-  const [expanded, setExpanded] = useState(false);
-  const [showAllProperties, setShowAllProperties] = useState(false);
+  const [expanded, setExpanded] = useState(true);
+  const [showAllProperties, setShowAllProperties] = useState(true);
   const navigation = useSmartNavigation();
 
   const { data: productDescription } = useQuery({
@@ -103,7 +103,9 @@ const Detail = ({ id }: { id: string | number }) => {
             setExpanded(!expanded);
           }}
         >
-          <Text className="text-[#383B45] text-sm mr-1">Xem chi tiết</Text>
+          <Text className="text-[#383B45] text-sm mr-1">
+            {expanded ? "Thu gọn" : "Xem chi tiết"}
+          </Text>
           <Image
             source={imagePaths.icArrowRight}
             className="w-5 h-5"

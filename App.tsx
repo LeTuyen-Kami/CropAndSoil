@@ -28,9 +28,9 @@ cssInterop(Image, {
   className: "style",
 });
 function App() {
-  // useEffect(() => {
-  //   Appearance.setColorScheme("light");
-  // }, []);
+  useEffect(() => {
+    Appearance.setColorScheme("light");
+  }, []);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

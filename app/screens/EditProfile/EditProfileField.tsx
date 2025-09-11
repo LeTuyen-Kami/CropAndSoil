@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
+  Pressable,
 } from "react-native";
 import Animated, {
   runOnJS,
@@ -21,6 +22,8 @@ import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import dayjs from "dayjs";
 import { GENDER_OPTIONS } from "~/utils/contants";
+import { twMerge } from "tailwind-merge";
+
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 type EditProfileFieldProps = {
@@ -169,13 +172,24 @@ const EditProfileField = ({
             {fieldType === "gender" && (
               <View className="mb-6">
                 {GENDER_OPTIONS.map((option) => (
-                  <TouchableOpacity
+                  <Pressable
+                    style={({ pressed }) => ({
+                      opacity: pressed ? 0.8 : 1,
+                      padding: 12,
+                      borderRadius: 12,
+                      borderWidth: 1,
+                      borderColor:
+                        value === option.value ? "#159747" : "#F5F5F5",
+                      marginBottom: 8,
+                    })}
+                    className={twMerge(
+                      `p-3 mb-2 border rounded-lg active:bg-[#DEF1E5] ${
+                        value === option.value
+                          ? "border-[#159747] bg-[#DEF1E5]"
+                          : "border-[#F5F5F5]"
+                      }`
+                    )}
                     key={option.value}
-                    className={`p-3 mb-2 border rounded-lg ${
-                      value === option.value
-                        ? "border-[#159747] bg-[#DEF1E5]"
-                        : "border-[#F5F5F5]"
-                    }`}
                     onPress={() => handleSelectGender(option.value)}
                   >
                     <Text
@@ -187,7 +201,7 @@ const EditProfileField = ({
                     >
                       {option.label}
                     </Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 ))}
               </View>
             )}

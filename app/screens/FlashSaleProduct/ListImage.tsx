@@ -1,5 +1,5 @@
 import { Image } from "expo-image";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Pressable } from "react-native";
 
 import { FlatList } from "react-native";
@@ -30,6 +30,7 @@ const ListImage = ({ id }: { id: string | number }) => {
       return {
         images: data?.flashSaleProduct?.images,
         upsellIds: data?.flashSaleProduct?.upsellIds,
+        variations: data?.flashSaleProduct?.variations,
       };
     },
   });
@@ -81,12 +82,20 @@ const ListImage = ({ id }: { id: string | number }) => {
     }
   }, [error]);
 
+  const isSoldOut = useMemo(() => {
+    const totalStock = productDetail?.variations?.reduce(
+      (acc, variation) => acc + (variation.stock ?? 0),
+      0
+    );
+    return totalStock === 0;
+  }, [productDetail]);
+
   return (
     <View
       style={{
         minHeight: screen.width,
       }}
-      className="bg-white"
+      className="bg-white relative"
     >
       <FlatList
         ref={flatListRef}
@@ -145,6 +154,15 @@ const ListImage = ({ id }: { id: string | number }) => {
         onChangeIndex={(index) => setCurrentIndex(index)}
         onClose={() => setIsGalleryVisible(false)}
       />
+      {isSoldOut && (
+        <View className="absolute inset-0 flex justify-center items-center z-10">
+          <View className="bg-black/50 rounded-full p-4">
+            <Text className="text-white text-center text-2xl font-bold">
+              Hết hàng
+            </Text>
+          </View>
+        </View>
+      )}
     </View>
   );
 };

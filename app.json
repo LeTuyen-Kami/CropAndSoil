@@ -2,7 +2,7 @@
   "expo": {
     "name": "Cropee",
     "slug": "CropAndSoil",
-    "version": "1.0.5",
+    "version": "1.0.7",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -17,7 +17,7 @@
       "infoPlist": {
         "UIBackgroundModes": ["remote-notification"]
       },
-      "buildNumber": "66",
+      "buildNumber": "69",
       "config": {
         "usesNonExemptEncryption": false
       }

@@ -25,6 +25,7 @@ type MediaAsset = {
   type: "image";
   size?: number;
   name: string;
+  mimeType: string;
 };
 
 interface ModalRefundProps {
@@ -88,6 +89,7 @@ const ModalRefund: React.FC<ModalRefundProps> = ({
           type: "image",
           size: fileInfo.size,
           name: result.assets[0].fileName || "image.jpg",
+          mimeType: result.assets[0].mimeType || "image/jpeg",
         };
 
         setMediaAssets([...mediaAssets, newAsset]);

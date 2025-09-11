@@ -13,6 +13,7 @@ const Text = React.forwardRef<TextRef, SlottableTextProps>(
     return (
       <Component
         className={cn("text-base", textClass, className)}
+        textBreakStrategy="simple"
         ref={ref}
         {...props}
       />

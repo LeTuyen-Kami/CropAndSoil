@@ -350,6 +350,7 @@ const HomeCarousel = () => {
       autoPlay={true}
       autoPlayInterval={5000}
       loop={true}
+      height={(screen.width * 42) / 91}
       renderItem={({ item }) => (
         <Pressable
           onPress={() => {
@@ -738,7 +739,7 @@ export const HomeScreen: React.FC = () => {
           return <HomeCarousel />;
 
         case ITEM_TYPES.CATEGORY:
-          return <Category className="px-2 pt-2" />;
+          return <Category className="px-2 py-2" itemBgColor="white" />;
 
         case ITEM_TYPES.FLASH_SALE:
           return <FlashSale />;

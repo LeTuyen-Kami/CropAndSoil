@@ -40,7 +40,7 @@ const ModalOrderRefund = ({
               reason,
               images: images.map((image) => ({
                 uri: image.uri,
-                type: image.type,
+                type: image.mimeType,
                 name: image.name,
               })),
             },

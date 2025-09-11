@@ -2,6 +2,7 @@ import { NavigatorScreenParams, RouteProp } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { IReview } from "~/services/api/review.service";
+import * as ImagePicker from "expo-image-picker";
 
 // Define the param list for the tab navigator
 export type TabParamList = {
@@ -47,7 +48,15 @@ export type RootStackParamList = {
     tabIndex: number;
   };
   Settings: undefined;
-  BusinessVoucher: undefined;
+  BusinessVoucher: {
+    fullName: string;
+    phone: string;
+    email: string;
+    gender: string;
+    birthDate: string;
+    taxId: string;
+    avatar: ImagePicker.ImagePickerAsset | null;
+  };
   MyRating: undefined;
   EditReview: {
     orderId: number;

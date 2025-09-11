@@ -2,7 +2,7 @@ import { AntDesign } from "@expo/vector-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   Modal,
   TouchableOpacity,
@@ -118,7 +118,20 @@ const BottomButton = ({
   //   }
   // }, [detailCart]);
 
+  const isSoldOut = useMemo(() => {
+    const totalStock = flashSaleProductDetail?.variations?.reduce(
+      (acc, variation) => acc + (variation.stock ?? 0),
+      0
+    );
+    return totalStock === 0;
+  }, [flashSaleProductDetail]);
+
   const handleAction = (type: "add" | "buy") => {
+    if (isSoldOut) {
+      toast.error("Sản phẩm đã hết hàng");
+      return;
+    }
+
     if (!auth?.isLoggedIn) {
       navigation.smartNavigate("Login");
       return;

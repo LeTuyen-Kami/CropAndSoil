@@ -40,7 +40,7 @@ const Item = ({ title, image, itemBgColor, textColor, onPress }: ItemProps) => {
           />
         </View>
         <Text
-          className="text-center"
+          className="text-center text-xs"
           style={{ color: textColor }}
           numberOfLines={2}
         >
@@ -146,7 +146,7 @@ interface CategoryProps {
 const Category = ({
   getCategoriesApi = categoryService.getCategories,
   queryKey = ["categories"],
-  itemBgColor = "rgba(0,0,0,0.25)",
+  itemBgColor = "transparent",
   textColor = "white",
   className,
   onPress,
