@@ -2,13 +2,14 @@ import { useNavigation } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { deepEqual } from "fast-equals";
 import { useAtomValue } from "jotai";
-import React from "react";
+import React, { useMemo } from "react";
 import { DimensionValue, Image as RNImage, View } from "react-native";
 import { Pressable } from "react-native-gesture-handler";
 import { imagePaths } from "~/assets/imagePath";
 import { Text } from "~/components/ui/text";
 import { cn } from "~/lib/utils";
 import { RootStackScreenProps } from "~/navigation/types";
+import { IProduct } from "~/services/api/product.service";
 import { authAtom, devModeAtom } from "~/store/atoms";
 import { formatPrice, isIOS, maskVNDPriceBeforeSale } from "~/utils";
 
@@ -30,6 +31,7 @@ export interface ProductItemProps {
   onSale?: boolean;
   id: string | number;
   overrideSalePrice?: string;
+  detailProduct?: IProduct;
 }
 
 const ProductItem = ({
@@ -50,6 +52,7 @@ const ProductItem = ({
   onSale,
   id,
   overrideSalePrice,
+  detailProduct,
 }: ProductItemProps) => {
   const navigation = useNavigation<RootStackScreenProps<"DetailProduct">>();
   const devMode = useAtomValue(devModeAtom);
@@ -76,9 +79,20 @@ const ProductItem = ({
     }
   };
 
+  const isSoldOut = useMemo(() => {
+    if (!detailProduct) return false;
+
+    const totalStock = detailProduct?.variations?.reduce(
+      (acc, variation) => acc + (variation.stock ?? 0),
+      0
+    );
+    return totalStock === 0;
+  }, [detailProduct]);
+
   return (
     <Pressable
       onPress={handlePress}
+      className="relative"
       style={({ pressed }) => ({
         opacity: pressed ? 0.8 : 1,
         transform: [{ scale: pressed ? 0.98 : 1 }],
@@ -94,7 +108,7 @@ const ProductItem = ({
           height: height ? height : undefined,
         }}
       >
-        <View className="w-full bg-neutral-100 aspect-square">
+        <View className="w-full bg-neutral-100 aspect-square relative">
           {isIOS ? (
             <RNImage
               source={{
@@ -119,6 +133,15 @@ const ProductItem = ({
               cachePolicy={"memory-disk"}
               allowDownscaling={true}
             />
+          )}
+          {isSoldOut && (
+            <View className="absolute inset-0 flex justify-center items-center z-10">
+              <View className="bg-black/50 rounded-full p-2">
+                <Text className="text-white text-center text-lg font-bold">
+                  Hết hàng
+                </Text>
+              </View>
+            </View>
           )}
         </View>
         <View className="p-[10] flex-col gap-[2] flex-1">

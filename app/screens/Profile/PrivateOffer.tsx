@@ -124,6 +124,7 @@ const PrivateOffer = () => {
         }}
         renderItem={({ item: product }) => (
           <ProductItem
+            detailProduct={product}
             name={product?.name}
             price={product?.salePrice}
             originalPrice={product?.regularPrice}

@@ -81,6 +81,7 @@ const TopProduct = ({ id }: { id: string | number }) => {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <ProductItem
+            detailProduct={item}
             name={item.name}
             price={item.salePrice}
             originalPrice={item.regularPrice}

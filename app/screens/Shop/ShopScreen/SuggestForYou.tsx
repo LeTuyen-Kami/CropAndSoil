@@ -24,8 +24,9 @@ const SuggestForYou = () => {
       </View>
       <FlatList
         data={[...Array(10)]}
-        renderItem={() => (
+        renderItem={({ item }) => (
           <ProductItem
+            detailProduct={item}
             name={"Sản phẩm 1"}
             price={100000}
             originalPrice={120000}

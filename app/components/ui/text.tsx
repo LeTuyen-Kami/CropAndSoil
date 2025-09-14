@@ -14,6 +14,7 @@ const Text = React.forwardRef<TextRef, SlottableTextProps>(
       <Component
         className={cn("text-base", textClass, className)}
         textBreakStrategy="simple"
+        allowFontScaling={false}
         ref={ref}
         {...props}
       />

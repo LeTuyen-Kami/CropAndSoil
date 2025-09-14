@@ -34,6 +34,7 @@ const MaybeLike = ({ id }: { id: string | number }) => {
       <View className="flex-row flex-wrap gap-2 px-2 py-3">
         {recommendedProduct?.map((item, index) => (
           <ProductItem
+            detailProduct={item}
             width={(screen.width - 24) / 2}
             key={item.id}
             name={item.name}

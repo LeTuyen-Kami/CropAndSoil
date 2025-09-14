@@ -54,7 +54,9 @@ const ContainerList: React.FC<ContainerListProps> = ({
         onPress={onPress}
       >
         {!!icon && icon}
-        <Text className="text-xl font-bold text-black uppercase">{title}</Text>
+        <Text className="text-base font-bold text-black uppercase">
+          {title}
+        </Text>
         {!!rightComponent && rightComponent}
       </Wrapper>
       {children}

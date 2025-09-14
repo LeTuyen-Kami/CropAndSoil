@@ -36,6 +36,7 @@ const RenderTwoProduct = ({ items }: { items: IProduct[] }) => {
     <View className="flex-row gap-2 bg-[#EEE] pb-2 px-2">
       {items.map((item) => (
         <ProductItem
+          detailProduct={item}
           key={item.id}
           width={width}
           name={item.name}

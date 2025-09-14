@@ -10,6 +10,7 @@ import { Image } from "expo-image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  PixelRatio,
   RefreshControl,
   TouchableOpacity,
   View,
@@ -43,11 +44,11 @@ const ExploreCategory = ({
 }) => {
   return (
     <View className="px-2 py-4 mx-2 rounded-2xl bg-white/20">
-      <Text className="text-lg font-bold text-white uppercase">
+      <Text className="text-base font-bold text-white uppercase">
         Khám phá theo danh mục
       </Text>
       <View className="mt-4">
-        <Category onPress={onPress} />
+        <Category onPress={onPress} itemBgColor="#fff" />
       </View>
     </View>
   );
@@ -151,13 +152,16 @@ const ContainerHeader = ({
     <View className="relative bg-[#EEE] px-2 py-4 rounded-t-[40px] mt-[30px]">
       <View className="mx-2 top-[-12px] absolute left-0 right-0 h-[76] rounded-[40] bg-secondary-50 opacity-20" />
 
-      <View className="flex-row gap-2 items-center px-2 mb-4 w-full">
-        <Text className="mt-3 text-xl font-bold text-black uppercase">
+      <View className="flex-row px-2 items-center mb-4 w-full gap-2">
+        <Text
+          className="mt-3 font-bold text-black uppercase mb-2 text-base flex-1"
+          numberOfLines={1}
+        >
           Tất cả sản phẩm
         </Text>
         <TouchableOpacity
           className={cn(
-            "flex-row gap-2 items-center px-4 py-2 ml-auto bg-white rounded-full",
+            "flex-row gap-2 items-center px-4 py-2 bg-white rounded-full ml-auto",
             sort && "border border-primary"
           )}
           onPress={onToggleSort}
@@ -167,8 +171,9 @@ const ContainerHeader = ({
               "text-sm font-medium leading-tight text-[#676767]",
               sort && "text-primary"
             )}
+            numberOfLines={1}
           >
-            Sắp xếp
+            Sắp xếp (Theo giá)
           </Text>
           {!sort ? (
             <Image
@@ -210,6 +215,7 @@ const TwoProductItem = ({ items }: { items: IProduct[] }) => {
     >
       {items.map((item, index) => (
         <ProductItem
+          detailProduct={item}
           width={width}
           key={item.id}
           name={item?.name}

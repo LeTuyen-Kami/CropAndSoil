@@ -335,8 +335,7 @@ const RegisterForm = () => {
                 {countdown}
               </Text>{" "}
               giây để nhận lại mã xác thực.{"\n"}Lưu ý: Kiểm tra thông báo SMS
-              để nhận Mã kịp thời Nếu bạn chưa có tài khoản Zalo, hãy nhấn mũi
-              tên trở lại để chọn phương thức khác
+              để nhận mã kịp thời.
             </Text>
           ) : (
             <TouchableOpacity

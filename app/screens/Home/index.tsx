@@ -51,6 +51,7 @@ import {
 import ContainerList from "./ContainerList";
 import Header from "./Header";
 import HeaderSearch from "./HeaderSearch";
+import { cn } from "~/lib/utils";
 
 const AnimatedFlashList = Animated.createAnimatedComponent(
   FlashList as unknown as React.ComponentType<FlashListProps<any>>
@@ -103,6 +104,7 @@ const FlashSale = () => {
               horizontal
               renderItem={({ item }) => (
                 <ProductItem
+                  detailProduct={item?.flashSaleProduct as unknown as IProduct}
                   onPress={() =>
                     navigation.push("FlashSaleProduct", { id: item?.id })
                   }
@@ -189,11 +191,10 @@ const SectionHeader = ({ title, image }: { title: string; image: string }) => {
       <View className="relative bg-white px-5 pb-4 pt-5 flex-row items-center rounded-t-[40px]">
         {image && <Image source={image} style={{ width: 40, height: 40 }} />}
         <Text
-          className={
-            image
-              ? "ml-2 text-xl font-bold text-black"
-              : "text-xl font-bold text-black"
-          }
+          className={cn(
+            "text-base",
+            image ? "ml-2 font-bold text-black" : "font-bold text-black"
+          )}
         >
           {title.toUpperCase()}
         </Text>
@@ -269,6 +270,7 @@ const SectionProducts = ({ products }: { products: IProduct[] }) => {
     <View className="flex-row flex-wrap gap-2 px-2 pb-2 bg-white">
       {products.map((product, index) => (
         <ProductItem
+          detailProduct={product}
           width={(screen.width - 24) / 2}
           key={product.id || index}
           name={product.name}
@@ -300,6 +302,7 @@ const SectionFlashSaleProducts = ({
     <View className="flex-row flex-wrap gap-2 px-2 pb-2 bg-white">
       {products.map((item, index) => (
         <ProductItem
+          detailProduct={item?.flashSaleProduct as unknown as IProduct}
           width={(screen.width - 24) / 2}
           key={item.id || index}
           name={item?.flashSaleProduct?.name}

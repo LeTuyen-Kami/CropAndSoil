@@ -19,6 +19,7 @@ const ListProduct = ({ data }: { data: IProduct[] }) => {
         data={data}
         renderItem={({ item }) => (
           <ProductItem
+            detailProduct={item}
             discount={calculateDiscount(item)}
             name={item.name}
             price={item.salePrice}

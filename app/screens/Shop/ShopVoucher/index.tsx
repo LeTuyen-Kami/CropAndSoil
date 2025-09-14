@@ -63,6 +63,7 @@ const RenderTwoProduct = memo(
       <View className="flex-row flex-wrap gap-x-2 gap-y-2 px-2 pb-2 bg-white">
         {items?.map((item) => (
           <ProductItem
+            detailProduct={item}
             key={item.id}
             name={item.name}
             price={item.salePrice}

@@ -134,6 +134,7 @@ const TwoProductItem = ({ items }: { items: IFlashSaleProduct[] }) => {
     >
       {items.map((item, index) => (
         <ProductItem
+          detailProduct={item?.flashSaleProduct as unknown as IProduct}
           width={width}
           key={item.id}
           onPress={() => {
