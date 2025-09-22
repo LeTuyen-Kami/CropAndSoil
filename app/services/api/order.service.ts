@@ -350,11 +350,6 @@ export interface StatusHistory {
   at: string;
 }
 
-export interface PaymentMethod {
-  type: string;
-  title: string;
-}
-
 export interface Billing {
   name: string;
   email: string;

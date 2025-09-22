@@ -56,8 +56,10 @@
     <string>Ứng dụng $(PRODUCT_NAME) cần dùng camera để chụp ảnh đại diện hoặc ảnh khi đánh giá sản phẩm.</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>Allow $(PRODUCT_NAME) to access your microphone</string>
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>Cho phép $(PRODUCT_NAME) lưu ảnh vào thư viện.</string>
     <key>NSPhotoLibraryUsageDescription</key>
-    <string>Ứng dụng $(PRODUCT_NAME) cần truy cập thư viện ảnh để bạn có thể tải ảnh đại diện và ảnh khi viết đánh giá sản phẩm.</string>
+    <string>Cho phép $(PRODUCT_NAME) truy cập vào ảnh của bạn.</string>
     <key>UIBackgroundModes</key>
     <array>
       <string>remote-notification</string>

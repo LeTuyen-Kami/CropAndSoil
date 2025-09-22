@@ -10,7 +10,7 @@ import ScreenWrapper from "~/components/common/ScreenWrapper";
 import { Text } from "~/components/ui/text";
 import { Button } from "~/components/ui/button";
 import { userService } from "~/services/api/user.service";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRoute } from "@react-navigation/native";
 import { RootStackRouteProp } from "~/navigation/types";
 import { orderService } from "~/services/api/order.service";
@@ -49,6 +49,7 @@ const DetailOrder = () => {
   });
   const [isVisibleModalRefund, setIsVisibleModalRefund] = useState(false);
   const setConfirmState = useSetAtom(confirmAtom);
+  const queryClient = useQueryClient();
 
   const mutationCancelOrder = useMutation({
     mutationFn: (orderId: number) => orderService.cancel(orderId.toString()),
@@ -72,6 +73,15 @@ const DetailOrder = () => {
           onSuccess: () => {
             toast.success("Đơn hàng đã được hủy");
             refetchOrder();
+            navigation.smartGoBack();
+
+            queryClient.invalidateQueries({
+              queryKey: ["my-order", ORDER_STATUS.PENDING],
+            });
+
+            queryClient.invalidateQueries({
+              queryKey: ["my-order", ORDER_STATUS.CANCELLED],
+            });
           },
           onError: (error) => {
             toast.error(getErrorMessage(error, "Lỗi khi hủy đơn hàng"));
@@ -220,7 +230,11 @@ const DetailOrder = () => {
 
           {/* Payment Method */}
           <View className="p-4 bg-white border-b border-gray-100">
-            <PaymentInfo paymentMethod={order?.paymentMethod} />
+            <PaymentInfo
+              paymentMethod={order?.paymentMethod}
+              orderStatus={order?.status}
+              paymentOrderId={order?.id!.toString()}
+            />
           </View>
 
           {/* Note */}

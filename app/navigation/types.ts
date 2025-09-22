@@ -103,6 +103,19 @@ export type RootStackParamList = {
   WebViewScreen: {
     url: string;
   };
+  SePayPayment: {
+    paymentOrderId: string;
+    orderCode: string;
+    totalAmount: number;
+  };
+  PaymentSuccess: {
+    orderCode: string;
+    totalAmount: number;
+  };
+  PaymentFailed: {
+    orderCode: string;
+    totalAmount: number;
+  };
 };
 
 // Create a type for the navigation prop for stack screens

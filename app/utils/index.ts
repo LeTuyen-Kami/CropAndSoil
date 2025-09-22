@@ -72,6 +72,10 @@ export const getDeviceId = () => {
 };
 
 export const getErrorMessage = (error: any, defaultMessage?: string) => {
+  if (!error) {
+    return defaultMessage || "Lỗi không xác định";
+  }
+
   if (error.response) {
     return error.response.data.message;
   }

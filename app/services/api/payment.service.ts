@@ -15,9 +15,34 @@ export interface IPaymentMethod {
   }[];
 }
 
+export interface IPaymentStatus {
+  status: string;
+  amount: number;
+  paymentMethod: string;
+  paymentUrl: string;
+  expiredAt: string;
+  orderIds: number[];
+  paymentMeta: {
+    orderCode: string;
+    expiredAtTz: string;
+    amount: number;
+    bankName: string;
+    bankLogo: string;
+    accountNumber: string;
+    accountHolderName: string;
+    qrCodeUrl: string;
+  };
+}
+
 class PaymentService {
   async getAvailablePaymentMethods() {
     return typedAxios.get<IPaymentMethod[]>("/payments");
+  }
+
+  async getPaymentStatus(paymentOrderId: string) {
+    return typedAxios.get<IPaymentStatus>(
+      `/payments/payment-status?paymentOrderId=${paymentOrderId}`
+    );
   }
 }
 

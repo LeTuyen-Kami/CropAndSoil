@@ -55,6 +55,9 @@ import DevMode from "~/screens/DevMode";
 import useInitSelectedAddress from "~/hooks/useInitSelectedAddress";
 import useSyncDevMode from "~/hooks/useSyncDevMode";
 import WebViewScreen from "~/screens/WebViewScreen";
+import SePayPaymentScreen from "~/screens/Order/Payment/SePayPaymentScreen";
+import PaymentSuccess from "~/screens/Order/Payment/PaymentSuccess";
+import PaymentFailed from "~/screens/Order/Payment/PaymentFailed";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -177,6 +180,9 @@ export const AppNavigator = () => {
           }}
         />
         <Stack.Screen name="WebViewScreen" component={WebViewScreen} />
+        <Stack.Screen name="SePayPayment" component={SePayPaymentScreen} />
+        <Stack.Screen name="PaymentSuccess" component={PaymentSuccess} />
+        <Stack.Screen name="PaymentFailed" component={PaymentFailed} />
       </Stack.Navigator>
     </NavigationContainer>
   );

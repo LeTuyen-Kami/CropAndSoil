@@ -137,6 +137,7 @@ import icVideo from "~/assets/icons/video_camera_icon.png";
 import placeholder from "~/assets/images/placeholder.png";
 
 import flashSaleBanner from "~/assets/images/flashsale_banner.png";
+import SepayLogo from "~/assets/images/sepay_logo.png";
 
 export const imagePaths = {
   //images
@@ -145,6 +146,7 @@ export const imagePaths = {
   selling: selling,
   fire: fire,
   homeBanner: homeBanner,
+  SepayLogo: SepayLogo,
   //icons
   icQuestionCircle: icQuestionCircle,
   icMessages: icMessages,

@@ -27,8 +27,13 @@ import {
 } from "~/services/api/order.service";
 import { paymentService } from "~/services/api/payment.service";
 import { IVoucher } from "~/services/api/shop.service";
-import { selectedAddressAtom, selectedVoucherAtom } from "~/store/atoms";
+import {
+  selectedAddressAtom,
+  selectedPaymentMethodAtom,
+  selectedVoucherAtom,
+} from "~/store/atoms";
 import { ENV, getErrorMessage } from "~/utils";
+import { PAYMENT_METHODS } from "~/lib/constants";
 import { storeAtom } from "../atom";
 import AddressItem from "./AddressItem";
 import DetailPayment from "./DetailPayment";
@@ -65,8 +70,9 @@ const Payment = () => {
 
   const queryClient = useQueryClient();
 
-  const [selectedPaymentMethod, setSelectedPaymentMethod] =
-    useState<string>("");
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useAtom(
+    selectedPaymentMethodAtom
+  );
 
   const mutationCheckoutOrder = useMutation({
     mutationFn: (data: IOrderCalculateRequest) => orderService.checkout(data),
@@ -151,14 +157,25 @@ const Payment = () => {
       {
         onSuccess: (data) => {
           setCheckoutData(data);
-          onOpenSuccess();
-          queryClient.invalidateQueries({
-            predicate: (query) =>
-              query.queryKey.includes("flash-sale") ||
-              query.queryKey.includes("home") ||
-              query.queryKey.includes("private-offer-products") ||
-              query.queryKey.includes("recently-viewed-products"),
-          });
+
+          // If SePay payment method, navigate to SePay payment screen
+          if (selectedPaymentMethod === PAYMENT_METHODS.SEPAY) {
+            navigation.navigate("SePayPayment", {
+              paymentOrderId: data.payload.paymentOrderId,
+              orderCode: `#${data.payload.paymentOrderId}`,
+              totalAmount: calculatedData?.total || 0,
+            });
+          } else {
+            onOpenSuccess();
+
+            queryClient.invalidateQueries({
+              predicate: (query) =>
+                query.queryKey.includes("flash-sale") ||
+                query.queryKey.includes("home") ||
+                query.queryKey.includes("private-offer-products") ||
+                query.queryKey.includes("recently-viewed-products"),
+            });
+          }
         },
         onError: (error) => {
           const message = getErrorMessage(error, "Lỗi khi đặt hàng");
@@ -180,7 +197,15 @@ const Payment = () => {
 
   useEffect(() => {
     if (paymentMethods) {
-      setSelectedPaymentMethod(paymentMethods[0].key);
+      setSelectedPaymentMethod((prev) => {
+        if (
+          prev !== "" &&
+          paymentMethods.some((method) => method.key === prev)
+        ) {
+          return prev;
+        }
+        return paymentMethods[0].key;
+      });
     }
   }, [paymentMethods]);
 
@@ -320,7 +345,7 @@ const Payment = () => {
       </View>
       <ModalSuccess
         isOpen={isOpenSuccess}
-        calculatedData={calculatedData!}
+        totalAmount={calculatedData?.total || 0}
         onContinueOrder={handlePressContinueOrder}
         onViewOrder={handlePressViewOrder}
       />

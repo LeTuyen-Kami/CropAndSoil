@@ -27,8 +27,6 @@ const OrderStatusBadge: React.FC<OrderStatusProps> = ({ status }) => {
 
   const statusInfo = getStatusInfo(status);
 
-  console.log(statusInfo);
-
   return (
     <View
       className={`px-3 py-1 rounded-full`}

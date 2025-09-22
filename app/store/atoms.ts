@@ -147,3 +147,8 @@ export const selectedAddressAtom = atomWithMMKV<IAddress | null>(
   "selectedAddress",
   null
 );
+
+export const selectedPaymentMethodAtom = atomWithMMKV<string>(
+  "selectedPaymentMethod",
+  ""
+);

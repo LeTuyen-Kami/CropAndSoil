@@ -12,12 +12,12 @@ const ModalSuccess = ({
   isOpen,
   onContinueOrder,
   onViewOrder,
-  calculatedData,
+  totalAmount,
 }: {
   isOpen: boolean;
   onContinueOrder: () => void;
   onViewOrder: () => void;
-  calculatedData?: ICalculateResponse;
+  totalAmount: number;
 }) => {
   const lottieRef = useRef<LottieView>(null);
 
@@ -43,7 +43,7 @@ const ModalSuccess = ({
             className="size-[175px] mb-10"
           />
           <Text className="text-xl font-bold leading-loose text-center text-white">
-            Bạn đã thanh toán {formatPrice(calculatedData?.total)}
+            Bạn đã thanh toán {formatPrice(totalAmount)}
           </Text>
           <Text className="text-sm font-normal leading-tight text-center text-white">
             Đơn hàng của bạn đã được ghi nhận. Theo dõi trạng thái đơn hàng tại

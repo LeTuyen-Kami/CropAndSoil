@@ -26,12 +26,17 @@ const PaymentMethod = ({
 
   // Handle payment method selection
   const handleSelectPaymentMethod = (id: string) => {
-    if (id !== PAYMENT_METHODS.COD && id !== PAYMENT_METHODS.BANK_TRANSFER) {
-      toast.error("Phương thức thanh toán này tạm không sử dụng được");
-      return;
-    }
+    const listAllowPaymentMethod = [
+      PAYMENT_METHODS.SEPAY,
+      PAYMENT_METHODS.BANK_TRANSFER,
+      PAYMENT_METHODS.COD,
+    ];
 
-    onSelectPaymentMethod(id);
+    if (listAllowPaymentMethod.includes(id)) {
+      onSelectPaymentMethod(id);
+    } else {
+      toast.error("Phương thức thanh toán này tạm không sử dụng được");
+    }
   };
 
   return (
@@ -64,7 +69,11 @@ const PaymentMethod = ({
               <View className={twMerge("flex-row flex-1 items-center")}>
                 <View className="justify-center items-center mr-2 size-10">
                   <Image
-                    source={imagePaths.icDollar}
+                    source={
+                      option.key === PAYMENT_METHODS.SEPAY
+                        ? imagePaths.SepayLogo
+                        : imagePaths.icDollar
+                    }
                     style={{ width: 20, height: 20 }}
                     contentFit="contain"
                   />

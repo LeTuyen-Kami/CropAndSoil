@@ -20,4 +20,5 @@ export const NAV_THEME = {
 export const PAYMENT_METHODS = {
   COD: "cod",
   BANK_TRANSFER: "bacs",
+  SEPAY: "sepay",
 };
