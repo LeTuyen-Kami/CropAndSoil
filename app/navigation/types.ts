@@ -105,6 +105,7 @@ export type RootStackParamList = {
   };
   SePayPayment: {
     paymentOrderId: string;
+    paymentToken?: string;
     orderCode: string;
     totalAmount: number;
   };

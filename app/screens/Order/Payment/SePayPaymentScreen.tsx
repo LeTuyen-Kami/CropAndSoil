@@ -2,6 +2,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, View } from "react-native";
+import { Button } from "~/components/ui/button";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Header from "~/components/common/Header";
 import ScreenWrapper from "~/components/common/ScreenWrapper";
@@ -20,7 +21,7 @@ import { getErrorMessage } from "~/utils";
 const SePayPaymentScreen = () => {
   const navigation = useNavigation<RootStackScreenProps<"SePayPayment">>();
   const route = useRoute<RootStackRouteProp<"SePayPayment">>();
-  const { paymentOrderId, orderCode, totalAmount } = route.params;
+  const { paymentOrderId, orderCode, totalAmount, paymentToken } = route.params;
   const [errorMessage, setErrorMessage] = useState("");
 
   const {
@@ -44,14 +45,14 @@ const SePayPaymentScreen = () => {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["payment-status", paymentOrderId],
-    queryFn: () => paymentService.getPaymentStatus(paymentOrderId),
+    queryKey: ["payment-status", paymentOrderId, paymentToken],
+    queryFn: () =>
+      paymentService.getPaymentStatus(paymentOrderId, paymentToken),
     refetchInterval: isPolling ? 5000 : false,
     refetchIntervalInBackground: true,
   });
 
   const { handlePaymentSuccess, handlePaymentFailed } = useSePayPayment({
-    paymentOrderId,
     onSuccess: () => {
       setIsPolling(false);
       onOpenSuccess();
@@ -65,7 +66,7 @@ const SePayPaymentScreen = () => {
   useEffect(() => {
     if (paymentStatus?.status === "success") {
       handlePaymentSuccess();
-    } else if (paymentStatus?.status === "failed") {
+    } else if (paymentStatus?.status === "fail") {
       handlePaymentFailed();
     }
   }, [paymentStatus?.status, handlePaymentSuccess, handlePaymentFailed]);
@@ -101,16 +102,19 @@ const SePayPaymentScreen = () => {
       />
       {isLoading ? (
         <View className="flex-1 justify-center items-center">
-          <Text className="text-gray-500">
+          <Text className="text-gray-500 py-2">
             Đang tải thông tin thanh toán...
           </Text>
           <ActivityIndicator size="large" color="#2D946E" />
         </View>
       ) : error || !paymentStatus ? (
         <View className="flex-1 justify-center items-center">
-          <Text className="text-red-500">
+          <Text className="text-red-500 text-center px-4">
             Có lỗi xảy ra khi tải thông tin thanh toán. Vui lòng thử lại.
           </Text>
+          <Button onPress={() => refetch()}>
+            <Text>Thử lại</Text>
+          </Button>
         </View>
       ) : (
         <ScrollView
@@ -160,7 +164,7 @@ const SePayPaymentScreen = () => {
       />
       <ModalSuccess
         isOpen={isOpenSuccess}
-        totalAmount={totalAmount}
+        totalAmount={paymentStatus?.paymentMeta.amount || 0}
         onContinueOrder={handlePressContinueOrder}
         onViewOrder={handlePressViewOrder}
       />

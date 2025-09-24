@@ -1,6 +1,8 @@
 import React from "react";
 import { View } from "react-native";
 import { Text } from "~/components/ui/text";
+import SuperShipLogo from "~/assets/images/supership_logo.png";
+import { Image } from "expo-image";
 
 type ShippingMethod = {
   key: string;
@@ -21,6 +23,10 @@ const ShippingInfo: React.FC<ShippingInfoProps> = ({ shippingMethod }) => {
         return "🛵";
       case "vnpost":
         return "📦";
+      case "supership":
+        return (
+          <Image source={SuperShipLogo} style={{ width: 20, height: 20 }} />
+        );
       default:
         return "🚚";
     }

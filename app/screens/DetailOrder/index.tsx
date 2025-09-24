@@ -233,7 +233,7 @@ const DetailOrder = () => {
             <PaymentInfo
               paymentMethod={order?.paymentMethod}
               orderStatus={order?.status}
-              paymentOrderId={order?.id!.toString()}
+              paymentToken={order?.paymentToken}
             />
           </View>
 

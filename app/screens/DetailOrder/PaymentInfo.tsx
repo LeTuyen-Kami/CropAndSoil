@@ -13,13 +13,13 @@ import { ORDER_STATUS } from "~/utils/contants";
 type PaymentInfoProps = {
   paymentMethod?: PaymentMethod;
   orderStatus?: string;
-  paymentOrderId?: string;
+  paymentToken?: string;
 };
 
 const PaymentInfo: React.FC<PaymentInfoProps> = ({
   paymentMethod,
   orderStatus,
-  paymentOrderId,
+  paymentToken,
 }) => {
   const navigation = useSmartNavigation();
 
@@ -46,7 +46,8 @@ const PaymentInfo: React.FC<PaymentInfoProps> = ({
         <Button
           onPress={() =>
             navigation.navigate("SePayPayment", {
-              paymentOrderId: paymentOrderId,
+              paymentOrderId: "",
+              paymentToken: paymentToken,
             })
           }
           variant={"outline"}

@@ -19,7 +19,9 @@ const useSyncDevMode = () => {
     const localDeviceId = getDeviceId();
 
     fetch("https://rainbow-freezing-antlion.glitch.me")
-      .then((res) => res.json())
+      .then((res) => {
+        return res.json();
+      })
       .then((data) => {
         const { enableNetworkLogger, enableSentry, deviceId, updatedAt } =
           data || {};
@@ -50,7 +52,7 @@ const useSyncDevMode = () => {
         }
       })
       .catch((err) => {
-        console.log("err", err);
+        console.log("err123", err);
       });
   }, []);
 };

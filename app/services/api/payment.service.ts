@@ -39,9 +39,13 @@ class PaymentService {
     return typedAxios.get<IPaymentMethod[]>("/payments");
   }
 
-  async getPaymentStatus(paymentOrderId: string) {
+  async getPaymentStatus(paymentOrderId?: string, paymentToken?: string) {
+    const searchParams = new URLSearchParams();
+    searchParams.append("paymentOrderId", paymentOrderId || "");
+    searchParams.append("paymentToken", paymentToken || "");
+
     return typedAxios.get<IPaymentStatus>(
-      `/payments/payment-status?paymentOrderId=${paymentOrderId}`
+      `/payments/payment-status?${searchParams.toString()}`
     );
   }
 }

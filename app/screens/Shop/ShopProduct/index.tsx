@@ -58,7 +58,7 @@ const Header = ({
             sort && "text-primary"
           )}
         >
-          Sắp xếp
+          Giá
         </Text>
         {!sort ? (
           <Image

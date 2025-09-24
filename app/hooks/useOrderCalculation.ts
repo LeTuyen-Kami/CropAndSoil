@@ -103,7 +103,7 @@ export const useOrderCalculation = ({
       shops:
         selectedStore?.map((store) => ({
           id: Number(store.id),
-          shippingMethodKey: "ghtk",
+          shippingMethodKey: "supership",
           note: storeMessage?.[store?.id] || "",
           voucherCode: store.shopVoucher?.code || "",
           items: store.items

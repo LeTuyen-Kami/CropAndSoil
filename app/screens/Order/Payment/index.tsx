@@ -43,6 +43,7 @@ import PaymentMenu from "./PaymentMenu";
 import PaymentMethod from "./PaymentMethod";
 import PaymentStore from "./PaymentStore";
 import * as WebBrowser from "expo-web-browser";
+import ShippingMethod from "./ShippingMethod";
 
 const Payment = () => {
   const navigation = useNavigation<RootStackScreenProps<"Payment">>();
@@ -136,7 +137,7 @@ const Payment = () => {
         isClearCart: !!isClearCart,
         shops: selectedStore?.map((store) => ({
           id: Number(store.id),
-          shippingMethodKey: "ghtk",
+          shippingMethodKey: "supership",
           note: storeMessage[store.id] || "",
           voucherCode: store.shopVoucher?.code || "",
           items: store.items
@@ -283,6 +284,8 @@ const Payment = () => {
     }
   }, [voucherState?.voucher?.id, setJustAddedVoucher]);
 
+  console.log("calculatedData", JSON.stringify(calculatedData, null, 2));
+
   return (
     <ScreenWrapper
       hasGradient={false}
@@ -317,6 +320,9 @@ const Payment = () => {
           selectedPaymentMethod={selectedPaymentMethod}
           onSelectPaymentMethod={setSelectedPaymentMethod}
         />
+
+        <ShippingMethod />
+
         <DetailPayment calculatedData={calculatedData!} />
         <View className="py-3">
           <Text className="text-sm font-normal leading-tight">

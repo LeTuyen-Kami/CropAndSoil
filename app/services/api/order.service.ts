@@ -445,6 +445,7 @@ export interface IOrder {
   shop: Shop;
   shippingMethod: ShippingMethod;
   isRefundable: boolean;
+  paymentToken: string;
 }
 
 export interface Order {
