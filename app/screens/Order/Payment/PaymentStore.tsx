@@ -160,10 +160,10 @@ const PaymentStore = ({
       </TouchableOpacity>
 
       {/* Delivery */}
-      <View className="flex-row justify-between items-center p-3 border-t border-[#F0F0F0]">
+      {/* <View className="flex-row justify-between items-center p-3 border-t border-[#F0F0F0]">
         <Text className="text-sm text-[#676767]">Phương thức giao hàng</Text>
-        <Text className="text-sm text-[#676767]">Giao hàng tiết kiệm</Text>
-      </View>
+        <Text className="text-sm text-[#676767]">SuperShip</Text>
+      </View> */}
 
       {/* Total */}
       <View className="flex-row justify-between items-center p-3 border-t border-[#F0F0F0]">

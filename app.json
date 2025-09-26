@@ -70,8 +70,8 @@
       [
         "expo-media-library",
         {
-          "photosPermission": "Cho phép $(PRODUCT_NAME) truy cập vào ảnh của bạn.",
-          "savePhotosPermission": "Cho phép $(PRODUCT_NAME) lưu ảnh vào thư viện.",
+          "photosPermission": "Ứng dụng $(PRODUCT_NAME) cần quyền truy cập thư viện ảnh để bạn có thể chọn và tải lên ảnh đại diện và ảnh khi đánh giá sản phẩm cho tài khoản của mình.",
+          "savePhotosPermission": "Ứng dụng $(PRODUCT_NAME) cần quyền lưu ảnh vào thư viện để bạn có thể lưu ảnh mã QR khi thanh toán qua SePay.",
           "isAccessMediaLocationEnabled": true,
           "granularPermissions": ["audio", "photo"]
         }

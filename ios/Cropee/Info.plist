@@ -57,9 +57,9 @@
     <key>NSMicrophoneUsageDescription</key>
     <string>Allow $(PRODUCT_NAME) to access your microphone</string>
     <key>NSPhotoLibraryAddUsageDescription</key>
-    <string>Cho phép $(PRODUCT_NAME) lưu ảnh vào thư viện.</string>
+    <string>Ứng dụng $(PRODUCT_NAME) cần quyền lưu ảnh vào thư viện để bạn có thể lưu ảnh mã QR khi thanh toán qua SePay.</string>
     <key>NSPhotoLibraryUsageDescription</key>
-    <string>Cho phép $(PRODUCT_NAME) truy cập vào ảnh của bạn.</string>
+    <string>Ứng dụng $(PRODUCT_NAME) cần quyền truy cập thư viện ảnh để bạn có thể chọn và tải lên ảnh đại diện và ảnh khi đánh giá sản phẩm cho tài khoản của mình.</string>
     <key>UIBackgroundModes</key>
     <array>
       <string>remote-notification</string>

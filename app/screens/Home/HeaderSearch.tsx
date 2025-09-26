@@ -17,6 +17,11 @@ const HeaderSearch = () => {
   const isApproved = auth?.isLoggedIn && auth?.user?.isApproved;
 
   const navigateCart = () => {
+    if (!auth?.isLoggedIn) {
+      navigation.smartNavigate("Login");
+      return;
+    }
+
     if (!isApproved) {
       toast.error(INVALID_ACCOUNT_MESSAGE);
       return;
