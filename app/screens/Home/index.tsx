@@ -80,7 +80,7 @@ const FlashSale = () => {
   }
 
   if (!data || data.length === 0) {
-    return <FlashSaleEmpty />;
+    return null;
   }
 
   return (
@@ -185,9 +185,22 @@ const ITEM_TYPES = {
 };
 
 // BestSellerHeader component
-const SectionHeader = ({ title, image }: { title: string; image: string }) => {
+const SectionHeader = ({
+  title,
+  image,
+  isFirst,
+}: {
+  title: string;
+  image: string;
+  isFirst?: boolean;
+}) => {
   return (
-    <View className="pt-6 bg-primary-100">
+    <View
+      className={cn(
+        "pt-6 bg-primary-100",
+        isFirst ? "rounded-t-[40px]" : undefined
+      )}
+    >
       <View className="relative bg-white px-5 pb-4 pt-5 flex-row items-center rounded-t-[40px]">
         {image && <Image source={image} style={{ width: 40, height: 40 }} />}
         <Text
@@ -424,6 +437,7 @@ interface IFlashListData {
   flashSaleProducts?: IFlashSaleProduct[];
   headerTitle?: string;
   headerImage?: string;
+  isFirstSection?: boolean;
   footerUrl?: string;
   footerTitle?: string;
   productIds?: number[];
@@ -461,6 +475,17 @@ export const HomeScreen: React.FC = () => {
     queryKey: ["home"],
     queryFn: () => homeService.getHome(),
     staleTime: 1000 * 60,
+  });
+
+  const { data: hasFlashSale } = useQuery({
+    queryKey: ["flash-sale", "home"],
+    queryFn: () =>
+      flashSaleService.getFlashSale({
+        skip: 0,
+        take: 10,
+      }),
+    staleTime: 1000 * 60 * 5,
+    select: (data) => data.data?.length > 0,
   });
 
   const mutateTopDealProducts = useMutation({
@@ -607,30 +632,7 @@ export const HomeScreen: React.FC = () => {
       }
     ) => {
       if (!checkCanRender(data) || data!.length === 0) {
-        return [
-          {
-            id: "header" + id,
-            type: ITEM_TYPES.SECTION_HEADER,
-            headerTitle: headerTitle,
-            headerImage: headerImage,
-          },
-          {
-            id: "empty" + id,
-            type: "sectionEmpty",
-            headerTitle: headerTitle,
-          },
-          {
-            id: "footer" + id,
-            type: ITEM_TYPES.SECTION_FOOTER,
-            footerUrl: footerUrl,
-            footerTitle: headerTitle,
-            productIds: productIds,
-            sectionId: id,
-            sectionType: type,
-            hasMore: false,
-            isLoadingMore: false,
-          },
-        ];
+        return [];
       }
 
       // Tạo các chunk gồm 2 sản phẩm mỗi chunk
@@ -685,6 +687,8 @@ export const HomeScreen: React.FC = () => {
       { type: ITEM_TYPES.FLASH_SALE, id: "flashSale" },
     ];
 
+    let hasMarkedFirstHeader = false;
+
     if (repeaterData.length > 0) {
       repeaterData.forEach((item) => {
         if (item?.banners && item?.banners?.length > 0) {
@@ -713,6 +717,17 @@ export const HomeScreen: React.FC = () => {
           isLoadingMore: currentPagination?.isLoading ?? false,
           isFlashSaleFormat: item.type === "top_deal",
         });
+        if (
+          !hasMarkedFirstHeader &&
+          processedData.length > 0 &&
+          !hasFlashSale
+        ) {
+          const first = processedData[0];
+          if (first && first.type === ITEM_TYPES.SECTION_HEADER) {
+            (first as any).isFirstSection = true;
+            hasMarkedFirstHeader = true;
+          }
+        }
         baseItems.push(...processedData);
       });
     }
@@ -729,11 +744,24 @@ export const HomeScreen: React.FC = () => {
         hasMore: false,
         isLoadingMore: false,
       });
+      if (!hasMarkedFirstHeader && suggestionData.length > 0 && !hasFlashSale) {
+        const first = suggestionData[0];
+        if (first && first.type === ITEM_TYPES.SECTION_HEADER) {
+          (first as any).isFirstSection = true;
+          hasMarkedFirstHeader = true;
+        }
+      }
       baseItems.push(...suggestionData);
     }
 
     return [...baseItems];
-  }, [repeaterData, sectionPagination, homeData, suggestionProducts]);
+  }, [
+    repeaterData,
+    sectionPagination,
+    homeData,
+    suggestionProducts,
+    hasFlashSale,
+  ]);
 
   const renderItem = useCallback(
     ({ item }: { item: IFlashListData }) => {
@@ -755,6 +783,7 @@ export const HomeScreen: React.FC = () => {
             <SectionHeader
               title={item.headerTitle ?? ""}
               image={item.headerImage ?? ""}
+              isFirst={item.isFirstSection}
             />
           );
 
@@ -803,7 +832,7 @@ export const HomeScreen: React.FC = () => {
           [sectionId]: {
             skip: PRODUCTS_PER_PAGE,
             hasMore: true,
-            isLoading: false,
+            isLoading: item.type === "top_deal" || item.type === "top_sale",
           },
         }));
 

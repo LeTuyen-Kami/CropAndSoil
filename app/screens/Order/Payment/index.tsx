@@ -161,7 +161,7 @@ const Payment = () => {
 
           // If SePay payment method, navigate to SePay payment screen
           if (selectedPaymentMethod === PAYMENT_METHODS.SEPAY) {
-            navigation.navigate("SePayPayment", {
+            navigation.replace("SePayPayment", {
               paymentOrderId: data.payload.paymentOrderId,
               orderCode: `#${data.payload.paymentOrderId}`,
               totalAmount: calculatedData?.total || 0,
